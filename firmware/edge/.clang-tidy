@@ -1,0 +1,42 @@
+---
+# Checks to enable
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  concurrency-*,
+  misc-*,
+  readability-*,
+  clang-analyzer-*,
+  security-*
+
+# Configuration options for specific checks
+CheckOptions:
+  # Naming conventions
+  - key:             readability-identifier-naming.FunctionCase
+    value:           snake_case
+  - key:             readability-identifier-naming.VariableCase
+    value:           snake_case
+  - key:             readability-identifier-naming.ParameterCase
+    value:           camelCase
+  - key:             readability-identifier-naming.MacroDefinitionCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.TypedefCase
+    value:           PascalCase
+  - key:             readability-identifier-naming.TypedefSuffix
+    value:           _t
+  - key:             readability-identifier-naming.StructCase
+    value:           PascalCase
+  - key:             readability-identifier-naming.EnumCase
+    value:           PascalCase
+  - key:             readability-identifier-naming.EnumConstantCase
+    value:           UPPER_CASE
+
+  # Const correctness
+  - key:             misc-const-correctness.*
+    value:           true
+
+  # Bugprone stuff
+  - key:             bugprone-suspicious-string-compare.WarnOnImplicitComparison
+    value:           true
+...

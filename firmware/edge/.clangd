@@ -1,0 +1,14 @@
+CompileFlags:
+  CompilationDatabase: build/edge/
+
+  Add:
+    - -isystem
+    - C:/ncs/toolchains/936afb6332/opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/include/c++/12.2.0
+    - -isystem
+    - C:/ncs/toolchains/936afb6332/opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/include/c++/12.2.0/arm-zephyr-eabi/thumb/v8-m.main+fp/hard
+
+  Remove: [
+    "-fno-printf-return-value",
+    "-mfp16-format=ieee",
+    "-fno-reorder-functions"
+  ]
