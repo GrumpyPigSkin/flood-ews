@@ -1,12 +1,13 @@
 #pragma once
 
-#include "common/expected.hpp"
+#include "expected.hpp"
+#include "scope_guard.hpp"
 #include <cstdint>
 #include <cstring>
 #include <openthread/coap.h>
 #include <openthread/link.h>
-#include <scope_guard.hpp>
 #include <zephyr/net/openthread.h>
+
 
 namespace coap_handler {
 
