@@ -14,6 +14,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(fmt)
 
 target_include_directories(app PRIVATE src)
+target_include_directories(app PRIVATE ../)
 target_link_libraries(app PRIVATE fmt::fmt)
 
 target_sources(app PRIVATE
