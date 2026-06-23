@@ -3,7 +3,7 @@
 #include <functional>
 #include <zephyr/kernel.h>
 
-namespace logging {
+namespace common {
 
 /**
  * @brief Periodic task encapsulates running a timer task on the main Zephyr
@@ -92,4 +92,4 @@ private:
   std::function<void()> m_fn;
 };
 
-} // namespace logging
+} // namespace common
