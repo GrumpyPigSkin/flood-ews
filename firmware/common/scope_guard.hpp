@@ -76,6 +76,7 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <exception>
 #include <functional>
 #include <type_traits>
 #include <utility>
@@ -171,7 +172,7 @@ private:
   void execute() noexcept(InvokeNoexcept) {
     if constexpr (InvokeNoexcept) {
       static_assert(std::is_same_v<void, decltype(function_())>);
-      catch_exception(function_, &terminate);
+      std::terminate();
     } else {
       function_();
     }
