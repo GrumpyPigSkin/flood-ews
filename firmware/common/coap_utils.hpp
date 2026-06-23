@@ -2,12 +2,12 @@
 
 #include "expected.hpp"
 #include "scope_guard.hpp"
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <openthread/coap.h>
 #include <openthread/link.h>
 #include <zephyr/net/openthread.h>
-
 
 namespace coap_handler {
 
@@ -149,12 +149,13 @@ tl::expected<T, CoapErr> coap_get_data(otMessage *const msg) {
 
   const auto coap_len = otMessageGetLength(msg) - otMessageGetOffset(msg);
 
-  if (coap_len > sizeof(T)) {
+  if (static_cast<std::size_t>(coap_len) > sizeof(T)) {
     return tl::unexpected(CoapErr::FAILED_GET_MESSAGE);
   }
 
   T out{};
-  otMessageRead(msg, otMessageGetOffset(msg), out, coap_len);
+  otMessageRead(msg, otMessageGetOffset(msg), static_cast<void *>(&out),
+                coap_len);
   return out;
 }
 
