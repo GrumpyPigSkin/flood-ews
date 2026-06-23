@@ -1,0 +1,21 @@
+/ {
+    jsn_sensor {
+        /* Zephyr GPIO definitions for JSN-SR04T */
+        compatible = "gpio-keys";
+
+        jsn_pwr: jsn_pwr {
+            gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+            label = "JSN Sensor VCC Power";
+        };
+
+        jsn_trig: jsn_trig {
+            gpios = <&gpio0 5 GPIO_ACTIVE_HIGH>;
+            label = "JSN Sensor Trigger Pin";
+        };
+
+        jsn_echo: jsn_echo {
+            gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>;
+            label = "JSN Sensor Echo Input";
+        };
+    };
+};
