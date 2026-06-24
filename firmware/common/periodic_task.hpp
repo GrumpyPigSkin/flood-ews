@@ -1,9 +1,29 @@
 #pragma once
 
+#include <cstdint>
 #include <functional>
 #include <zephyr/kernel.h>
 
+
 namespace common {
+
+/**
+ * @brief Millisecond value to k_timeout_t wrapper to avoid clangd issues.
+ * @param [in] val
+ * @return k_timeout_t
+ */
+inline k_timeout_t ms_to_k_timeout(const std::uint32_t val) {
+  return K_MSEC(val);
+}
+
+/**
+ * @brief Microsecond value to k_timeout_t wrapper to avoid clangd issues.
+ * @param [in] val
+ * @return k_timeout_t
+ */
+inline k_timeout_t us_to_k_timeout(const std::uint32_t val) {
+  return K_USEC(val);
+}
 
 /**
  * @brief Periodic task encapsulates running a timer task on the main Zephyr
