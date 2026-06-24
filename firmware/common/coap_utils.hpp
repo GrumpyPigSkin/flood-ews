@@ -7,13 +7,15 @@
 #include <cstring>
 #include <openthread/coap.h>
 #include <openthread/link.h>
+#include <span>
 #include <zephyr/net/openthread.h>
 
-namespace coap_handler {
+namespace coap_utils {
 
 enum class CoapErr : std::uint8_t {
   OK,
   NO_INST,
+  BAD_ADDR,
   NO_MSG,
   FAILED_TO_APPEND_URI,
   FAILED_SET_PAYLOAD,
@@ -48,11 +50,16 @@ CoapErr req_send(char const *const addr, char const *const uri, const T &buf,
     return CoapErr::NO_INST;
   }
 
-  (void)otIp6AddressFromString(addr, &msg_info.mPeerAddr);
+  err = otIp6AddressFromString(addr, &msg_info.mPeerAddr);
+
+  if (err != OT_ERROR_NONE) {
+    return CoapErr::BAD_ADDR;
+  }
+
   msg_info.mPeerPort = OT_DEFAULT_COAP_PORT;
 
   otMessage *const msg = otCoapNewMessage(ot_inst, NULL);
-  if (!msg) {
+  if (msg == nullptr) {
     return CoapErr::NO_MSG;
   }
 
@@ -159,6 +166,109 @@ tl::expected<T, CoapErr> coap_get_data(otMessage *const msg) {
   return out;
 }
 
+/**
+ * @brief Read a variable length CoAP payload into a caller buffer.
+ * @tparam ByteLike defaulted to std::byte
+ * @param msg The message to parse.
+ * @param out The output buffer.
+ * @return tl::expected<std::span<ByteLike>, CoapErr> A span over the actual
+ * data, or an error.
+ */
+template <typename ByteLike = std::byte>
+[[nodiscard]] tl::expected<std::span<ByteLike>, CoapErr>
+coap_get_bytes(otMessage *const msg, std::span<ByteLike> out) {
+  static_assert(
+      sizeof(ByteLike) == 1,
+      "coap_get_bytes works on byte-sized elements (std::byte/char/uint8_t)");
+
+  const int length = otMessageGetLength(msg);
+  const int offset = otMessageGetOffset(msg);
+
+  // Guard the unsigned-subtraction underflow.
+  if (length < 0 || offset < 0 || length < offset) {
+    return tl::unexpected(CoapErr::FAILED_GET_MESSAGE);
+  }
+
+  const auto avail = static_cast<std::size_t>(length - offset);
+  if (avail > out.size()) {
+    // Payload doesn't fit the caller's buffer.
+    return tl::unexpected(CoapErr::FAILED_GET_MESSAGE);
+  }
+
+  const uint16_t read = otMessageRead(msg, static_cast<uint16_t>(offset),
+                                      out.data(), static_cast<uint16_t>(avail));
+  return out.subspan(0, read);
+}
+
+inline int coap_resp_send(otMessage *const req,
+                          const otMessageInfo *const req_info,
+                          uint8_t const *const buf, const int len) {
+
+  otMessage *resp;
+  otCoapCode resp_code;
+  otCoapType resp_type;
+  otError err;
+  int ret;
+
+  auto sg_free_msg = folly::makeGuard([&msg] { otMessageFree(msg); });
+
+  otInstance *const ot resp = otCoapNewMessage(ot, NULL);
+
+  if (!ot) {
+    return -ENODEV;
+  }
+
+  if (!resp) {
+    return -ENOMEM;
+  }
+
+  switch (otCoapMessageGetType(req)) {
+  case OT_COAP_TYPE_CONFIRMABLE:
+    resp_type = OT_COAP_TYPE_ACKNOWLEDGMENT;
+    break;
+  case OT_COAP_TYPE_NON_CONFIRMABLE:
+    resp_type = OT_COAP_TYPE_NON_CONFIRMABLE;
+    break;
+  default:
+    return -EINVAL;
+  }
+
+  switch (otCoapMessageGetCode(req)) {
+  case OT_COAP_CODE_GET:
+    resp_code = OT_COAP_CODE_CONTENT;
+    break;
+  case OT_COAP_CODE_PUT:
+    resp_code = OT_COAP_CODE_CHANGED;
+    break;
+  default:
+    return -EINVAL;
+  }
+
+  err = otCoapMessageInitResponse(resp, req, resp_type, resp_code);
+  if (err != OT_ERROR_NONE) {
+    return -EBADMSG;
+  }
+
+  err = otCoapMessageSetPayloadMarker(resp);
+  if (err != OT_ERROR_NONE) {
+    return -EBADMSG;
+  }
+
+  err = otMessageAppend(resp, buf, len);
+  if (err != OT_ERROR_NONE) {
+    return -EBADMSG;
+  }
+
+  err = otCoapSendResponse(ot, resp, req_info);
+  if (err != OT_ERROR_NONE) {
+    return -EIO;
+  }
+
+  sg_free_msg.dismiss();
+
+  return 0;
+}
+
 constexpr std::size_t EUI64_LEN = 8;
 using Eui64Arr = std::array<std::uint8_t, EUI64_LEN>;
 
@@ -193,4 +303,4 @@ inline Eui64Arr get_eui64_as_arr8() {
   return eui_out;
 }
 
-} // namespace coap_handler
+} // namespace coap_utils
