@@ -31,12 +31,15 @@ void err(fmt::format_string<Args...> fmt_str, Args &&...args) {
 #endif
 }
 
-template <typename... Args> void wrn(const char *fmt_str, Args... args) {
+template <typename... Args>
+void wrn(fmt::format_string<Args...> fmt_str, Args &&...args) {
 #if defined(CONFIG_LOG)
   if (__log_level >= LOG_LEVEL_ERR) {
-    printf("WRN: ");
-    printf(fmt_str, args...);
-    printf("\r\n");
+    fmt::memory_buffer buf;
+    fmt::format_to(std::back_inserter(buf), "WRN: ");
+    fmt::format_to(std::back_inserter(buf), fmt_str,
+                   std::forward<Args>(args)...);
+    fmt::println("{}", fmt::string_view(buf.data(), buf.size()));
   }
 #endif
 }
