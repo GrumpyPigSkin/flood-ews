@@ -168,7 +168,7 @@ private:
   common::PeriodicTask m_timeout;
 
   /** @brief Work for when a successful reading arrives.  */
-  WorkTask m_read_work;
+  common::WorkTask m_read_work;
 
   /** @brief The start time on each cycle. */
   std::int64_t m_cycle_start_ms{0};
