@@ -294,7 +294,6 @@ inline int coap_resp_send(otMessage *const req,
   otCoapCode resp_code;
   otCoapType resp_type;
   otError err;
-  int ret;
 
   otInstance *const ot = openthread_get_default_instance();
 
