@@ -12,6 +12,12 @@
 
 namespace coap_utils {
 
+/**
+ * @brief Address to multicast to all routers in a mesh.
+ * https://openthread.io/guides/thread-primer/ipv6-addressing#multicast
+ */
+static constexpr auto *MESH_LOCAL_MULTICAST_ADDR = "ff03::2";
+
 enum class CoapErr : std::uint8_t {
   OK,
   NO_INST,
@@ -93,6 +99,69 @@ CoapErr req_send(char const *const addr, char const *const uri, const T &buf,
   sg_free_msg.dismiss();
   return CoapErr::OK;
 }
+
+template <typename ByteLike = std::byte>
+[[nodiscard]] CoapErr
+req_send_bytes(char const *const addr, char const *const uri,
+               const std::span<const ByteLike> buf,
+               otCoapResponseHandler handler, void *ctx, otCoapCode code) {
+
+  static_assert(
+      sizeof(ByteLike) == 1,
+      "coap_get_bytes works on byte-sized elements (std::byte/char/uint8_t)");
+
+  otMessageInfo msg_info{};
+  otError err{};
+
+  otInstance *const ot_inst = openthread_get_default_instance();
+  if (!ot_inst) {
+    return CoapErr::NO_INST;
+  }
+
+  err = otIp6AddressFromString(addr, &msg_info.mPeerAddr);
+
+  if (err != OT_ERROR_NONE) {
+    return CoapErr::BAD_ADDR;
+  }
+
+  msg_info.mPeerPort = OT_DEFAULT_COAP_PORT;
+
+  otMessage *const msg = otCoapNewMessage(ot_inst, NULL);
+  if (msg == nullptr) {
+    return CoapErr::NO_MSG;
+  }
+
+  otCoapMessageInit(msg, OT_COAP_TYPE_CONFIRMABLE, code);
+
+  err = otCoapMessageAppendUriPathOptions(msg, uri);
+
+  auto sg_free_msg = folly::makeGuard([&msg] { otMessageFree(msg); });
+
+  if (err != OT_ERROR_NONE) {
+
+    return CoapErr::FAILED_TO_APPEND_URI;
+  }
+
+  err = otCoapMessageSetPayloadMarker(msg);
+  if (err != OT_ERROR_NONE) {
+    return CoapErr::FAILED_SET_PAYLOAD;
+  }
+
+  err = otMessageAppend(msg, buf.data(), buf.size());
+  if (err != OT_ERROR_NONE) {
+    return CoapErr::FAILED_APPEND_MSG;
+  }
+
+  err = otCoapSendRequest(ot_inst, msg, &msg_info, handler, ctx);
+  if (err != OT_ERROR_NONE) {
+    return CoapErr::FAILED_SEND_REQUEST;
+  }
+
+  // Disarm the guard, all was okay.
+  sg_free_msg.dismiss();
+  return CoapErr::OK;
+}
+
 } // namespace detail
 
 /**
@@ -123,10 +192,28 @@ inline CoapErr init() {
  * @param [in] ctx The response context nullptr if none.
  * @return CoapErr
  */
+template <typename ByteLike = std::byte>
+[[nodiscard]] CoapErr
+put_req_send_bytes(char const *const addr, char const *const uri,
+                   const std::span<const ByteLike> buf,
+                   otCoapResponseHandler handler, void *ctx) {
+  return detail::req_send(addr, uri, buf, handler, ctx, OT_COAP_CODE_PUT);
+}
+
+/**
+ * @brief Helper to send a CoAP PUT request.
+ * @tparam T The type to send.
+ * @param [in] addr The address to send to.
+ * @param [in] uri The URI of the CoAP message.
+ * @param [in] buf The data to send.
+ * @param [in] handler The response handler, nullptr if none.
+ * @param [in] ctx The response context nullptr if none.
+ * @return CoapErr
+ */
 template <typename T>
 CoapErr put_req_send(char const *const addr, char const *const uri,
                      const T &msg, otCoapResponseHandler handler, void *ctx) {
-  return detail::req_send(addr, uri, msg, handler, ctx, OT_COAP_CODE_PUT);
+  return detail::req_send_bytes(addr, uri, msg, handler, ctx, OT_COAP_CODE_PUT);
 }
 
 /**
@@ -204,23 +291,24 @@ inline int coap_resp_send(otMessage *const req,
                           const otMessageInfo *const req_info,
                           uint8_t const *const buf, const int len) {
 
-  otMessage *resp;
   otCoapCode resp_code;
   otCoapType resp_type;
   otError err;
   int ret;
 
-  auto sg_free_msg = folly::makeGuard([&msg] { otMessageFree(msg); });
-
-  otInstance *const ot resp = otCoapNewMessage(ot, NULL);
+  otInstance *const ot = openthread_get_default_instance();
 
   if (!ot) {
     return -ENODEV;
   }
 
+  otMessage *const resp = otCoapNewMessage(ot, NULL);
+
   if (!resp) {
     return -ENOMEM;
   }
+
+  auto sg_free_msg = folly::makeGuard([&resp] { otMessageFree(resp); });
 
   switch (otCoapMessageGetType(req)) {
   case OT_COAP_TYPE_CONFIRMABLE:
@@ -301,6 +389,20 @@ inline Eui64Arr get_eui64_as_arr8() {
   Eui64Arr eui_out;
   std::memcpy(eui_out.data(), eui.m8, eui_out.size());
   return eui_out;
+}
+
+inline int coap_init() {
+  otInstance *ot = openthread_get_default_instance();
+  if (!ot) {
+    return -ENODEV;
+  }
+
+  const otError err = otCoapStart(ot, OT_DEFAULT_COAP_PORT);
+  if (err != OT_ERROR_NONE) {
+    return -EBADMSG;
+  }
+
+  return 0;
 }
 
 } // namespace coap_utils
