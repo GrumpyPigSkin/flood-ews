@@ -31,4 +31,14 @@ struct SensorReading {
   IEC61850_DetailQual detail;
 };
 
+/** @brief The CoAP URI for sensor data. */
+static constexpr auto *SENSOR_URI = "sensor";
+
+/** @brief Expected payload format for sensor data. */
+static constexpr auto *SENSOR_PAYLOAD_FORMAT =
+    R"({{"eui":{},"v":{},"seq":{},"q":{},"d":{}}})";
+
+/** @brief Sensor configuration URI. */
+static constexpr auto *SENSOR_CONFIG_URI = "config";
+
 } // namespace common
