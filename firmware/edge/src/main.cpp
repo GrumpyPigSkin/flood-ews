@@ -49,6 +49,42 @@ void on_thread_state_changed(otChangedFlags flags, void *user_data) {
   }
 }
 
+static constexpr std::uint32_t CSL_PERIOD_US = 10000000U;
+static constexpr std::uint32_t CSL_TIMEOUT_S = 100U;
+
+/**
+ * @brief CSL needs enabling before openthread is started. Set the CSL window
+ * and disable active poling.
+ */
+int csl_setup() {
+
+  otInstance *const inst = openthread_get_default_instance();
+
+  // Disable polling.
+  otError err = otLinkSetPollPeriod(inst, 0);
+  if (err != OT_ERROR_NONE) {
+    logging::err("Failed to to disable poll period: {}",
+                 otThreadErrorToString(err));
+    return -1;
+  }
+
+  // Enable CSL.
+  err = otLinkSetCslPeriod(inst, CSL_PERIOD_US);
+  if (err != OT_ERROR_NONE) {
+    logging::err("Failed to to set CSL period: {}", otThreadErrorToString(err));
+    return -1;
+  }
+
+  err = otLinkSetCslTimeout(inst, CSL_TIMEOUT_S);
+  if (err != OT_ERROR_NONE) {
+    logging::err("Failed to to set CSL timout period: {}",
+                 otThreadErrorToString(err));
+    return -1;
+  }
+
+  return 0;
+}
+
 /**
  * @brief State change callback structure, used to register to callback with
  * openthread.
@@ -61,9 +97,13 @@ struct openthread_state_changed_callback s_ot_state_chaged_cb = {
 int main(void) {
 
   if (const auto err = coap_utils::coap_init(); err != 0) {
-
     logging::err("Failed to initialise CoAP");
-    return -1;
+    return err;
+  }
+
+  if (const auto err = csl_setup(); err != 0) {
+    logging::err("Failed to initialise CSL");
+    return err;
   }
 
   App.emplace();
