@@ -3,6 +3,8 @@
 #include "zephyr/kernel.h"
 #include <functional>
 
+namespace common {
+
 /**
  * @brief Wraps up submitting work to the global work queue.
  */
@@ -39,7 +41,6 @@ private:
   /**
    * @brief Zephyr needs a static function to call into. From here we recover
    * the this pointer and call the callback.
-   *
    * @param w
    */
   static void trampoline(k_work *const w) {
@@ -56,3 +57,5 @@ private:
    */
   FuncTypeT m_fn;
 };
+
+} // namespace common
