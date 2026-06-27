@@ -6,6 +6,7 @@
 #include <common/sensor_reading.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <glaze/beve.hpp>
 #include <mutex>
 #include <type_traits>
 
@@ -32,25 +33,22 @@ public:
    */
   coap_utils::CoapErr send_sensor_data(const common::SensorReading &reading) {
     // Write to an internal buffer.
-    constexpr std::size_t BUF_SIZE = 128;
-    std::array<char, BUF_SIZE> buffer;
+    constexpr std::size_t BUF_SIZE = 64;
+    std::array<std::byte, BUF_SIZE> buffer;
 
-    const auto validity =
-        static_cast<std::underlying_type_t<common::IEC61850_Validity>>(
-            reading.validity);
-    const auto detail =
-        static_cast<std::underlying_type_t<common::IEC61850_DetailQual>>(
-            reading.detail);
+    common::SensorReadingWire to_wire{.eui = m_eui,
+                                      .lvl = reading.water_level,
+                                      .seq = m_seq_id,
+                                      .val = reading.validity,
+                                      .det = reading.detail};
 
-    char *const buffer_start = buffer.data();
-    char *const buffer_end = fmt::format_to(
-        buffer.data(), fmt::runtime(common::SENSOR_PAYLOAD_FORMAT), m_eui,
-        reading.water_level, m_seq_id, validity, detail);
+    auto err = glz::write_beve(to_wire, buffer);
 
-    std::size_t bytes_written = std::distance(buffer_start, buffer_end);
+    if (err) {
+      return coap_utils::CoapErr::NO_MSG;
+    }
 
-    const auto payload_span =
-        std::span<const char>{buffer_start, bytes_written};
+    const std::span<const std::byte> payload_span{buffer.data(), err.count};
 
     // Increment the sequence id.
     m_seq_id++;

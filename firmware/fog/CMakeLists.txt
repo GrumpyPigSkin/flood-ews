@@ -13,9 +13,17 @@ FetchContent_Declare(
   GIT_TAG        e69e5f977d458f2650bb346dadf2ad30c5320281) # 10.2.1
 FetchContent_MakeAvailable(fmt)
 
+FetchContent_Declare(
+    glaze
+    GIT_REPOSITORY https://github.com/stephenberry/glaze.git
+    GIT_TAG        v2.9.5
+)
+FetchContent_MakeAvailable(glaze)
+
 target_include_directories(app PRIVATE src)
 target_include_directories(app PRIVATE ../)
 target_link_libraries(app PRIVATE fmt::fmt)
+target_link_libraries(app PRIVATE glaze::glaze)
 
 target_include_directories(app PRIVATE src)
 

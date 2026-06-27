@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <glaze/glaze.hpp>
 
 namespace common {
 /**
@@ -31,14 +32,27 @@ struct SensorReading {
   IEC61850_DetailQual detail;
 };
 
+struct SensorReadingWire {
+  std::uint64_t eui;
+  std::uint16_t lvl;
+  std::uint8_t seq;
+  IEC61850_Validity val;
+  IEC61850_DetailQual det;
+};
+
 /** @brief The CoAP URI for sensor data. */
 static constexpr auto *SENSOR_URI = "sensor";
-
-/** @brief Expected payload format for sensor data. */
-static constexpr auto *SENSOR_PAYLOAD_FORMAT =
-    R"({{"eui":{},"v":{},"seq":{},"q":{},"d":{}}})";
 
 /** @brief Sensor configuration URI. */
 static constexpr auto *SENSOR_CONFIG_URI = "config";
 
 } // namespace common
+
+template <> struct glz::meta<common::SensorReadingWire> {
+  using T = common::SensorReadingWire;
+  // By using glz::array instead of glz::object, we bypass the string naming
+  // engine entirely. This is perfect for pure binary layouts where names aren't
+  // serialized anyway!
+  static constexpr auto value =
+      glz::array(&T::eui, &T::lvl, &T::seq, &T::val, &T::det);
+};
