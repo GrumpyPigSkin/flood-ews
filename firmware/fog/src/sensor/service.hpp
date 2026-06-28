@@ -66,17 +66,17 @@ private:
     auto &self = *static_cast<Service *>(ctx);
     SensorReadingWire reading{};
 
-    std::array<char, BUF_SIZE> json_payload{};
+    std::array<char, BUF_SIZE> payload{};
 
     const auto res = coap_utils::coap_get_bytes(
-        msg, std::span(json_payload.begin(), json_payload.size()));
+        msg, std::span(payload.begin(), payload.size()));
 
     if (!res.has_value()) {
       // Bad payload.
       return;
     }
 
-    auto err = glz::read_beve(reading, json_payload);
+    auto err = glz::read_beve(reading, payload);
 
     if (err) {
       return;
