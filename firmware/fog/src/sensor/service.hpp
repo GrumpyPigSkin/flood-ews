@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/coap_utils.hpp"
-#include "common/logging.hpp"
 #include "common/sensor_reading.hpp"
 #include <cstddef>
 #include <functional>
+#include <glaze/beve.hpp>
 #include <openthread/coap.h>
 
 namespace fog::sensor {
@@ -24,15 +24,26 @@ public:
 
   /**
    * @brief Constructor
+   * @param [in] uri The URI for the CoAP resource to attach to.
    * @param [in] func The call back, this will be called in open thread context
    * so needs to be small.
    */
-  Service(OnReadingT func) : m_on_reading(std::move(func)) {}
+  Service(const char *uri, OnReadingT func)
+      : m_uri(uri), m_on_reading(std::move(func)) {}
 
   /**
    * @brief Initialise the class, registers the CoAP resource.
    */
-  void init();
+  void init() {
+
+    m_resource = otCoapResource{.mUriPath = m_uri,
+                                .mHandler = sensor_request_handler,
+                                .mContext = this,
+                                .mNext = nullptr};
+
+    otInstance *const ot_inst = openthread_get_default_instance();
+    otCoapAddResource(ot_inst, &m_resource);
+  }
 
   /**
    * @brief On a message call back into out callback.
@@ -45,6 +56,9 @@ public:
   }
 
 private:
+  /**
+   * @brief Handle receiving a CoAP message from the sensors.
+   */
   static void sensor_request_handler(void *ctx, otMessage *msg,
                                      otMessageInfo const * /*i*/) {
 
@@ -62,20 +76,20 @@ private:
       return;
     }
 
-    // Direct memory parsing out of your string_view buffer.
-    auto err = glz::read_json(reading, json_payload);
+    auto err = glz::read_beve(reading, json_payload);
 
     if (err) {
       return;
     }
 
-    // Data is fully verified and populated.
-    logging::inf("received sensor reading: .eui={:x}, .water_level={:x}",
-                 reading.eui, reading.water_level);
-
     // Submit the reading.
     self.on_reading(reading);
   }
+
+  /**
+   * @brief The URI to attach the CoAP resource to in init.
+   */
+  const char *m_uri;
 
   /**
    * @brief The resource for registering coap handle.
