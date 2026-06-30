@@ -50,9 +50,6 @@ static constexpr auto *SENSOR_CONFIG_URI = "config";
 
 template <> struct glz::meta<common::SensorReadingWire> {
   using T = common::SensorReadingWire;
-  // By using glz::array instead of glz::object, we bypass the string naming
-  // engine entirely. This is perfect for pure binary layouts where names aren't
-  // serialized anyway!
   static constexpr auto value =
       glz::array(&T::eui, &T::lvl, &T::seq, &T::val, &T::det);
 };
