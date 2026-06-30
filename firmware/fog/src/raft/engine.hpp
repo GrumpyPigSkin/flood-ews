@@ -1,0 +1,153 @@
+#pragma once
+
+#include "callback.hpp"
+#include "coap/coap.hpp"
+#include "common/logging.hpp"
+#include "common/message_queue.hpp"
+#include "common/periodic_task.hpp"
+#include "common/work_task.hpp"
+#include "raft_types.hpp"
+#include "server/server.hpp"
+#include "service/network_service.hpp"
+#include <cstddef>
+#include <openthread/link.h>
+#include <zephyr/random/random.h>
+
+namespace fog::raft {
+
+class Engine {
+
+  /**
+   * @brief The raft nodes we expect to be part of the system.
+   */
+  static constexpr std::array<NodeId, 3> EXPECTED_EUIS = {
+      0xf4ce360a4eac3643,
+      0xf4ce363a5c916092,
+      0xf4ce3696247825d1,
+  };
+
+  static constexpr k_timeout_t TICK = K_MSEC(100);
+  static constexpr std::size_t QUEUE_DEPTH = 8;
+
+public:
+  using OnApplyCallbackT = std::function<void(const Entry<> &)>;
+
+  /**
+   * @brief Constructor
+   * @param [in] cb Called when apply is called.
+   * @param [in] self_id This nodes ID
+   */
+  Engine(OnApplyCallbackT cb, NodeId self_id)
+      : m_coap([this](const auto &msg) { return receive(msg); },
+               m_network_service),
+        m_server(self_id, EXPECTED_EUIS, make_cbs()),
+        m_tick([this] { m_server.periodic(); }),
+        m_message_pending_work([this] { drain(); }),
+        m_discover_peers_work([this] { m_network_service.discover_peers(); }),
+        m_on_apply(std::move(cb)) {}
+
+  /**
+   * @brief Start the raft server.
+   */
+  void start() {
+    m_coap.init();
+    m_network_service.init();
+    m_server.start();
+    m_tick.start(TICK);
+    m_discover_peers_work.start(TICK);
+  }
+
+  /**
+   * @brief Stop the raft server.
+   */
+  void stop() { m_tick.stop(); }
+
+  /**
+   * @brief Submit new work to be replicated across the raft nodes.
+   * @param [in] data
+   */
+  void submit(std::span<const std::byte> data) { (void)m_server.submit(data); }
+
+private:
+  /**
+   * @brief Called when a new message comes in over Openthread
+   * @param [in] msg The new message.
+   * @return true
+   */
+  bool receive(const Message<> &msg) {
+    if (!m_rx_queue.try_put(msg)) {
+      logging::wrn("Raft RX queue full, dropping msg from {}", msg.from);
+      return false;
+    }
+    m_message_pending_work.submit();
+    return true;
+  }
+
+  /**
+   * @brief Make the callbacks for raft server.
+   * @return Callbacks<DefaultConfig>
+   */
+  Callbacks<DefaultConfig> make_cbs() {
+    return {
+        .m_send =
+            [this](const Server<>::MessageT &msg) { m_coap.send_msg(msg); },
+        .m_apply =
+            [this](const Server<>::EntryT &entry) {
+              if (m_on_apply) {
+                m_on_apply(entry);
+              }
+            },
+        // Snapshotting / persisting is missing from the current implementation,
+        // to get this to work on hardware is a significant task.
+        .m_now = [] { return static_cast<Time>(k_uptime_get()); },
+        .m_rand = [] { return sys_rand32_get(); },
+        .m_on_state_change = &Engine::handle_state_change};
+  }
+
+  /**
+   * @brief Handle state change, just prints for logging.
+   * @param [in] old_state
+   * @param [in] new_state
+   */
+  static void handle_state_change(const State old_state,
+                                  const State new_state) {
+    logging::inf("State changed from: {} to: {}", to_string(old_state),
+                 to_string(new_state));
+  }
+
+  /**
+   * @brief Drain the queue for any messages that were sent, call handle for
+   * each message.
+   */
+  void drain() {
+    m_rx_queue.drain(
+        [this](const Server<>::MessageT &msg) { m_server.handle(msg); });
+  }
+
+  /** @brief The coap resources for raft. */
+  CoapServer m_coap;
+
+  /** @brief The network discovery service. */
+  NetworkService m_network_service;
+
+  /** @brief The Raft server. */
+  Server<DefaultConfig> m_server;
+
+  /** @brief Periodic work for running the main heartbeat/timeout task. */
+  common::PeriodicTask m_tick;
+
+  /** @brief Work task for when a new message is delivered from the openthread
+   * workqueue. */
+  common::WorkTask m_message_pending_work;
+
+  /** @brief Queue to store received messages. */
+  common::MessageQueue<Server<>::MessageT, QUEUE_DEPTH> m_rx_queue;
+
+  /** @brief Periodic task to discover new raft nodes. */
+  common::PeriodicTask m_discover_peers_work;
+
+  /** @brief Callback for when apply is called. */
+  OnApplyCallbackT m_on_apply;
+};
+
+} // namespace fog::raft
