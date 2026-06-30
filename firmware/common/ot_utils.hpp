@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <openthread/instance.h>
 #include <openthread/link.h>
+#include <zephyr/sys/byteorder.h>
 
 namespace common {
 

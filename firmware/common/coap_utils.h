@@ -7,7 +7,6 @@
 #ifndef COAP_UTILS_H
 #define COAP_UTILS_H
 
-#include "zephyr/sys/byteorder.h"
 #include <openthread/coap.h>
 #include <openthread/ip6.h>
 #include <zephyr/net/openthread.h>
