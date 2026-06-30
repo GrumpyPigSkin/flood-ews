@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/coap_utils.hpp"
 #include "common/logging.hpp"
+#include "common/ot_utils.hpp"
 #include "network_service.hpp"
 #include "openthread.h"
 #include <cstring>
@@ -14,11 +14,12 @@
 #include <openthread/thread.h>
 #include <optional>
 
+
 namespace fog::raft {
 
 inline void NetworkService::init() {
   const std::scoped_lock guard(m_otmx);
-  m_eui = coap_utils::get_eui64_as_uint64();
+  m_eui = common::get_eui64_as_uint64();
   register_local_service();
 }
 
