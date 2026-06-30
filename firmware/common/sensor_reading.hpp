@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <glaze/glaze.hpp>
 
 namespace common {
 /**
@@ -47,9 +46,3 @@ static constexpr auto *SENSOR_URI = "sensor";
 static constexpr auto *SENSOR_CONFIG_URI = "config";
 
 } // namespace common
-
-template <> struct glz::meta<common::SensorReadingWire> {
-  using T = common::SensorReadingWire;
-  static constexpr auto value =
-      glz::array(&T::eui, &T::lvl, &T::seq, &T::val, &T::det);
-};
