@@ -126,18 +126,18 @@ template <typename Cfg = DefaultConfig> struct Entry {
  * @brief RequestVote RPC (5.2, 5.4).
  */
 struct RequestVote {
-  Term term{};            // candidate's term
-  NodeId candidate_id{};  // candidate requesting the vote
-  Index last_log_index{}; // index of candidate's last log entry
-  Term last_log_term{};   // term of candidate's last log entry
+  Term m_term{};            // candidate's term
+  NodeId m_candidate_id{};  // candidate requesting the vote
+  Index m_last_log_index{}; // index of candidate's last log entry
+  Term m_last_log_term{};   // term of candidate's last log entry
 };
 
 /**
  * @brief Response for request vote.
  */
 struct RequestVoteResp {
-  Term term{};         // currentTerm, for candidate to update itself
-  bool vote_granted{}; // true means candidate received the vote
+  Term m_term{};         // currentTerm, for candidate to update itself
+  bool m_vote_granted{}; // true means candidate received the vote
 };
 
 /**
