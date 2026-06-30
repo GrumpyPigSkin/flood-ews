@@ -1,8 +1,7 @@
 #pragma once
 
-#include "common/coap_utils.hpp"
+#include "common/coap_utils.h"
 #include "common/sensor_reading.hpp"
-#include <cstddef>
 #include <functional>
 #include <glaze/beve.hpp>
 #include <openthread/coap.h>
@@ -61,24 +60,14 @@ private:
    */
   static void sensor_request_handler(void *ctx, otMessage *msg,
                                      otMessageInfo const * /*i*/) {
-
-    static constexpr std::size_t BUF_SIZE = 128;
     auto &self = *static_cast<Service *>(ctx);
     SensorReadingWire reading{};
 
-    std::array<char, BUF_SIZE> payload{};
+    int len = sizeof(reading);
+    const auto res = coap_get_data(msg, &reading, &len);
 
-    const auto res = coap_utils::coap_get_bytes(
-        msg, std::span(payload.begin(), payload.size()));
-
-    if (!res.has_value()) {
+    if (res == 0 || len != sizeof(reading)) {
       // Bad payload.
-      return;
-    }
-
-    auto err = glz::read_beve(reading, payload);
-
-    if (err) {
       return;
     }
 
