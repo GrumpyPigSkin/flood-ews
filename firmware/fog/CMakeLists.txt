@@ -13,24 +13,16 @@ FetchContent_Declare(
   GIT_TAG        e69e5f977d458f2650bb346dadf2ad30c5320281) # 10.2.1
 FetchContent_MakeAvailable(fmt)
 
-FetchContent_Declare(
-    glaze
-    GIT_REPOSITORY https://github.com/stephenberry/glaze.git
-    GIT_TAG        main
-)
-FetchContent_MakeAvailable(glaze)
-
 target_include_directories(app PRIVATE src)
 target_include_directories(app PRIVATE ../)
 target_link_libraries(app PRIVATE fmt::fmt)
-target_link_libraries(app PRIVATE glaze::glaze)
-
-target_compile_definitions(app PRIVATE GLZ_USE_STD_FORMAT_FLOAT=0)
 
 target_include_directories(app PRIVATE src)
 
 target_sources(app PRIVATE
     src/main.cpp
+    src/raft/coap/coap.cpp
+    ../common/coap_utils.c
 )
 
 include(${ZEPHYR_BASE}/samples/net/common/common.cmake)
