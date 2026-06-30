@@ -3,7 +3,6 @@
 #include "common/coap_utils.h"
 #include "common/sensor_reading.hpp"
 #include <functional>
-#include <glaze/beve.hpp>
 #include <openthread/coap.h>
 
 namespace fog::sensor {
