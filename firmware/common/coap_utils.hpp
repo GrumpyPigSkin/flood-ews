@@ -34,75 +34,9 @@ enum class CoapErr : std::uint8_t {
 
 namespace detail {
 
-/**
- * @brief Generic helper to send a CoAP message.
- * @tparam T The type to send.
- * @param [in] addr The address to send to.
- * @param [in] uri The URI of the CoAP message.
- * @param [in] buf The data to send.
- * @param [in] handler The response handler, nullptr if none.
- * @param [in] ctx The response context nullptr if none.
- * @param [in] code The CoAP code, GET/PUT/POST/DELETE
- * @return CoapErr
- */
-template <typename T>
-CoapErr req_send(char const *const addr, char const *const uri, const T &buf,
-                 otCoapResponseHandler handler, void *ctx, otCoapCode code) {
-  otMessageInfo msg_info{};
-  otError err{};
-
-  otInstance *const ot_inst = openthread_get_default_instance();
-  if (!ot_inst) {
-    return CoapErr::NO_INST;
-  }
-
-  err = otIp6AddressFromString(addr, &msg_info.mPeerAddr);
-
-  if (err != OT_ERROR_NONE) {
-    return CoapErr::BAD_ADDR;
-  }
-
-  msg_info.mPeerPort = OT_DEFAULT_COAP_PORT;
-
-  otMessage *const msg = otCoapNewMessage(ot_inst, NULL);
-  if (msg == nullptr) {
-    return CoapErr::NO_MSG;
-  }
-
-  otCoapMessageInit(msg, OT_COAP_TYPE_CONFIRMABLE, code);
-
-  err = otCoapMessageAppendUriPathOptions(msg, uri);
-
-  auto sg_free_msg = folly::makeGuard([&msg] { otMessageFree(msg); });
-
-  if (err != OT_ERROR_NONE) {
-
-    return CoapErr::FAILED_TO_APPEND_URI;
-  }
-
-  err = otCoapMessageSetPayloadMarker(msg);
-  if (err != OT_ERROR_NONE) {
-    return CoapErr::FAILED_SET_PAYLOAD;
-  }
-
-  err = otMessageAppend(msg, &buf, sizeof(T));
-  if (err != OT_ERROR_NONE) {
-    return CoapErr::FAILED_APPEND_MSG;
-  }
-
-  err = otCoapSendRequest(ot_inst, msg, &msg_info, handler, ctx);
-  if (err != OT_ERROR_NONE) {
-    return CoapErr::FAILED_SEND_REQUEST;
-  }
-
-  // Disarm the guard, all was okay.
-  sg_free_msg.dismiss();
-  return CoapErr::OK;
-}
-
-template <typename ByteLike = std::byte>
+template <typename ByteLike>
 [[nodiscard]] CoapErr
-req_send_bytes(char const *const addr, char const *const uri,
+req_send_bytes(otIp6Address const *const addr, char const *const uri,
                const std::span<const ByteLike> buf,
                otCoapResponseHandler handler, void *ctx, otCoapCode code) {
 
@@ -118,12 +52,7 @@ req_send_bytes(char const *const addr, char const *const uri,
     return CoapErr::NO_INST;
   }
 
-  err = otIp6AddressFromString(addr, &msg_info.mPeerAddr);
-
-  if (err != OT_ERROR_NONE) {
-    return CoapErr::BAD_ADDR;
-  }
-
+  msg_info.mPeerAddr = *addr;
   msg_info.mPeerPort = OT_DEFAULT_COAP_PORT;
 
   otMessage *const msg = otCoapNewMessage(ot_inst, NULL);
@@ -162,6 +91,33 @@ req_send_bytes(char const *const addr, char const *const uri,
   return CoapErr::OK;
 }
 
+template <typename ByteLike = std::byte>
+[[nodiscard]] CoapErr
+req_send_bytes(char const *const addr, char const *const uri,
+               const std::span<const ByteLike> buf,
+               otCoapResponseHandler handler, void *ctx, otCoapCode code) {
+
+  static_assert(
+      sizeof(ByteLike) == 1,
+      "coap_get_bytes works on byte-sized elements (std::byte/char/uint8_t)");
+
+  otIp6Address msg_addr{};
+  otError err{};
+
+  otInstance *const ot_inst = openthread_get_default_instance();
+  if (!ot_inst) {
+    return CoapErr::NO_INST;
+  }
+
+  err = otIp6AddressFromString(addr, &msg_addr);
+
+  if (err != OT_ERROR_NONE) {
+    return CoapErr::BAD_ADDR;
+  }
+
+  return req_send_bytes(&msg_addr, uri, buf, handler, ctx, code);
+}
+
 } // namespace detail
 
 /**
@@ -192,12 +148,12 @@ inline CoapErr init() {
  * @param [in] ctx The response context nullptr if none.
  * @return CoapErr
  */
-template <typename ByteLike = std::byte>
+template <typename ByteLike>
 [[nodiscard]] CoapErr
 put_req_send_bytes(char const *const addr, char const *const uri,
                    const std::span<const ByteLike> buf,
                    otCoapResponseHandler handler, void *ctx) {
-  return detail::req_send(addr, uri, buf, handler, ctx, OT_COAP_CODE_PUT);
+  return detail::req_send_bytes(addr, uri, buf, handler, ctx, OT_COAP_CODE_PUT);
 }
 
 /**
@@ -210,14 +166,17 @@ put_req_send_bytes(char const *const addr, char const *const uri,
  * @param [in] ctx The response context nullptr if none.
  * @return CoapErr
  */
-template <typename T>
-CoapErr put_req_send(char const *const addr, char const *const uri,
-                     const T &msg, otCoapResponseHandler handler, void *ctx) {
-  return detail::req_send_bytes(addr, uri, msg, handler, ctx, OT_COAP_CODE_PUT);
+template <typename ByteLike>
+[[nodiscard]] CoapErr
+put_req_send_bytes(otIp6Address const *const addr, char const *const uri,
+                   const std::span<const ByteLike> buf,
+                   otCoapResponseHandler handler, void *ctx) {
+  return detail::req_send_bytes<ByteLike>(addr, uri, buf, handler, ctx,
+                                          OT_COAP_CODE_PUT);
 }
 
 /**
- * @brief Helper to send a CoAP GET request.
+ * @brief Helper to send a CoAP PUT request.
  * @tparam T The type to send.
  * @param [in] addr The address to send to.
  * @param [in] uri The URI of the CoAP message.
@@ -226,10 +185,13 @@ CoapErr put_req_send(char const *const addr, char const *const uri,
  * @param [in] ctx The response context nullptr if none.
  * @return CoapErr
  */
-template <typename T>
-CoapErr get_req_send(char const *const addr, char const *const uri,
-                     const T &msg, otCoapResponseHandler handler, void *ctx) {
-  return detail::req_send(addr, uri, msg, handler, ctx, OT_COAP_CODE_GET);
+template <typename ByteLike>
+[[nodiscard]] CoapErr
+put_req_send_bytes_addr_str(char const *const addr, char const *const uri,
+                            const std::span<const ByteLike> buf,
+                            otCoapResponseHandler handler, void *ctx) {
+  return detail::req_send_bytes<ByteLike>(addr, uri, buf, handler, ctx,
+                                          OT_COAP_CODE_PUT);
 }
 
 /**
