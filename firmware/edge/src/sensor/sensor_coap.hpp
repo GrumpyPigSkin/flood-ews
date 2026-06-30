@@ -1,14 +1,12 @@
 #pragma once
 
 #include "common/mutex.hpp"
-#include "fmt/core.h"
 #include <common/coap_utils.hpp>
 #include <common/sensor_reading.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <glaze/beve.hpp>
 #include <mutex>
-#include <type_traits>
 
 namespace edge::sensor {
 
@@ -54,8 +52,8 @@ public:
     m_seq_id++;
 
     std::lock_guard guard{m_otmx};
-    return coap_utils::put_req_send_bytes(m_address, m_uri_path, payload_span,
-                                          nullptr, nullptr);
+    return coap_utils::put_req_send_bytes_addr_str(
+        m_address, m_uri_path, payload_span, nullptr, nullptr);
   }
 
 private:
