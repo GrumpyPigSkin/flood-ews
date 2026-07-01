@@ -1,12 +1,35 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
+#include <type_traits>
 
 namespace common {
 /**
  * @brief Follows IEC 61850-7-3
  * https://cdn.standards.iteh.ai/samples/14982/302a451ae92e4a9ea9dbf56d819c0b2a/IEC-61850-7-3-2010.pdf
  */
+
+/**
+ * @brief Define a default false typed template for enabling bitwise operation
+ * on enum classes.
+ * @tparam E
+ */
+template <typename E> struct enable_bitmask_operators : std::false_type {};
+
+/**
+ * @brief Enable bitwise OR operations on an enum class.
+ * @param [in] lhs
+ * @param [in] rhs
+ * @return std::enable_if_t<enable_bitmask_operators<E>::value, E>
+ */
+template <typename E>
+typename std::enable_if_t<enable_bitmask_operators<E>::value, E>
+operator|(const E lhs, const E rhs) noexcept {
+  using underlying = std::underlying_type_t<E>;
+  return static_cast<E>(static_cast<underlying>(lhs) |
+                        static_cast<underlying>(rhs));
+}
 
 /** @brief IEC 61850-7-3 Section 6.2 Quality — validity values */
 enum class IEC61850_Validity : std::uint8_t {
@@ -25,18 +48,25 @@ enum class IEC61850_DetailQual : std::uint8_t {
   DETAIL_OUTLIER = 0x10,      // Outlier in BZT.
 };
 
+/**
+ * @brief Enable bitwise operations on IEC61850_DetailQual.
+ */
+template <>
+struct enable_bitmask_operators<IEC61850_DetailQual> : std::true_type {};
+
 struct SensorReading {
-  std::uint16_t water_level;
-  IEC61850_Validity validity;
-  IEC61850_DetailQual detail;
+  std::uint16_t m_water_level;
+  IEC61850_Validity m_validity;
+  IEC61850_DetailQual m_detail;
 };
 
 struct SensorReadingWire {
-  std::uint64_t eui;
-  std::uint16_t lvl;
-  std::uint8_t seq;
-  IEC61850_Validity val;
-  IEC61850_DetailQual det;
+  std::uint64_t m_eui;
+  std::uint64_t m_timestamp;
+  std::uint16_t m_water_level_mm;
+  IEC61850_Validity m_validity;
+  IEC61850_DetailQual m_detail;
+  std::uint8_t m_seq;
 };
 
 /** @brief The CoAP URI for sensor data. */
@@ -44,5 +74,8 @@ static constexpr auto *SENSOR_URI = "sensor";
 
 /** @brief Sensor configuration URI. */
 static constexpr auto *SENSOR_CONFIG_URI = "config";
+
+/** @brief The number of expected sensors in the system. */
+constexpr std::size_t MAX_SENSORS = 3;
 
 } // namespace common
