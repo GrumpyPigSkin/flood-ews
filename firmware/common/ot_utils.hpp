@@ -2,6 +2,9 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <openthread.h>
 #include <openthread/instance.h>
 #include <openthread/link.h>
 #include <zephyr/sys/byteorder.h>
