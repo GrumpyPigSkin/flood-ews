@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/coap_utils.hpp"
 #include "common/logging.hpp"
+#include "common/ot_utils.hpp"
 #include "common/sensor_reading.hpp"
 #include "config/service.hpp"
 #include "jsn/driver.hpp"
@@ -83,7 +83,7 @@ private:
               }}};
 
   /** @brief CoAP service for sending sensor data back to the fog node. */
-  sensor::CoapService m_sensor_coap{coap_utils::MESH_LOCAL_MULTICAST_ADDR,
+  sensor::CoapService m_sensor_coap{common::MESH_LOCAL_MULTICAST_ADDR,
                                     common::SENSOR_URI};
 };
 
