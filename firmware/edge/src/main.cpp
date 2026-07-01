@@ -1,4 +1,4 @@
-#include "common/coap_utils.hpp"
+#include "common/coap_utils.h"
 #include "common/logging.hpp"
 #include "edge.hpp"
 #include "openthread.h"
@@ -37,6 +37,7 @@ void on_thread_state_changed(otChangedFlags flags, void *user_data) {
       logging::wrn("Device attached to thread network.");
       if (!s_initialised) {
         get_app()->init();
+        s_initialised = true;
       }
       break;
 
@@ -96,7 +97,7 @@ struct openthread_state_changed_callback s_ot_state_chaged_cb = {
 
 int main(void) {
 
-  if (const auto err = coap_utils::coap_init(); err != 0) {
+  if (const auto err = coap_init(); err != 0) {
     logging::err("Failed to initialise CoAP");
     return err;
   }
