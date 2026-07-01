@@ -4,7 +4,6 @@
 #include <functional>
 #include <zephyr/kernel.h>
 
-
 namespace common {
 
 /**
@@ -23,6 +22,15 @@ inline k_timeout_t ms_to_k_timeout(const std::uint32_t val) {
  */
 inline k_timeout_t us_to_k_timeout(const std::uint32_t val) {
   return K_USEC(val);
+}
+
+/**
+ * @brief Wrapper for zephyr macro k_ticks_to_ms_near32.
+ * @param [in] val
+ * @return auto
+ */
+inline k_timeout_t ticks_to_ms_near32(const std::uint32_t val) {
+  return k_ticks_to_ms_near32(val);
 }
 
 /**
