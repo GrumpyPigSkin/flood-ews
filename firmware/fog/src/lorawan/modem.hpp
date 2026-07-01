@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/logging.hpp"
+#include "fmt/core.h"
 #include "lorawan/protocol.hpp"
 #include <cstdint>
 #include <functional>
@@ -70,6 +72,7 @@ public:
   CmdResult cmd(std::string_view command, std::string_view expected,
                 std::uint32_t timeout_ms, std::span<std::byte> downlink = {},
                 std::size_t *dl_len = nullptr) const {
+
     m_port.m_write(command);
     if (dl_len != nullptr) {
       *dl_len = 0;
@@ -99,6 +102,9 @@ public:
       }
 
       if (line->contains(expected)) {
+        constexpr std::uint32_t DRAIN_MS = 150;
+        while (m_port.m_read_line(DRAIN_MS)) { /* discard */
+        }
         return CmdResult::MATCHED;
       }
     }
