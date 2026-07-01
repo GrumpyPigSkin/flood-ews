@@ -51,26 +51,26 @@ calculate_reading(const bool is_valid, const std::uint16_t dist,
   using common::IEC61850_Validity;
   using common::SensorReading;
 
-  SensorReading result = {.water_level = 0,
-                          .validity = IEC61850_Validity::VALIDITY_INVALID,
-                          .detail = IEC61850_DetailQual::DETAIL_FAILURE};
+  SensorReading result = {.m_water_level = 0,
+                          .m_validity = IEC61850_Validity::VALIDITY_INVALID,
+                          .m_detail = IEC61850_DetailQual::DETAIL_FAILURE};
 
   if (!is_valid) {
     return result;
   }
 
   if (dist > ground_dist) {
-    result.validity = IEC61850_Validity::VALIDITY_QUESTIONABLE;
-    result.detail = IEC61850_DetailQual::DETAIL_OUT_OF_RANGE;
-    result.water_level = 0;
+    result.m_validity = IEC61850_Validity::VALIDITY_QUESTIONABLE;
+    result.m_detail = IEC61850_DetailQual::DETAIL_OUT_OF_RANGE;
+    result.m_water_level = 0;
   } else if (dist < MIN_DISTANCE_MM) {
-    result.validity = IEC61850_Validity::VALIDITY_QUESTIONABLE;
-    result.detail = IEC61850_DetailQual::DETAIL_OVERFLOW;
-    result.water_level = ground_dist;
+    result.m_validity = IEC61850_Validity::VALIDITY_QUESTIONABLE;
+    result.m_detail = IEC61850_DetailQual::DETAIL_OVERFLOW;
+    result.m_water_level = ground_dist;
   } else {
-    result.water_level = ground_dist - dist;
-    result.validity = IEC61850_Validity::VALIDITY_GOOD;
-    result.detail = IEC61850_DetailQual::DETAIL_NONE;
+    result.m_water_level = ground_dist - dist;
+    result.m_validity = IEC61850_Validity::VALIDITY_GOOD;
+    result.m_detail = IEC61850_DetailQual::DETAIL_NONE;
   }
 
   return result;
