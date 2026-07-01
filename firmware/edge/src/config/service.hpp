@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/coap_utils.hpp"
+#include "common/coap_utils.h"
 #include "common/mutex.hpp"
 #include "common/work_task.hpp"
 #include "config/store.hpp"
@@ -163,22 +163,23 @@ private:
     }
 
     std::scoped_lock guard{m_ot_lock};
-    coap_utils::coap_resp_send(
-        msg, info, reinterpret_cast<std::uint8_t const *>(body->data()),
-        static_cast<int>(body->size()));
+    coap_resp_send(msg, info,
+                   reinterpret_cast<std::uint8_t const *>(body->data()),
+                   static_cast<int>(body->size()));
   }
 
   void handle_post(otMessage *msg, const otMessageInfo *info) {
     constexpr std::size_t BUF_SIZE = 64;
     std::array<char, BUF_SIZE> buf;
-    const auto body = coap_utils::coap_get_bytes<char>(msg, buf);
-    if (!body) {
+    int len = buf.size();
+    const auto ret = coap_get_data(msg, buf.data(), &len);
+    if (ret != 0) {
       return;
     }
 
     // Add a null to the end to as json_obj_parse required a null terminated
     // string.
-    const std::size_t body_size = body->size();
+    const std::size_t body_size = len;
     char json[BUF_SIZE + 1];
     std::memcpy(json, buf.data(), body_size);
     json[body_size] = '\0';
@@ -208,7 +209,7 @@ private:
     }
 
     std::scoped_lock guard{m_ot_lock};
-    coap_utils::coap_resp_send(msg, info, nullptr, 0);
+    coap_resp_send(msg, info, nullptr, 0);
   }
 
   /**
