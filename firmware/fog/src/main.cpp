@@ -1,3 +1,4 @@
+#include "application.hpp"
 #include "common/coap_utils.h"
 #include "common/logging.hpp"
 #include "raft/engine.hpp"
@@ -8,7 +9,7 @@ namespace {
 /** @brief Flag to handle reattaching to openthread network. */
 bool s_initialised = false;
 
-std::optional<fog::raft::Engine> engine;
+std::optional<fog::Application> app;
 
 /**
  * @brief OpenThread state change callback.
@@ -30,7 +31,8 @@ void on_thread_state_changed(otChangedFlags flags, void *user_data) {
       // We have a valid role so start.
       if (!s_initialised) {
         logging::wrn("Device attached started raft.");
-        engine->start();
+        app->init();
+        app->start();
         s_initialised = true;
       }
       break;
@@ -62,7 +64,7 @@ int main(void) {
 
   auto on_apply = [](auto) { logging::inf("Apply called."); };
 
-  engine.emplace(on_apply, common::get_eui64_as_uint64());
+  app.emplace();
 
   openthread_state_changed_callback_register(&s_ot_state_chaged_cb);
   openthread_run();
