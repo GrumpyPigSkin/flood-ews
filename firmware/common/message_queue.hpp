@@ -62,6 +62,19 @@ public:
   }
 
   /**
+   * @brief Pop an item off the queue, blocking up to the specified timeout.
+   * @param [in] timeout The maximum time to wait for an item.
+   * @return std::optional<T> The item if popped, or std::nullopt on timeout.
+   */
+  [[nodiscard]] std::optional<T> get(const k_timeout_t timeout) {
+    T item;
+    if (k_msgq_get(&m_q, &item, timeout) == 0) {
+      return item;
+    }
+    return std::nullopt;
+  }
+
+  /**
    * @brief Drain every queued item through fn, on the calling context.
    */
   template <typename Fn> void drain(Fn &&fn) {
