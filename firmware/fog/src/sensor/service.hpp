@@ -60,6 +60,7 @@ public:
 
     if (m_on_reading) {
       reading.m_timestamp = network_time_us;
+      m_on_reading(reading);
     }
   }
 
@@ -75,8 +76,7 @@ private:
     int len = sizeof(reading);
     const auto res = coap_get_data(msg, &reading, &len);
 
-    if (res == 0 || len != sizeof(reading)) {
-      // Bad payload.
+    if (res != 0 || len != sizeof(reading)) {
       return;
     }
 
