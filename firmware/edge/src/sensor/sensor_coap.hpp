@@ -1,7 +1,8 @@
 #pragma once
 
 #include "common/mutex.hpp"
-#include <common/coap_utils.hpp>
+#include <common/coap_utils.h>
+#include <common/ot_utils.hpp>
 #include <common/sensor_reading.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -21,7 +22,7 @@ public:
    * @param [in] uri_path The uri path to send on.
    */
   CoapService(const char *address, const char *uri_path)
-      : m_eui(coap_utils::get_eui64_as_uint64()), m_address(address),
+      : m_eui(common::get_eui64_as_uint64()), m_address(address),
         m_uri_path{uri_path} {}
 
   /**
@@ -29,31 +30,25 @@ public:
    * @param [in] reading The sensor reading.
    * @return coap_utils::CoapErr
    */
-  coap_utils::CoapErr send_sensor_data(const common::SensorReading &reading) {
-    // Write to an internal buffer.
-    constexpr std::size_t BUF_SIZE = 64;
-    std::array<std::byte, BUF_SIZE> buffer;
+  int send_sensor_data(const common::SensorReading &reading) {
 
-    common::SensorReadingWire to_wire{.eui = m_eui,
-                                      .lvl = reading.water_level,
-                                      .seq = m_seq_id,
-                                      .val = reading.validity,
-                                      .det = reading.detail};
-
-    auto err = glz::write_beve(to_wire, buffer);
-
-    if (err) {
-      return coap_utils::CoapErr::NO_MSG;
-    }
-
-    const std::span<const std::byte> payload_span{buffer.data(), err.count};
+    common::SensorReadingWire to_wire{.m_eui = m_eui,
+                                      .m_water_level_mm = reading.m_water_level,
+                                      .m_validity = reading.m_validity,
+                                      .m_detail = reading.m_detail,
+                                      .m_seq = m_seq_id};
 
     // Increment the sequence id.
     m_seq_id++;
 
+    coap_addr_t addr;
+    addr.u.str = m_address;
+    addr.is_str = true;
+
     std::lock_guard guard{m_otmx};
-    return coap_utils::put_req_send_bytes_addr_str(
-        m_address, m_uri_path, payload_span, nullptr, nullptr);
+    return coap_put_req_send(addr, m_uri_path,
+                             reinterpret_cast<const uint8_t *>(&to_wire),
+                             sizeof(to_wire), nullptr, nullptr);
   }
 
 private:
