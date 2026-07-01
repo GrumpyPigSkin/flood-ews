@@ -1,9 +1,11 @@
 #pragma once
 
 #include "common/coap_utils.h"
+#include "common/logging.hpp"
 #include "common/sensor_reading.hpp"
 #include <functional>
 #include <openthread/coap.h>
+#include <openthread/network_time.h>
 
 namespace fog::sensor {
 
@@ -47,9 +49,17 @@ public:
    * @brief On a message call back into out callback.
    * @param [in] e
    */
-  void on_reading(const SensorReadingWire &reading) {
+  void on_reading(SensorReadingWire reading) {
+    otInstance *const ot_inst = openthread_get_default_instance();
+    uint64_t network_time_us = 0;
+    otNetworkTimeStatus status = otNetworkTimeGet(ot_inst, &network_time_us);
+
+    if (status != OT_NETWORK_TIME_SYNCHRONIZED) {
+      logging::wrn("on_reading: Network time not synced.");
+    }
+
     if (m_on_reading) {
-      m_on_reading(reading);
+      reading.m_timestamp = network_time_us;
     }
   }
 
