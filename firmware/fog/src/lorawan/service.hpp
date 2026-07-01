@@ -103,15 +103,17 @@ public:
     payload.m_raft_term = static_cast<std::uint32_t>(term);
     payload.m_raft_log_index = static_cast<std::uint32_t>(index);
     payload.m_alert = alert ? 1 : 0;
-    payload.m_count =
-        static_cast<std::uint8_t>(std::min(MAX_ENTRIES, batch.m_count));
+    payload.m_count = static_cast<std::uint8_t>(
+        std::min(MAX_ENTRIES, std::size_t(batch.m_count)));
 
     for (std::uint8_t i = 0; i < payload.m_count; ++i) {
-      payload.entries[i].m_device_rloc = batch.entries[i].device_rloc;
-      payload.entries[i].m_water_level_mm = batch.entries[i].water_level_mm;
-      payload.entries[i].m_validity = batch.entries[i].validity;
-      payload.entries[i].m_detail = batch.entries[i].detail;
-      payload.entries[i].m_timestamp = batch.entries[i].timestamp;
+      payload.entries[i].m_device_rloc = batch.m_entries[i].m_eui;
+      payload.entries[i].m_water_level_mm = batch.m_entries[i].m_water_level_mm;
+      payload.entries[i].m_validity =
+          static_cast<std::uint8_t>(batch.m_entries[i].m_validity);
+      payload.entries[i].m_detail =
+          static_cast<std::uint8_t>(batch.m_entries[i].m_detail);
+      payload.entries[i].m_timestamp = batch.m_entries[i].m_timestamp;
     }
 
     return m_tx_q.try_put(payload);
@@ -132,8 +134,12 @@ private:
         // PHASE 1: Attempt to join the network and back off progressively on
         // failed attempts.
         logging::inf("LoraWanService: Attempting to join network.");
-        const bool join_ok = run_join(
-            self->m_modem, {self->m_eui, self->m_app_key}, self->m_scratch);
+        const bool join_ok =
+            run_join(self->m_modem, {self->m_eui, self->m_app_key},
+                     self->m_scratch) &&
+            // Send a ping packet to set the correct data rate so we can send
+            // our main packet
+            self->send_ping();
         if (join_ok) {
           logging::inf("LoraWanService: Joined LoRaWAN network.");
           self->m_joined.store(true, std::memory_order_release);
@@ -156,6 +162,16 @@ private:
         }
       }
     }
+  }
+
+  /**
+   * @brief A ping packet is used in order to set the data rate, before first
+   * comms the data rate is set to only accept up 51 bytes. After sending a ping
+   * LoRaWAN upgrades this connection.
+   * @return true cmd executed okay.
+   */
+  bool send_ping() {
+    return m_modem.ok(MSG_PING_CMD, MSG_DONE_RSP, Timeouts::DEFAULT_MS);
   }
 
   /**
@@ -237,7 +253,7 @@ private:
   std::atomic<bool> m_running{false};
 
   /** @brief The thread stack for the internal thread. */
-  K_KERNEL_STACK_MEMBER(m_stack, 2048);
+  K_KERNEL_STACK_MEMBER(m_stack, 4096);
 
   /** @brief Thread struct for thread control. */
   struct k_thread m_thread_data;

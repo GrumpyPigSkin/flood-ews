@@ -64,6 +64,7 @@ constexpr std::string_view FORCE_JOIN_RSP = "+JOIN: Network joined";
 constexpr std::string_view MSG_START_CMD = "AT+MSGHEX=\"";
 constexpr std::string_view MSG_FMT_CMD = "%02X";
 constexpr std::string_view MSG_END_CMD = "\"\r\n";
+constexpr std::string_view MSG_PING_CMD = "AT+MSGHEX=\"BEEF\"\r\n";
 constexpr std::string_view MSG_DONE_RSP = "+MSGHEX: Done";
 constexpr std::string_view E5_TOK_NOT_JOINED = "Please join network first";
 
