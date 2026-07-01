@@ -22,7 +22,7 @@ namespace fog::raft {
 struct DefaultConfig {
   static constexpr std::size_t MAX_NODES = 3;       // servers in the cluster
   static constexpr std::size_t LOG_CAPACITY = 64;   // in-memory log ring size
-  static constexpr std::size_t MAX_ENTRY_DATA = 64; // payload bytes per entry
+  static constexpr std::size_t MAX_ENTRY_DATA = 80; // payload bytes per entry
   static constexpr std::size_t MAX_APPEND_ENTRIES = 8; // entries per AE RPC
   static constexpr std::size_t SNAPSHOT_MAX = 512;     // reassembly buffer
   static constexpr std::size_t SNAPSHOT_CHUNK = 256;   // bytes per IS chunk
