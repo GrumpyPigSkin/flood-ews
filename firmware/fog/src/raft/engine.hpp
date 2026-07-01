@@ -68,6 +68,12 @@ public:
    */
   void submit(std::span<const std::byte> data) { (void)m_server.submit(data); }
 
+  /**
+   * @brief Are we the leader.
+   * @return true if we are.
+   */
+  [[nodiscard]] bool is_leader() const noexcept { return m_server.is_leader(); }
+
 private:
   /**
    * @brief Called when a new message comes in over Openthread

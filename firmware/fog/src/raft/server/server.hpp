@@ -40,6 +40,14 @@ public:
   [[nodiscard]] bool valid() const noexcept { return m_valid; }
 
   /**
+   * @brief Are we the leader.
+   * @return true if we are.
+   */
+  [[nodiscard]] bool is_leader() const noexcept {
+    return m_current_leader == m_self_id;
+  }
+
+  /**
    * @brief Start the raft server.
    */
   void start() noexcept {
@@ -164,6 +172,12 @@ private:
    * @return Peer*
    */
   [[nodiscard]] Peer *self() noexcept { return node_by_id(m_self_id); }
+
+  /**
+   * @brief Get the the Peer instance for this node.
+   * @return Peer*
+   */
+  [[nodiscard]] Peer *self() const noexcept { return node_by_id(m_self_id); }
 
   /**
    * @brief Persist the state to none volatile storage.
