@@ -6,6 +6,7 @@
 #include "common/message_queue.hpp"
 #include "common/periodic_task.hpp"
 #include "common/work_task.hpp"
+#include "fs/persist.hpp"
 #include "raft_types.hpp"
 #include "server/server.hpp"
 #include "service/network_service.hpp"
@@ -26,7 +27,8 @@ class Engine {
       0xf4ce3696247825d1,
   };
 
-  static constexpr k_timeout_t TICK = K_MSEC(100);
+  static constexpr k_timeout_t TICK = common::ms_to_k_timeout(100);
+  static constexpr k_timeout_t DISCOVER_TICK = common::ms_to_k_timeout(1000);
   static constexpr std::size_t QUEUE_DEPTH = 8;
 
 public:
@@ -46,15 +48,23 @@ public:
         m_discover_peers_work([this] { m_network_service.discover_peers(); }),
         m_on_apply(std::move(cb)) {}
 
+  void init() {
+    if (auto err = m_persistence.init(); err != 0) {
+      logging::inf("Persistence init failed: {}", err);
+    }
+    m_coap.init();
+    m_network_service.init();
+  }
+
   /**
    * @brief Start the raft server.
    */
   void start() {
-    m_coap.init();
-    m_network_service.init();
+    const auto loaded = m_persistence.load();
+    m_server.restore_state(loaded.m_term, loaded.m_voted_for);
     m_server.start();
     m_tick.start(TICK);
-    m_discover_peers_work.start(TICK);
+    m_discover_peers_work.start(DISCOVER_TICK);
   }
 
   /**
@@ -102,6 +112,12 @@ private:
               if (m_on_apply) {
                 m_on_apply(entry);
               }
+            },
+        .m_persist_state =
+            [this](Term current_term, NodeId voted_for) {
+              logging::inf("Persistence saved: .current_term={}, .voted_for={}",
+                           current_term, voted_for);
+              m_persistence.save({current_term, voted_for});
             },
         // Snapshotting / persisting is missing from the current implementation,
         // to get this to work on hardware is a significant task.
@@ -154,6 +170,8 @@ private:
 
   /** @brief Callback for when apply is called. */
   OnApplyCallbackT m_on_apply;
+
+  fog::fs::RaftPersistence m_persistence;
 };
 
 } // namespace fog::raft

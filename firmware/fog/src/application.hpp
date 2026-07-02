@@ -20,6 +20,7 @@ public:
   void init() {
     m_uart.init();
     m_sensor_service.init();
+    m_raft_engine.init();
   }
 
   void start() {
@@ -39,15 +40,13 @@ private:
 
     vote::SensorBatch batch;
     if (entry.m_data_len < sizeof(batch)) {
-      logging::err("entry idx=%llu too small ({} < {}), skipping",
-                   entry.m_index, entry.m_data_len);
       return;
     }
     std::memcpy(&batch, &entry.m_data, sizeof(batch));
 
     logging::inf("on_apply: batch sent to LoRaWAN.");
 
-    (void)m_lora_service.send_batch(batch, entry.m_term, entry.m_index, false);
+    (void)m_lora_service.send_batch(batch, entry.m_term, entry.m_index);
   }
 
   common::Eui64Arr m_eui = common::get_eui64_as_arr8();
