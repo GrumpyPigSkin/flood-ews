@@ -15,6 +15,7 @@ using Eui = std::uint64_t;
 struct SensorBatch {
   std::array<common::SensorReadingWire, common::MAX_SENSORS> m_entries;
   std::uint8_t m_count;
+  bool m_alert_active;
 };
 
 /**

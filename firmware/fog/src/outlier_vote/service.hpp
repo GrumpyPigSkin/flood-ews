@@ -130,6 +130,8 @@ private:
     if (batch.has_value() && m_submit) {
 
       logging::inf("on_window_close: Batch submitted to raft.");
+      batch->m_alert_active = m_engine.check_alert(batch.value());
+
       m_submit(batch.value());
     }
 
