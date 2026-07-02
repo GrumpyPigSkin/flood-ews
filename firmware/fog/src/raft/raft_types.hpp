@@ -26,12 +26,14 @@ struct DefaultConfig {
   static constexpr std::size_t MAX_APPEND_ENTRIES = 8; // entries per AE RPC
   static constexpr std::size_t SNAPSHOT_MAX = 512;     // reassembly buffer
   static constexpr std::size_t SNAPSHOT_CHUNK = 256;   // bytes per IS chunk
+  static constexpr std::size_t SNAPSHOT_THRESHOLD =
+      LOG_CAPACITY / 2; // Trigger value for compaction.
 
   /**
    * @brief Election timeout is chosen randomly in [min, min+spread] ms
-   * Heartbeat must be << election timeout. The choice for a large timeout here
-   * is that sensor readings happen every 30-300s, so a ms timeout doesn't gain
-   * much and just increase the amount of thread usage.
+   * Heartbeat must be << election timeout. The choice for a large timeout
+   * here is that sensor readings happen every 30-300s, so a ms timeout
+   * doesn't gain much and just increase the amount of thread usage.
    */
   static constexpr std::uint32_t ELECTION_TIMEOUT_MIN_MS = 2500;
   static constexpr std::uint32_t ELECTION_TIMEOUT_SPREAD_MS = 1000;
@@ -98,8 +100,9 @@ template <typename T> using Result = tl::expected<T, Error>;
  * @brief The current entry type, heartbeats are NOOPS.
  */
 enum class EntryType : std::uint8_t {
-  COMMAND, // opaque state-machine command
-  NOOP,    // blank no-op committed at start of term (8)
+  NOOP,        // blank no-op committed at start of term (8)
+  SENSOR_DATA, // New sensor data.
+  EGRESS_MSG,  // Egress message type.
 };
 
 /**
@@ -109,7 +112,7 @@ enum class EntryType : std::uint8_t {
 template <typename Cfg = DefaultConfig> struct Entry {
   Term m_term{};   // term entry was created in
   Index m_index{}; // position in the log
-  EntryType m_type{EntryType::COMMAND};
+  EntryType m_type{EntryType::NOOP};
   std::uint16_t m_data_len{};
   std::array<std::byte, Cfg::MAX_ENTRY_DATA> m_data{};
 

@@ -284,4 +284,14 @@ template <typename Cfg> void Server<Cfg>::apply_committed() noexcept {
     }
     detail::call_if(m_cbs.m_apply, *entry);
   }
+
+  maybe_compact();
+}
+
+template <typename Cfg> void Server<Cfg>::maybe_compact() noexcept {
+  const Index live = m_last_applied - m_log.base();
+  if (live < Cfg::SNAPSHOT_THRESHOLD) {
+    return;
+  }
+  (void)begin_snapshot();
 }

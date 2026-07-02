@@ -56,7 +56,9 @@ template <typename Cfg> void Server<Cfg>::periodic() noexcept {
 }
 
 template <typename Cfg>
-Result<Index> Server<Cfg>::submit(std::span<const std::byte> data) noexcept {
+Result<Index>
+Server<Cfg>::submit(const EntryType type,
+                    const std::span<const std::byte> data) noexcept {
 
   if (!m_running) {
     return tl::unexpected(Error::SHUTDOWN);
@@ -77,7 +79,7 @@ Result<Index> Server<Cfg>::submit(std::span<const std::byte> data) noexcept {
   EntryT entry{
       .m_term = m_current_term,
       .m_index = m_log.last_index() + 1,
-      .m_type = EntryType::COMMAND,
+      .m_type = type,
       .m_data_len = static_cast<std::uint16_t>(data.size()),
   };
 
@@ -104,8 +106,12 @@ Result<Index> Server<Cfg>::submit(std::span<const std::byte> data) noexcept {
     }
   }
 
-  leader_advance_commit(); // single-node clusters commit at once
-  apply_committed();
+  // Only a single node cluster submits to itself.
+  if (m_n_nodes == 1) {
+    leader_advance_commit();
+    apply_committed();
+  }
+
   return assigned;
 }
 

@@ -76,13 +76,20 @@ public:
    * @brief Submit new work to be replicated across the raft nodes.
    * @param [in] data
    */
-  void submit(std::span<const std::byte> data) { (void)m_server.submit(data); }
+  auto submit(const EntryType type, const std::span<const std::byte> data) {
+    return m_server.submit(type, data);
+  }
 
   /**
    * @brief Are we the leader.
    * @return true if we are.
    */
   [[nodiscard]] bool is_leader() const noexcept { return m_server.is_leader(); }
+
+  /** @brief an entry submitted at `index`. */
+  [[nodiscard]] Server<>::EntryT const *get_entry(const Index index) {
+    return m_server.get_entry(index);
+  }
 
 private:
   /**

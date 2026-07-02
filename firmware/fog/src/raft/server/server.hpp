@@ -85,10 +85,12 @@ public:
   /**
    * @brief Leader only, append a client command for replication. On success the
    * result holds the assigned log index.
+   * @param [in] EntryType the type of message we want to submit.
    * @param [in] data The data to submit.
    * @return Result<Index>
    */
-  [[nodiscard]] Result<Index> submit(std::span<const std::byte> data) noexcept;
+  [[nodiscard]] Result<Index> submit(EntryType type,
+                                     std::span<const std::byte> data) noexcept;
 
   /**
    * @brief Compact in-memory and persisted log up to last_applied by
@@ -102,6 +104,11 @@ public:
    * without going through the log.
    */
   [[nodiscard]] bool can_read() const noexcept;
+
+  /** @brief an entry submitted at `index`. */
+  [[nodiscard]] EntryT const *get_entry(const Index index) {
+    return m_log.at(index);
+  }
 
   /**
    * @brief Apply the loaded `term` and `voted_for` BEFORE raft is started.
@@ -259,6 +266,11 @@ private:
    * @brief Call apply for the newly commited entries.
    */
   void apply_committed() noexcept;
+
+  /**
+   * @brief Called after commit to compact the log.
+   */
+  void maybe_compact() noexcept;
 
   /**
    * @brief Send a MessageT out to other nodes.
