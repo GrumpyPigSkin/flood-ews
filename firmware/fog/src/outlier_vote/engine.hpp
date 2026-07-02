@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/sensor_reading.hpp"
+#include "outlier_vote/sensor_batch.hpp"
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -11,12 +12,6 @@
 namespace fog::vote {
 
 using Eui = std::uint64_t;
-
-struct SensorBatch {
-  std::array<common::SensorReadingWire, common::MAX_SENSORS> m_entries;
-  std::uint8_t m_count;
-  bool m_alert_active;
-};
 
 /**
  * @brief Configuration for the engine parameters.
@@ -51,7 +46,7 @@ struct Reputation {
 class VoteEngine {
 public:
   using Entry = common::SensorReadingWire;
-  using Batch = SensorBatch;
+  using Batch = batch::SensorBatch;
   using Validity = common::IEC61850_Validity;
   using Detail = common::IEC61850_DetailQual;
   static constexpr std::size_t MAX_SENSORS = common::MAX_SENSORS;

@@ -5,6 +5,7 @@
 #include "common/periodic_task.hpp"
 #include "common/sensor_reading.hpp"
 #include "outlier_vote/engine.hpp"
+#include "outlier_vote/sensor_batch.hpp"
 #include <cstdint>
 #include <functional>
 #include <mutex>
@@ -18,7 +19,7 @@ namespace fog::vote {
 class VoteService {
 public:
   using Engine = VoteEngine;
-  using Batch = SensorBatch;
+  using Batch = batch::SensorBatch;
   using Entry = common::SensorReadingWire;
   using SubmitFn = std::function<void(const Batch &)>;
 
