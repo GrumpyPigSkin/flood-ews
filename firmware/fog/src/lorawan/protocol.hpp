@@ -29,6 +29,7 @@ struct Payload {
   std::uint64_t m_node_id{};        // sending fog node id
   std::uint32_t m_raft_term{};      // term of the Raft entry being shipped
   std::uint32_t m_raft_log_index{}; // index of the Raft entry being shipped
+  std::uint32_t m_sequence{};       // The sequence number for this message
   std::uint8_t m_alert{};           // 1 if alert mode active
   std::uint8_t m_count{};           // number of valid entries
   std::array<Entry, MAX_ENTRIES> entries{};
@@ -36,7 +37,7 @@ struct Payload {
 #pragma pack(pop)
 
 constexpr std::size_t EXPECTED_ENTRY_SIZE = 16;
-constexpr std::size_t EXPECTED_PAYLOAD_SIZE = 66;
+constexpr std::size_t EXPECTED_PAYLOAD_SIZE = 70;
 
 static_assert(sizeof(Entry) == EXPECTED_ENTRY_SIZE,
               "Entry must stay wire-packed");
