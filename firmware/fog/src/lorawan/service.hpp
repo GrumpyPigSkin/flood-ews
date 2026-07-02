@@ -96,13 +96,13 @@ public:
   template <typename SensorBatch>
   [[nodiscard]] bool send_batch(const SensorBatch &batch,
                                 const std::uint64_t term,
-                                const std::uint64_t index, const bool alert) {
+                                const std::uint64_t index) {
 
     Payload payload{};
     payload.m_node_id = common::get_eui64_as_uint64();
     payload.m_raft_term = static_cast<std::uint32_t>(term);
     payload.m_raft_log_index = static_cast<std::uint32_t>(index);
-    payload.m_alert = alert ? 1 : 0;
+    payload.m_alert = batch.m_alert_active ? 1 : 0;
     payload.m_count = static_cast<std::uint8_t>(
         std::min(MAX_ENTRIES, std::size_t(batch.m_count)));
 
