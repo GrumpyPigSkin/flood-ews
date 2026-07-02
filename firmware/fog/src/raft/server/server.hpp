@@ -103,6 +103,16 @@ public:
    */
   [[nodiscard]] bool can_read() const noexcept;
 
+  /**
+   * @brief Apply the loaded `term` and `voted_for` BEFORE raft is started.
+   * @param [in] term
+   * @param [in] voted_for
+   */
+  void restore_state(Term term, NodeId voted_for) noexcept {
+    m_current_term = term;
+    m_voted_for = voted_for;
+  }
+
 private:
   /**
    * @brief Handle a request vote message.
@@ -182,7 +192,7 @@ private:
   /**
    * @brief Persist the state to none volatile storage.
    */
-  void persist_state() noexcept {
+  void persist_state() const noexcept {
     detail::call_if(m_cbs.m_persist_state, m_current_term, m_voted_for);
   }
 
