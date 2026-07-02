@@ -22,6 +22,8 @@ struct Platform {
   UartPort uart{};
   std::array<std::uint8_t, common::EUI64_LEN> eui{};
   std::string_view app_key;
+  std::function<void(std::uint32_t seq, std::uint64_t batch_index)>
+      m_on_complete;
 };
 
 class LoraWanService {
@@ -36,7 +38,8 @@ public:
    */
   explicit LoraWanService(Platform platform)
       : m_eui{platform.eui}, m_app_key{platform.app_key},
-        m_modem{std::move(platform.uart)} {
+        m_modem{std::move(platform.uart)},
+        m_on_complete(std::move(platform.m_on_complete)) {
     k_sem_init(&m_join_sem, 0, 1);
   }
 
@@ -94,14 +97,15 @@ public:
    * @return true if the messaged was enqueued successfully.
    */
   template <typename SensorBatch>
-  [[nodiscard]] bool send_batch(const SensorBatch &batch,
-                                const std::uint64_t term,
-                                const std::uint64_t index) {
+  [[nodiscard]] bool
+  send_batch(const SensorBatch &batch, const std::uint64_t term,
+             const std::uint64_t index, const std::uint32_t seq) {
 
     Payload payload{};
     payload.m_node_id = common::get_eui64_as_uint64();
     payload.m_raft_term = static_cast<std::uint32_t>(term);
     payload.m_raft_log_index = static_cast<std::uint32_t>(index);
+    payload.m_sequence = seq;
     payload.m_alert = batch.m_alert_active ? 1 : 0;
     payload.m_count = static_cast<std::uint8_t>(
         std::min(MAX_ENTRIES, std::size_t(batch.m_count)));
@@ -203,6 +207,8 @@ private:
       if (dl_len > 0) {
         handle_downlink({dl_buf.data(), dl_len});
       }
+
+      m_on_complete(payload.m_sequence, payload.m_raft_log_index);
       return true;
     }
 
@@ -257,6 +263,10 @@ private:
 
   /** @brief Thread struct for thread control. */
   struct k_thread m_thread_data;
+
+  /** @brief Callback for when a message has been successfully sent. */
+  std::function<void(std::uint32_t seq, std::uint64_t batch_index)>
+      m_on_complete;
 };
 
 } // namespace fog::lora
