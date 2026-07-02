@@ -82,8 +82,14 @@ private:
         m_egress_coordinator.on_lorawan_ok(seq, batch_index);
       }}};
 
-  raft::Engine m_raft_engine{[this](const auto &entry) { on_apply(entry); },
-                             common::get_eui64_as_uint64()};
+  raft::Engine m_raft_engine{
+      [this](const auto &entry) { on_apply(entry); },
+      [this](const raft::State /*old_state*/, const raft::State new_state) {
+        if (new_state == raft::State::LEADER) {
+          m_egress_coordinator.on_became_leader();
+        }
+      },
+      common::get_eui64_as_uint64()};
 
   vote::VoteService m_vote_service{[this](const batch::SensorBatch &batch) {
     (void)m_raft_engine.submit(
