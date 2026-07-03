@@ -1,7 +1,6 @@
 #include "application.hpp"
 #include "common/coap_utils.h"
 #include "common/logging.hpp"
-#include "raft/engine.hpp"
 #include <optional>
 
 namespace {
