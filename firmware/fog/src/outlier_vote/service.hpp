@@ -22,15 +22,16 @@ public:
   using Batch = batch::SensorBatch;
   using Entry = common::SensorReadingWire;
   using SubmitFn = std::function<void(const Batch &)>;
+  using NowMsFn = std::function<std::uint64_t()>;
 
   /**
    * @brief Constructor
    * @param [in] submit Called with each new sensor batch.
    * @param [in] cfg The configuration for the underlying engine.
    */
-  explicit VoteService(SubmitFn submit, Config cfg = {})
+  explicit VoteService(SubmitFn submit, NowMsFn now_ms, Config cfg = {})
       : m_engine{cfg}, m_submit{std::move(submit)},
-        m_window([this] { on_window_close(); }) {}
+        m_window([this] { on_window_close(); }), m_now_ms{std::move(now_ms)} {}
 
   /** @brief Deleted copy and move constructors. */
   VoteService(const VoteService &) = delete;
@@ -44,13 +45,23 @@ public:
    */
   void start() {
     const auto cfg = config();
-    m_window.one_shot(common::ms_to_k_timeout(cfg.m_collection_window_ms));
+    m_window.one_shot(next_boundary_timeout(cfg.m_collection_window_ms));
   }
 
   /**
    * @brief Stop the collection windown timer.
    */
   void stop() { m_window.stop(); }
+
+  /**
+   * @brief Force the window timer to re-align to the next boundary using
+   * the current clock reading.
+   */
+  void resync() {
+    const std::scoped_lock guard(m_lock);
+    m_window.one_shot(
+        next_boundary_timeout(m_engine.config().m_collection_window_ms));
+  }
 
   /**
    * @brief (Re)open the collection window, called when the leader signals a
@@ -61,7 +72,7 @@ public:
     const std::scoped_lock guard(m_lock);
     m_engine.open_window();
     m_window.one_shot(
-        common::ms_to_k_timeout(m_engine.config().m_collection_window_ms));
+        next_boundary_timeout(m_engine.config().m_collection_window_ms));
   }
 
   /**
@@ -102,6 +113,15 @@ public:
   }
 
   /**
+   * @brief Set a new collection window for sampling.
+   * @param [in] collection_window
+   */
+  void set_collection_window(const std::uint32_t collection_window) {
+    const std::scoped_lock guard(m_lock);
+    m_engine.set_collection_window(collection_window);
+  }
+
+  /**
    * @brief Copy the reputation into the span `out`.
    * @param [out] out user supplied buffer.
    * @return std::size_t the number written.
@@ -136,7 +156,21 @@ private:
       m_submit(batch.value());
     }
 
-    m_window.one_shot(common::ms_to_k_timeout(next_ms));
+    m_window.one_shot(next_boundary_timeout(next_ms));
+  }
+
+  /**
+   * @brief k_timeout_t until the next aligned period boundary, computed
+   * fresh from the synchronised clock each call.
+   * @param [in] period_ms Period; treated as 1 if 0 to avoid div-by-zero.
+   */
+  [[nodiscard]] k_timeout_t
+  next_boundary_timeout(const std::uint32_t period_ms) const {
+    const std::uint64_t period = period_ms == 0 ? 1 : period_ms;
+    const std::uint64_t now = m_now_ms();
+    const std::uint64_t next_boundary = ((now / period) + 1) * period;
+    const std::uint64_t delay_ms = next_boundary - now;
+    return common::ms_to_k_timeout(static_cast<std::uint32_t>(delay_ms));
   }
 
   /** @brief The underlying logic. */
@@ -150,6 +184,9 @@ private:
 
   /** @brief Periodic task to work off timer. */
   common::PeriodicTask m_window;
+
+  /** @brief Get the time now in ms. */
+  NowMsFn m_now_ms;
 };
 
 } // namespace fog::vote
