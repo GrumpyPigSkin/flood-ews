@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common/coap_utils.h"
-#include "common/mutex.hpp"
-#include "common/ot_utils.hpp"
+#include "coap_utils.h"
+#include "mutex.hpp"
+#include "ot_utils.hpp"
 #include <functional>
 #include <mutex>
 #include <openthread/coap.h>
