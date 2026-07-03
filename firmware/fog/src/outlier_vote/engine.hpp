@@ -69,6 +69,14 @@ public:
   void set_config(const Config &cfg) noexcept { m_cfg = cfg; }
 
   /**
+   * @brief Set a new collection window for sampling.
+   * @param [in] collection_window
+   */
+  void set_collection_window(const std::uint32_t collection_window) {
+    m_cfg.m_collection_window_ms = collection_window;
+  }
+
+  /**
    * @brief Get the current configuration
    * @return Config
    */
