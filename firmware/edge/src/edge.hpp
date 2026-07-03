@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/alert.hpp"
 #include "common/logging.hpp"
 #include "common/ot_utils.hpp"
 #include "common/sensor_reading.hpp"
@@ -85,6 +86,17 @@ private:
   /** @brief CoAP service for sending sensor data back to the fog node. */
   sensor::CoapService m_sensor_coap{common::MESH_LOCAL_MULTICAST_ADDR,
                                     common::SENSOR_URI};
+
+  /** @brief Handle an alert message from the fog layer. */
+  common::Alert m_alert_handler{[this](const auto alert) {
+    if (alert.m_alert_active) {
+      logging::inf("Alert activated: sleep time: {}", alert.m_alert_interval);
+      m_config_service.set_alert(alert.m_alert_interval);
+    } else {
+      logging::inf("Alert deactivated", alert.m_alert_interval);
+      m_config_service.clear_alert();
+    }
+  }};
 };
 
 } // namespace edge

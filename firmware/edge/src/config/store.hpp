@@ -155,6 +155,14 @@ public:
   void clear_alert() noexcept { m_alert_active = false; }
 
   /**
+   * @brief Set an alert from the alert message.
+   */
+  void set_alert(const std::uint16_t alert_time) noexcept {
+    m_alert_active = true;
+    m_alert_sleep_s = alert_time;
+  }
+
+  /**
    * @brief Serialise the configuration into json.
    * @param [out] out The output buffer to write the data into.
    * @return std::optional<std::string_view> A string view to the data in out,

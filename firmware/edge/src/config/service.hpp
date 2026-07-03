@@ -118,6 +118,18 @@ public:
     m_store.clear_alert();
   }
 
+  /**
+   * @brief On an alert message, set the alert and reschedule.
+   * @param [in] alert_sleep_time
+   */
+  void set_alert(const std::uint16_t alert_sleep_time) {
+    {
+      const std::scoped_lock guard(m_lock);
+      m_store.set_alert(alert_sleep_time);
+    }
+    m_reschedule();
+  }
+
 private:
   /**
    * @brief Trampoline function for the CoAP request.
