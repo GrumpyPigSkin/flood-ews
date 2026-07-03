@@ -84,7 +84,9 @@ private:
 
   raft::Engine m_raft_engine{
       [this](const auto &entry) { on_apply(entry); },
-      [this](const raft::State /*old_state*/, const raft::State new_state) {
+      [this](const raft::State old_state, const raft::State new_state) {
+        logging::inf("State changed from: {} to: {}", to_string(old_state),
+                     to_string(new_state));
         if (new_state == raft::State::LEADER) {
           m_egress_coordinator.on_became_leader();
         }

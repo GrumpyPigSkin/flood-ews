@@ -44,11 +44,11 @@ public:
   Engine(OnApplyCallbackT oacb, OnStateChangeCallbackT sccb, NodeId self_id)
       : m_coap([this](const auto &msg) { return receive(msg); },
                m_network_service),
-        m_server(self_id, EXPECTED_EUIS, make_cbs()),
+        m_server(self_id, EXPECTED_EUIS, make_cbs(std::move(sccb))),
         m_tick([this] { m_server.periodic(); }),
         m_message_pending_work([this] { drain(); }),
         m_discover_peers_work([this] { m_network_service.discover_peers(); }),
-        m_on_apply(std::move(oacb)), m_on_state_change(std::move(sccb)) {}
+        m_on_apply(std::move(oacb)) {}
 
   void init() {
     if (auto err = m_persistence.init(); err != 0) {
@@ -112,7 +112,7 @@ private:
    * @brief Make the callbacks for raft server.
    * @return Callbacks<DefaultConfig>
    */
-  Callbacks<DefaultConfig> make_cbs() {
+  Callbacks<DefaultConfig> make_cbs(OnStateChangeCallbackT osccb) {
     return {
         .m_send =
             [this](const Server<>::MessageT &msg) { m_coap.send_msg(msg); },
@@ -132,21 +132,7 @@ private:
         // to get this to work on hardware is a significant task.
         .m_now = [] { return static_cast<Time>(k_uptime_get()); },
         .m_rand = [] { return sys_rand32_get(); },
-        .m_on_state_change =
-            [this](const State old_state, const State new_state) {
-              handle_state_change(old_state, new_state);
-            }};
-  }
-
-  /**
-   * @brief Handle state change, just prints for logging.
-   * @param [in] old_state
-   * @param [in] new_state
-   */
-  void handle_state_change(const State old_state, const State new_state) {
-    logging::inf("State changed from: {} to: {}", to_string(old_state),
-                 to_string(new_state));
-    m_on_state_change(old_state, new_state);
+        .m_on_state_change = std::move(osccb)};
   }
 
   /**
@@ -182,9 +168,6 @@ private:
 
   /** @brief Callback for when apply is called. */
   OnApplyCallbackT m_on_apply;
-
-  /** @brief Callback for when state is changed. */
-  OnStateChangeCallbackT m_on_state_change;
 
   /** @brief Persistence for current term and voted for. */
   fog::fs::RaftPersistence m_persistence;
