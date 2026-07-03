@@ -68,7 +68,7 @@ public:
       R"({{"default":{},"warmup":{},"timeout":{},"ground":{}}})";
 
   /** @brief Constexpr default values. */
-  static constexpr Field SLEEP_S{1, 3600, 30};
+  static constexpr Field SLEEP_S{1, 3600, 300};
   static constexpr Field WARMUP_MS{1, 100000, 100};
   static constexpr Field SENSOR_TIMEOUT_MS{1, 1000000, 1000};
   static constexpr Field GROUND_DIST_MM{0, 10000, 10000};
