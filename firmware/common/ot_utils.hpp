@@ -12,6 +12,7 @@
 namespace common {
 
 constexpr auto *MESH_LOCAL_MULTICAST_ADDR = "ff03::2";
+constexpr auto *MESH_LOCAL_FTD_MTD_MULTICAST_ADDR = "ff03::1";
 
 constexpr std::size_t EUI64_LEN = 8;
 using Eui64Arr = std::array<std::uint8_t, EUI64_LEN>;
