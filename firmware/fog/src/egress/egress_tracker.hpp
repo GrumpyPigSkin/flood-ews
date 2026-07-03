@@ -82,11 +82,12 @@ public:
       }
     }
 
-    if (best_sequence.has_value()) {
+    if (!best_sequence.has_value()) {
       return std::nullopt;
     }
 
-    return {best_index, best_sequence.value()};
+    return Outstanding{best_index,
+                       static_cast<std::uint32_t>(best_sequence.value())};
   }
 
   /**
