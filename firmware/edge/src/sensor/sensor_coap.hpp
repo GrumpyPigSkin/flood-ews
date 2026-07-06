@@ -6,7 +6,6 @@
 #include <common/sensor_reading.hpp>
 #include <cstddef>
 #include <cstdint>
-#include <glaze/beve.hpp>
 #include <mutex>
 
 namespace edge::sensor {
