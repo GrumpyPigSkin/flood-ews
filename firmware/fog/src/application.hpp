@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/alert.hpp"
+#include "common/logging.hpp"
 #include "common/ot_utils.hpp"
 #include "common/sensor_reading.hpp"
 #include "egress/egress_coordinator.hpp"
@@ -27,6 +28,7 @@ public:
     m_uart.init();
     m_sensor_service.init();
     m_raft_engine.init();
+    m_alert_service.init();
   }
 
   void start() {
@@ -66,7 +68,7 @@ private:
       m_alert_active = true;
       m_alert_service.send_alert({.m_alert_interval = ALERT_INTERVAL_S,
                                   .m_alert_active = m_alert_active});
-      m_vote_service.set_collection_window(ALERT_INTERVAL_S);
+      m_vote_service.set_collection_window(ALERT_INTERVAL_S * 1000);
       m_vote_service.resync();
     } else if (!batch.m_alert_active &&
                m_alert_active != batch.m_alert_active) {
@@ -127,11 +129,11 @@ private:
             raft::EntryType::SENSOR_DATA,
             std::span(std::bit_cast<const std::byte *>(&batch), sizeof(batch)));
       },
-      [] -> std::uint64_t {
+      [] -> std::optional<std::uint64_t> {
         if (const auto time_us = time_sync::get_time_us()) {
           return time_us.value() / 1000;
         }
-        return 0;
+        return std::nullopt;
       }};
 
   sensor::Service m_sensor_service{
@@ -143,13 +145,18 @@ private:
       m_egress_coordinator{make_egress_hooks()};
 
   common::Alert m_alert_service{[this](const auto alert) {
-    if (alert.m_alert_active) {
-      auto alert_ms = alert.m_alert_interval * 1000;
-      m_vote_service.set_collection_window(alert_ms);
-      m_vote_service.resync();
-    } else {
-      m_vote_service.set_config(vote::Config{});
-      m_vote_service.resync();
+    if (!m_raft_engine.is_leader()) {
+      if (alert.m_alert_active) {
+        logging::inf("Received an active alert, changing period to: {} s",
+                     alert.m_alert_interval);
+        auto alert_ms = alert.m_alert_interval * 1000;
+        m_vote_service.set_collection_window(alert_ms);
+        m_vote_service.resync();
+      } else {
+        logging::inf("Alert cancelled", alert.m_alert_interval);
+        m_vote_service.set_config(vote::Config{});
+        m_vote_service.resync();
+      }
     }
   }};
 

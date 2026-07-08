@@ -58,6 +58,9 @@ public:
       logging::wrn("on_reading: Network time not synced.");
     }
 
+    logging::inf("on_reading: got new reading: .eui={}, .reading={}",
+                 reading.m_eui, reading.m_water_level_mm);
+
     if (m_on_reading) {
       reading.m_timestamp = network_time_us;
       m_on_reading(reading);
