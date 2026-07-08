@@ -5,8 +5,11 @@
 #include "ot_utils.hpp"
 #include <functional>
 #include <mutex>
+#include <openthread.h>
 #include <openthread/coap.h>
+#include <openthread/ip6.h>
 #include <openthread/network_time.h>
+#include <openthread/thread.h>
 
 namespace common {
 
@@ -62,10 +65,31 @@ public:
   int send_alert(const AlertPacket packet) const noexcept {
     std::scoped_lock guard{m_otmx};
 
-    coap_addr_t addr;
-    addr.u.str = ALERT_ADDR;
-    addr.is_str = true;
+    otInstance *const inst = openthread_get_default_instance();
 
+    // Fetch the Mesh-Local Prefix.
+    const otMeshLocalPrefix *ml_prefix = otThreadGetMeshLocalPrefix(inst);
+
+    // For SSEDs we need to build the multicast address:
+    // https://openthread.io/guides/thread-primer/ipv6-addressing#multicast
+
+    // Build the RFC 3306 Prefix-Based Multicast Address structure
+    otIp6Address ssed_addr;
+    std::memset(&ssed_addr, 0, sizeof(ssed_addr));
+
+    ssed_addr.mFields.m8[0] = 0xff; // Multicast
+    ssed_addr.mFields.m8[1] = 0x33; // Flags = 3, Scope = 3 (Mesh-Local)
+    ssed_addr.mFields.m8[2] = 0x00; // Reserved
+    ssed_addr.mFields.m8[3] = 0x40; // Prefix length (64 bits = 0x40)
+    std::memcpy(&ssed_addr.mFields.m8[4], ml_prefix->m8,
+                8);                  // Inject network prefix
+    ssed_addr.mFields.m8[15] = 0x01; // Group ID = 1 (All Nodes)
+
+    coap_addr_t addr;
+    addr.u.addr = ssed_addr;
+    addr.is_str = false;
+
+    // Send
     return coap_put_req_send(addr, ALERT_URI,
                              reinterpret_cast<const uint8_t *>(&packet),
                              sizeof(packet), nullptr, nullptr);
@@ -76,8 +100,16 @@ private:
    * @brief Handle receiving a CoAP message from the sensors.
    */
   static void alert_handler(void *ctx, otMessage *msg,
-                            otMessageInfo const * /*i*/) noexcept {
+                            otMessageInfo const *info) noexcept {
+
     auto &self = *static_cast<Alert *>(ctx);
+
+    otInstance *const inst = openthread_get_default_instance();
+    const otIp6Address *mine = otThreadGetMeshLocalEid(inst);
+    if (mine && info && otIp6IsAddressEqual(&info->mPeerAddr, mine)) {
+      return; // our own multicast echo
+    }
+
     AlertPacket alert{};
 
     int len = sizeof(alert);
