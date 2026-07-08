@@ -22,7 +22,7 @@ public:
   using Batch = batch::SensorBatch;
   using Entry = common::SensorReadingWire;
   using SubmitFn = std::function<void(const Batch &)>;
-  using NowMsFn = std::function<std::uint64_t()>;
+  using NowMsFn = std::function<std::optional<std::uint64_t>()>;
 
   /**
    * @brief Constructor
@@ -59,6 +59,7 @@ public:
    */
   void resync() {
     const std::scoped_lock guard(m_lock);
+    m_window.stop();
     m_window.one_shot(
         next_boundary_timeout(m_engine.config().m_collection_window_ms));
   }
@@ -167,9 +168,15 @@ private:
   [[nodiscard]] k_timeout_t
   next_boundary_timeout(const std::uint32_t period_ms) const {
     const std::uint64_t period = period_ms == 0 ? 1 : period_ms;
-    const std::uint64_t now = m_now_ms();
-    const std::uint64_t next_boundary = ((now / period) + 1) * period;
-    const std::uint64_t delay_ms = next_boundary - now;
+    const std::optional<std::uint64_t> now = m_now_ms();
+
+    if (!now.has_value()) {
+      // No synchronised clock, fallback to unsynced.
+      return common::ms_to_k_timeout(static_cast<std::uint32_t>(period));
+    }
+
+    const std::uint64_t next_boundary = ((now.value() / period) + 1) * period;
+    const std::uint64_t delay_ms = next_boundary - now.value();
     return common::ms_to_k_timeout(static_cast<std::uint32_t>(delay_ms));
   }
 
