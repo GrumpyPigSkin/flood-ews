@@ -259,7 +259,7 @@ private:
   std::atomic<bool> m_running{false};
 
   /** @brief The thread stack for the internal thread. */
-  K_KERNEL_STACK_MEMBER(m_stack, 4096);
+  K_KERNEL_STACK_MEMBER(m_stack, 8192);
 
   /** @brief Thread struct for thread control. */
   struct k_thread m_thread_data;
