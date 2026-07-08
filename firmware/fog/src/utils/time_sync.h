@@ -1,5 +1,6 @@
 
 
+#include "common/logging.hpp"
 #include "openthread.h"
 #include <cstdint>
 #include <openthread/network_time.h>
@@ -17,6 +18,7 @@ inline std::optional<std::uint64_t> get_time_us() {
   otNetworkTimeStatus status = otNetworkTimeGet(ot_inst, &network_time_us);
 
   if (status != OT_NETWORK_TIME_SYNCHRONIZED) {
+    logging::inf("get_time_us: Time not synced");
     return std::nullopt;
   }
 
