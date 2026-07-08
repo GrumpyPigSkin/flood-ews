@@ -93,6 +93,8 @@ public:
         }
       }
 
+      logging::wrn("cmd: got line: {}", line.value());
+
       if (line->contains("AT_ERROR") || line->contains("AT_PARAM_ERROR")) {
         return CmdResult::AT_ERROR;
       }
