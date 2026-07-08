@@ -50,8 +50,8 @@ void on_thread_state_changed(otChangedFlags flags, void *user_data) {
   }
 }
 
-constexpr std::uint32_t CSL_PERIOD_US = 10000000;
-constexpr std::uint32_t CSL_TIMEOUT_S = 100;
+constexpr std::uint32_t CSL_PERIOD_US = 30000000;
+constexpr std::uint32_t CSL_TIMEOUT_S = 20;
 
 /**
  * @brief CSL needs enabling before openthread is started. Set the CSL window
