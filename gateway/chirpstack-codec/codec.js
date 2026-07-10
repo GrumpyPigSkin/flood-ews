@@ -60,7 +60,7 @@ function decodeUplink(input) {
     var detail = b[off + 11];
 
     entries.push({
-      device_rloc: rdU64LE(b, off),         // Bytes 0-7
+      device_eui: rdU64LE(b, off),          // Bytes 0-7
       water_level_mm: rdU16LE(b, off + 8),  // Bytes 8-9
       validity: VALIDITY[validityCode] || ('UNKNOWN_' + validityCode),
       validity_code: validityCode,  // Byte 10
