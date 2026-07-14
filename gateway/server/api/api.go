@@ -12,7 +12,6 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"os"
 	"server/actuator"
 	"server/policy"
 	"server/poller"
@@ -49,13 +48,14 @@ func (l *LiveStore) UpdateStation(eui string, reading map[string]any) {
 
 // Server wires handlers to their dependencies.
 type Server struct {
-	store     *store.Store
-	live      *LiveStore
-	poll      *poller.Poller
-	daemon    *actuator.Daemon
-	engine    *policy.Engine
-	log       *slog.Logger
-	tokenAuth *jwtauth.JWTAuth
+	store         *store.Store
+	live          *LiveStore
+	poll          *poller.Poller
+	daemon        *actuator.Daemon
+	engine        *policy.Engine
+	log           *slog.Logger
+	tokenAuth     *jwtauth.JWTAuth
+	adminPassword string
 
 	// isLocal gates whether the config-write and control tiers are mounted.
 	// True only for the trusted-network deployment.
@@ -71,6 +71,7 @@ func NewServer(
 	e *policy.Engine,
 	log *slog.Logger,
 	jwtSecret string,
+	adminPassword string,
 	isLocal bool,
 ) *Server {
 
@@ -79,14 +80,15 @@ func NewServer(
 	tokenAuth := jwtauth.New("HS256", []byte(jwtSecret), nil)
 
 	return &Server{
-		store:     st,
-		live:      live,
-		poll:      p,
-		daemon:    d,
-		engine:    e,
-		log:       log,
-		tokenAuth: tokenAuth,
-		isLocal:   isLocal,
+		store:         st,
+		live:          live,
+		poll:          p,
+		daemon:        d,
+		engine:        e,
+		log:           log,
+		tokenAuth:     tokenAuth,
+		adminPassword: adminPassword,
+		isLocal:       isLocal,
 	}
 }
 
@@ -152,9 +154,7 @@ func (s *Server) handleLocalLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the admin password from the environment variables.
-	expectedPassword := os.Getenv("ADMIN_PASSWORD")
-
-	if req.Password != expectedPassword {
+	if req.Password != s.adminPassword {
 		s.writeErr(w, http.StatusUnauthorized, nil)
 		return
 	}

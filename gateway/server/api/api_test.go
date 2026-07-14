@@ -57,7 +57,7 @@ func TestLiveStore_UpdateAndSnapshot(t *testing.T) {
 // HTTP handler tests
 
 func TestRoute_Healthz(t *testing.T) {
-	srv := NewServer(nil, nil, nil, nil, nil, nil, "secret", false)
+	srv := NewServer(nil, nil, nil, nil, nil, nil, "secret", "admin", false)
 	router := srv.Routes()
 
 	req := httptest.NewRequest("GET", "/healthz", nil)
@@ -90,7 +90,7 @@ func TestRoute_DashboardReadings(t *testing.T) {
 	liveStore := NewLiveStore()
 	liveStore.UpdateStation("station-123", map[string]any{"test": "test"})
 
-	srv := NewServer(nil, liveStore, nil, nil, nil, nil, "secret", false)
+	srv := NewServer(nil, liveStore, nil, nil, nil, nil, "secret", "admin", false)
 	router := srv.Routes()
 
 	req := httptest.NewRequest("GET", "/v1/dashboard/readings", nil)
@@ -117,7 +117,7 @@ func TestRoute_DashboardReadings(t *testing.T) {
 }
 
 func TestLocalRoutesIsolation(t *testing.T) {
-	srvRemote := NewServer(nil, nil, nil, nil, nil, nil, "secret", false)
+	srvRemote := NewServer(nil, nil, nil, nil, nil, nil, "secret", "password", false)
 	routerRemote := srvRemote.Routes()
 
 	req := httptest.NewRequest("GET", "/v1/config/sources", nil)
@@ -144,8 +144,6 @@ func setupTestStore(t *testing.T) *store.Store {
 func TestLocalLogin_And_JWT_Authorization(t *testing.T) {
 	// Set our expected environment variable for password validation
 	const testPass = "super-secret-password"
-	_ = os.Setenv("ADMIN_PASSWORD", testPass)
-	defer func() { _ = os.Unsetenv("ADMIN_PASSWORD") }()
 
 	jwtSecret := "my-jwt-test-key"
 
@@ -159,7 +157,7 @@ func TestLocalLogin_And_JWT_Authorization(t *testing.T) {
 	liveStore := NewLiveStore()
 
 	// Pass initialized dependencies instead of nil
-	srv := NewServer(mockStore, liveStore, nil, nil, nil, testLogger, jwtSecret, true)
+	srv := NewServer(mockStore, liveStore, nil, nil, nil, testLogger, jwtSecret, testPass, true)
 	router := srv.Routes()
 
 	// Attempt login with a bad password
@@ -216,13 +214,13 @@ func TestActorFrom_HeaderFallback(t *testing.T) {
 	reqWithHeader := httptest.NewRequest("GET", "/", nil)
 	reqWithHeader.Header.Set("X-Actor", "admin-user")
 
-	sLocal := NewServer(nil, nil, nil, nil, nil, nil, "secret", true)
+	sLocal := NewServer(nil, nil, nil, nil, nil, nil, "secret", "password", true)
 
 	if actor := sLocal.actorFrom(reqWithHeader); actor != "admin-user" {
 		t.Errorf("expected 'admin-user', got '%s'", actor)
 	}
 
-	sRemote := NewServer(nil, nil, nil, nil, nil, nil, "secret", false)
+	sRemote := NewServer(nil, nil, nil, nil, nil, nil, "secret", "password", false)
 	if actor := sRemote.actorFrom(reqWithHeader); actor != "local" {
 		t.Errorf("expected 'local' fallback under non-local server environment, got '%s'", actor)
 	}
@@ -241,7 +239,7 @@ func TestWriteErr(t *testing.T) {
 		Level: slog.LevelError + 1,
 	}))
 
-	s := NewServer(nil, nil, nil, nil, nil, testLogger, "secret", false)
+	s := NewServer(nil, nil, nil, nil, nil, testLogger, "secret", "password", false)
 	s.writeErr(rec, http.StatusBadRequest, customErr)
 
 	if rec.Code != http.StatusBadRequest {
