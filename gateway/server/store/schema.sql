@@ -14,7 +14,8 @@ CREATE TABLE external_source (
   max_age_ms    INTEGER NOT NULL DEFAULT 0,
   min_value     REAL NOT NULL DEFAULT 0,
   max_value     REAL NOT NULL DEFAULT 0,
-  disposition   TEXT NOT NULL DEFAULT 'advisory'
+  disposition   TEXT NOT NULL DEFAULT 'advisory',
+  field_map     TEXT NOT NULL DEFAULT '{}'
 );
 
 -- A physical actuator

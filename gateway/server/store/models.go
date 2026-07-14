@@ -45,6 +45,7 @@ type ExternalSource struct {
 	MinValue    float64
 	MaxValue    float64
 	Disposition string
+	FieldMap    string
 }
 
 type PolicyRule struct {

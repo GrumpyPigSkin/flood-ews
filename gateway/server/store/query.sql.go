@@ -179,7 +179,7 @@ func (q *Queries) ListRules(ctx context.Context) ([]PolicyRule, error) {
 }
 
 const listSources = `-- name: ListSources :many
-SELECT id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, disposition
+SELECT id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, disposition, field_map
 FROM external_source ORDER BY id
 `
 
@@ -205,6 +205,7 @@ func (q *Queries) ListSources(ctx context.Context) ([]ExternalSource, error) {
 			&i.MinValue,
 			&i.MaxValue,
 			&i.Disposition,
+			&i.FieldMap,
 		); err != nil {
 			return nil, err
 		}

@@ -1,5 +1,5 @@
 -- name: ListSources :many
-SELECT id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, disposition
+SELECT id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, disposition, field_map
 FROM external_source ORDER BY id;
 
 -- name: UpsertSource :exec
