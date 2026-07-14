@@ -1,285 +1,218 @@
-// Testing stub for checking message format from Chirpstack sent over MQTT.
-// Since flutter only runs when someone is connect or flutter is running we need
-// an intermediate to collect data, and then pass it onto flutter when someone
-// starts up flutter/web app.
-// This server application bridges that gap chirpstack -> server -> flutter
-// For testing, I just make a simple websocket so flutter get's a live update of incoming messages.
+// Wire up all the components and run the server.
+//
+// store      SQLite config
+// actuator   sim/GPIO daemon with watchdog + failsafe
+// policy     advisory -> action decision engine
+// poller     outbound pull of external advisories
+// egress     push to Supabase read-model + EWS authority webhook
+// telemetry  ChirpStack MQTT -> WebSocket bridge + uplink fan-out
+// api        HTTP endpoints
+//
 
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"log"
+	"errors"
+	"log/slog"
 	"net/http"
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
 	"time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gorilla/websocket"
+
+	"server/actuator"
+	"server/advisory"
+	"server/api"
+	"server/egress"
+	"server/policy"
+	"server/poller"
+	"server/store"
+	"server/telemetry"
 )
 
-const (
-	historySize     = 100 // ring buffer of recent uplinks
-	mqttTopic       = "application/+/device/+/event/up"
-	wsWriteTimeout  = 5 * time.Second
-	wsClientBufSize = 32 // per-client send queue depth
-)
-
-// Uplink is the subset of ChirpStack's uplink event we forward to flutter. We
-// pass through the decoded `object` from the codec verbatim because that's the
-// actual telemetry; everything else is metadata useful for debugging.
-type Uplink struct {
-	ReceivedAt    time.Time              `json:"receivedAt"`
-	DevEUI        string                 `json:"devEui"`
-	DeviceName    string                 `json:"deviceName,omitempty"`
-	ApplicationID string                 `json:"applicationId,omitempty"`
-	FCnt          uint32                 `json:"fCnt,omitempty"`
-	FPort         uint8                  `json:"fPort,omitempty"`
-	Object        map[string]interface{} `json:"object,omitempty"` // decoded payload
-	RxRSSI        *int                   `json:"rssi,omitempty"`
-	RxSNR         *float64               `json:"snr,omitempty"`
-}
-
-// ChirpStack v4 event-up envelope, only the fields we care about.
-type chirpstackUplink struct {
-	DeviceInfo struct {
-		DevEUI        string `json:"devEui"`
-		DeviceName    string `json:"deviceName"`
-		ApplicationID string `json:"applicationId"`
-	} `json:"deviceInfo"`
-	FCnt   uint32                 `json:"fCnt"`
-	FPort  uint8                  `json:"fPort"`
-	Object map[string]interface{} `json:"object"`
-	RxInfo []struct {
-		RSSI int     `json:"rssi"`
-		SNR  float64 `json:"snr"`
-	} `json:"rxInfo"`
-}
-
-// Hub holds the connected clients and the ring buffer of recent uplinks.
-type Hub struct {
-	mu      sync.Mutex
-	clients map[chan []byte]struct{}
-	history []Uplink // ring; oldest first
-	head    int      // next write position
-	filled  bool
-}
-
-func newHub() *Hub {
-	return &Hub{
-		clients: make(map[chan []byte]struct{}),
-		history: make([]Uplink, historySize),
-	}
-}
-
-func (h *Hub) record(u Uplink) []byte {
-	msg, err := json.Marshal(u)
-	if err != nil {
-		log.Printf("marshal uplink: %v", err)
-		return nil
-	}
-	h.mu.Lock()
-	h.history[h.head] = u
-	h.head = (h.head + 1) % historySize
-	if h.head == 0 {
-		h.filled = true
-	}
-	// Snapshot client channels so we don't hold the lock during sends.
-	chans := make([]chan []byte, 0, len(h.clients))
-	for c := range h.clients {
-		chans = append(chans, c)
-	}
-	h.mu.Unlock()
-
-	for _, c := range chans {
-		select {
-		case c <- msg:
-		default:
-			// Slow client, drop the message rather than block.
-			// The client will reconnect or accept the loss.
-		}
-	}
-	return msg
-}
-
-func (h *Hub) snapshot() []Uplink {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	if !h.filled {
-		out := make([]Uplink, h.head)
-		copy(out, h.history[:h.head])
-		return out
-	}
-	out := make([]Uplink, historySize)
-	copy(out, h.history[h.head:])
-	copy(out[historySize-h.head:], h.history[:h.head])
-	return out
-}
-
-// Add a client listening to the websocket.
-func (h *Hub) addClient() chan []byte {
-	c := make(chan []byte, wsClientBufSize)
-	h.mu.Lock()
-	h.clients[c] = struct{}{}
-	h.mu.Unlock()
-	return c
-}
-
-func (h *Hub) removeClient(c chan []byte) {
-	h.mu.Lock()
-	delete(h.clients, c)
-	h.mu.Unlock()
-	close(c)
-}
-
-func env(key, def string) string {
-	if v := os.Getenv(key); v != "" {
+// Handle environment variables with a safe default.
+func env(k, def string) string {
+	if v := os.Getenv(k); v != "" {
 		return v
 	}
 	return def
 }
 
 func main() {
-	hub := newHub()
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	// MQTT client running remotely on the PI
-	opts := mqtt.NewClientOptions().
-		AddBroker(env("MQTT_BROKER", "tcp://192.168.1.109:1883")).
-		SetClientID("telemetry-bridge").
-		SetCleanSession(true).
-		SetAutoReconnect(true).
-		SetConnectRetry(true).
-		SetConnectRetryInterval(2 * time.Second).
-		SetOnConnectHandler(func(c mqtt.Client) {
-			log.Printf("MQTT connected; subscribing to %s", mqttTopic)
-			if t := c.Subscribe(mqttTopic, 0, func(_ mqtt.Client, m mqtt.Message) {
-				handleUplink(hub, m.Payload())
-			}); t.Wait() && t.Error() != nil {
-				log.Fatalf("subscribe: %v", t.Error())
+	// Config store.
+	st, err := store.Open(ctx, env("CONFIG_DB", "gateway.db"))
+	if err != nil {
+		logger.Error("open config store", "err", err)
+		os.Exit(1)
+	}
+	defer st.Close()
+
+	// Live sensor store (REST mirror of the WS hub).
+	live := api.NewLiveStore()
+
+	// Response side: sim backend -> actuator daemon -> policy engine.
+	daemon := actuator.NewDaemon(actuator.NewSimBackend(logger), 15*time.Second, logger)
+	daemon.OnResult(func(r actuator.Result) {
+		if r.Applied {
+			logger.Info("actuation", "actuator", r.ActuatorID, "to", r.NewState, "reason", r.Reason)
+			_ = st.RecordControlAction(context.Background(), "policy", r.ActuatorID, r.NewState, r.Reason)
+		}
+	})
+	opQueue := &stubOperatorQueue{log: logger}
+	engine := policy.NewEngine(daemon, opQueue, logger)
+
+	// Load stored data and setup policy engine.
+	if specs, err := st.ListActuators(ctx); err != nil {
+		logger.Error("list actuators", "err", err)
+	} else {
+		daemon.SetSpecs(ctx, specs)
+	}
+
+	if rules, err := st.ListRules(ctx); err != nil {
+		logger.Error("list rules", "err", err)
+	} else {
+		engine.SetRules(rules)
+	}
+
+	// Start actuator watchdog and heartbeat.
+	go daemon.RunWatchdog(ctx)
+	go runHeartbeat(ctx, daemon, 5*time.Second)
+
+	// Start poller, pull external advisories into the policy engine.
+	p := poller.New(engine, opQueue, logger)
+	if sources, err := st.ListSources(ctx); err != nil {
+		logger.Error("list sources", "err", err)
+	} else {
+		p.Sync(ctx, sources)
+	}
+	defer p.StopAll()
+
+	// Egress targets TODO: Finish supabase storage.
+	targets, err := st.ListTargets(ctx)
+	if err != nil {
+		logger.Error("list targets", "err", err)
+	}
+
+	var egressSink telemetry.EgressSink
+	for _, t := range targets {
+		if t.Enabled && store.EgressType(t.Type) == store.TypeSupabase {
+			supa, err := egress.OpenSupabase(ctx, t.Dsn, logger)
+			if err != nil {
+				logger.Error("open supabase", "id", t.ID, "err", err)
+				continue
 			}
-		}).
-		SetConnectionLostHandler(func(_ mqtt.Client, err error) {
-			log.Printf("MQTT connection lost: %v", err)
-		})
-
-	user := env("MQTT_USERNAME", "")
-	if user != "" {
-		opts.SetUsername(user).SetPassword(env("MQTT_PASSWORD", ""))
+			defer supa.Close()
+			egressSink = supa // only now is the interface non-nil
+			logger.Info("egress: supabase ready", "id", t.ID)
+		}
 	}
 
-	client := mqtt.NewClient(opts)
-	if t := client.Connect(); t.Wait() && t.Error() != nil {
-		log.Fatalf("MQTT connect: %v", t.Error())
+	// Telemetry bridge: hub + fan-out + MQTT.
+	tcfg := telemetry.Config{}
+	hub := telemetry.NewHub(tcfg, logger)
+	bridge := telemetry.NewBridge(telemetry.BridgeDeps{
+		Hub:     hub,
+		Live:    live,
+		Egress:  egressSink,
+		Webhook: egress.NewWebhookSink(logger),
+		Targets: targets,
+		Log:     logger,
+	})
+	go bridge.RunEgressFlusher(ctx, 5*time.Second)
+
+	mqttClient, err := bridge.ConnectMQTT(telemetry.MQTTOptions{
+		Broker:   env("MQTT_BROKER", "tcp://192.168.1.109:1883"),
+		Username: env("MQTT_USERNAME", ""),
+		Password: env("MQTT_PASSWORD", ""),
+	})
+
+	if err != nil {
+		logger.Warn("MQTT connect (non-fatal)", "err", err)
+	}
+	defer mqttClient.Disconnect(250)
+
+	// HTTP: API + WebSocket + /recent
+	isLocal := env("ROLE", "local") == "local"
+	secretKey := env("JWT_SECRET", "super-secret-token")
+	adminPassword := env("ADMIN_PASSWORD", "")
+
+	if adminPassword == "" && isLocal {
+		logger.Error("ADMIN_PASSWORD environment variable must be set in local mode")
 	}
 
-	// HTTP / WebSocket
+	apiSrv := api.NewServer(st, live, p, daemon, engine, logger, secretKey, adminPassword, isLocal)
+
+	// TODO: Remove when I move backend to RPI!!!
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(_ *http.Request) bool { return true },
 	}
 
-	// Handle healthz endpoint
-	http.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
-	})
-
-	// Encode the recent snapshot and sent it to the client.
-	http.HandleFunc("/recent", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(hub.snapshot())
-	})
-
-	// Handle websocket.
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.Handle("/", apiSrv.Routes())
+	mux.HandleFunc("GET /ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Printf("ws upgrade: %v", err)
+			logger.Warn("ws upgrade", "err", err)
 			return
 		}
-		log.Printf("ws client connected: %s", r.RemoteAddr)
-		serveWS(hub, conn)
+		logger.Info("ws client connected", "remote", r.RemoteAddr)
+		hub.ServeWS(conn)
 	})
 
-	// Run the HTTP server.
-	addr := env("HTTP_ADDR", ":8081")
-	log.Printf("HTTP listening on %s", addr)
-	log.Fatal(http.ListenAndServe(addr, nil))
-}
+	mux.HandleFunc("GET /recent", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(hub.Snapshot())
+	})
 
-// Handle a new uplink message from chirpstack.
-func handleUplink(hub *Hub, payload []byte) {
-	var cs chirpstackUplink
-	if err := json.Unmarshal(payload, &cs); err != nil {
-		log.Printf("parse uplink: %v", err)
-		return
+	httpSrv := &http.Server{
+		Addr:              env("HTTP_ADDR", ":8081"),
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	u := Uplink{
-		ReceivedAt:    time.Now().UTC(),
-		DevEUI:        cs.DeviceInfo.DevEUI,
-		DeviceName:    cs.DeviceInfo.DeviceName,
-		ApplicationID: cs.DeviceInfo.ApplicationID,
-		FCnt:          cs.FCnt,
-		FPort:         cs.FPort,
-		Object:        cs.Object,
-	}
-	// Take best RSSI/SNR across gateways that heard the uplink.
-	if len(cs.RxInfo) > 0 {
-		bestRSSI := cs.RxInfo[0].RSSI
-		bestSNR := cs.RxInfo[0].SNR
-		for _, rx := range cs.RxInfo[1:] {
-			if rx.RSSI > bestRSSI {
-				bestRSSI = rx.RSSI
-			}
-			if rx.SNR > bestSNR {
-				bestSNR = rx.SNR
-			}
-		}
-		u.RxRSSI = &bestRSSI
-		u.RxSNR = &bestSNR
-	}
-
-	hub.record(u)
-	log.Printf("uplink from %s: fCnt=%d count=%v",
-		u.DevEUI, u.FCnt, u.Object["count"])
-}
-
-func serveWS(hub *Hub, conn *websocket.Conn) {
-	ch := hub.addClient()
-	defer func() {
-		hub.removeClient(ch)
-		conn.Close()
-	}()
-
-	// Send recent history on connect.
-	for _, u := range hub.snapshot() {
-		msg, err := json.Marshal(u)
-		if err != nil {
-			continue
-		}
-		conn.SetWriteDeadline(time.Now().Add(wsWriteTimeout))
-		if err := conn.WriteMessage(websocket.TextMessage, msg); err != nil {
-			return
-		}
-	}
-
-	// We don't expect messages from the client.
-	// Just close the connection if they disconnect.
 	go func() {
-		for {
-			if _, _, err := conn.NextReader(); err != nil {
-				conn.Close()
-				return
-			}
+		logger.Info("http listening", "addr", httpSrv.Addr, "local", isLocal)
+		if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Error("http serve", "err", err)
+			stop()
 		}
 	}()
 
-	// Writer loop: pull messages off the per-client channel.
-	for msg := range ch {
-		conn.SetWriteDeadline(time.Now().Add(wsWriteTimeout))
-		if err := conn.WriteMessage(websocket.TextMessage, msg); err != nil {
+	<-ctx.Done()
+	logger.Info("shutting down")
+	shutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := httpSrv.Shutdown(shutCtx); err != nil {
+		logger.Error("http shutdown", "err", err)
+	}
+}
+
+// runHeartbeat feeds the actuator watchdog while the process is healthy.
+func runHeartbeat(ctx context.Context, d *actuator.Daemon, interval time.Duration) {
+	t := time.NewTicker(interval)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
 			return
+		case <-t.C:
+			d.Heartbeat()
 		}
 	}
+}
+
+// TODO: Replace this stub with the proper operator queue, need to add to API.!!!
+type stubOperatorQueue struct{ log *slog.Logger }
+
+func (s *stubOperatorQueue) Enqueue(a advisory.Advisory) error {
+	s.log.Info("OPERATOR-QUEUE <- advisory (stub)", "source", a.SourceID, "kind", a.Kind)
+	return nil
 }

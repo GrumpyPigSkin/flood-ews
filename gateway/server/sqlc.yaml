@@ -1,0 +1,28 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    schema: "store/schema.sql"
+    queries: "store/query.sql"
+    gen:
+      go:
+        package: "store"
+        out: "store"
+        overrides:
+          - column: "external_source.enabled"
+            go_type: "bool"
+          - column: "actuator.enabled"
+            go_type: "bool"
+          - column: "policy_rule.enabled"
+            go_type: "bool"
+          - column: "policy_rule.require_operator"
+            go_type: "bool"
+          - column: "egress_target.enabled"
+            go_type: "bool"
+  - engine: "postgresql"
+    schema: "egress/schema.sql"
+    queries: "egress/query.sql"
+    gen:
+      go:
+        package: "egress"
+        out: "egress"
+        sql_package: "pgx/v5"
