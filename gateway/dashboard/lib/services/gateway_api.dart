@@ -20,15 +20,16 @@ class GatewayApiException implements Exception {
 }
 
 class GatewayApi {
-  final String baseUrl;
+  final Uri baseUrl;
   final AuthService auth;
   final http.Client _http;
 
   GatewayApi({
-    required this.baseUrl,
+    required String baseUrl,
     required this.auth,
     http.Client? httpClient,
-  }) : _http = httpClient ?? http.Client();
+  }) : baseUrl = Uri.parse(baseUrl),
+       _http = httpClient ?? http.Client();
 
   /// Handle listing external sources.
   Future<List<dynamic>> listSources() => _getList('/v1/config/sources');
@@ -114,64 +115,79 @@ class GatewayApi {
   /// Handle a DELETE request for the given `path`.
   Future<void> _delete(String path) => _send('DELETE', path);
 
-  /// Common CRUD send handler.
+  /// Core HTTP request and response handler.
   Future<http.Response> _send(
     String method,
     String path, {
     Map<String, dynamic>? body,
   }) async {
-    final uri = Uri.parse('$baseUrl$path');
+    // Resolve the path against the base URL.
+    final uri = baseUrl.resolve(path);
 
-    // Fill in the headers
-    final headers = <String, String>{
+    final headers = {
       ...auth.authHeaders,
       if (body != null) 'Content-Type': 'application/json',
     };
 
-    late http.Response resp;
+    final http.Response resp;
     try {
-      // Encode the body if there is one to send.
       final encoded = body == null ? null : jsonEncode(body);
 
-      // Send the message.
-      resp = await switch (method) {
-        'GET' => _http.get(uri, headers: headers),
-        'PUT' => _http.put(uri, headers: headers, body: encoded),
-        'POST' => _http.post(uri, headers: headers, body: encoded),
-        'DELETE' => _http.delete(uri, headers: headers),
-        _ => throw GatewayApiException('Unsupported method $method'),
-      }.timeout(const Duration(seconds: 10));
+      // Executing the request.
+      resp = await _executeRequest(
+        method,
+        uri,
+        headers,
+        encoded,
+      ).timeout(const Duration(seconds: 10));
     } on TimeoutException {
       throw GatewayApiException('Gateway did not respond');
     } catch (e) {
-      throw GatewayApiException('Could not reach the gateway');
+      throw GatewayApiException('Could not reach the gateway: $e');
     }
 
+    // Process HTTP response status.
+    if (resp.statusCode >= 400) {
+      _handleHttpError(resp);
+    }
+
+    return resp;
+  }
+
+  /// Dispatch the request.
+  Future<http.Response> _executeRequest(
+    String method,
+    Uri uri,
+    Map<String, String> headers,
+    String? body,
+  ) {
+    return switch (method) {
+      'GET' => _http.get(uri, headers: headers),
+      'PUT' => _http.put(uri, headers: headers, body: body),
+      'POST' => _http.post(uri, headers: headers, body: body),
+      'DELETE' => _http.delete(uri, headers: headers),
+      _ => throw ArgumentError('Unsupported HTTP method: $method'),
+    };
+  }
+
+  /// Handle any error responses from the HTTP request.
+  void _handleHttpError(http.Response resp) {
     if (resp.statusCode == 401) {
-      // Token rejected or expired, send the user back to the login page.
       auth.onUnauthorized();
-      throw GatewayApiException(
-        'Not authenticated',
-        statusCode: resp.statusCode,
-      );
+      throw GatewayApiException('Not authenticated', statusCode: 401);
     }
 
-    // Do not have the permission.
     if (resp.statusCode == 403) {
       throw GatewayApiException(
         'Forbidden: insufficient scope',
-        statusCode: resp.statusCode,
+        statusCode: 403,
       );
     }
 
-    // Some other error.
-    if (resp.statusCode >= 400) {
-      throw GatewayApiException(
-        _errorFrom(resp.body) ?? 'Gateway returned ${resp.statusCode}',
-        statusCode: resp.statusCode,
-      );
-    }
-    return resp;
+    throw GatewayApiException(
+      _errorFrom(resp.body) ?? 'Gateway returned ${resp.statusCode}',
+      statusCode: resp.statusCode,
+    );
   }
 
   /// Handle an error from the given `body`s
