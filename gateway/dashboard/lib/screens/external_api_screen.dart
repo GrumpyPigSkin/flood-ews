@@ -1,6 +1,7 @@
 // External sources deep-dive: the policies governing which outside APIs the
 // gateway pulls advisories from.
 
+import 'package:dashboard/services/base_entity_card.dart';
 import 'package:dashboard/widgets/confirmation_dialogue.dart';
 import 'package:dashboard/widgets/error_banner.dart';
 import 'package:flutter/material.dart';
@@ -213,50 +214,16 @@ class _SourceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Opacity(
-      // Change the transparency when disabled.
-      opacity: source.enabled ? 1.0 : 0.55,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: selected
-              ? theme.colorScheme.surfaceContainerHigh
-              : theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: selected
-                ? theme.colorScheme.primary.withValues(alpha: 0.6)
-                : theme.colorScheme.outlineVariant,
-          ),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(10),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _header(theme),
-                  const SizedBox(height: 8),
-                  _meta(theme),
-                  // Only show the details and actions when selected.
-                  if (selected) ...[
-                    const SizedBox(height: 12),
-                    Divider(height: 1, color: theme.colorScheme.outlineVariant),
-                    const SizedBox(height: 10),
-                    _details(theme),
-                    const SizedBox(height: 12),
-                    _actions(theme),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+    return BaseEntityCard(
+      enabled: source.enabled,
+      selected: selected,
+      busy: busy,
+      onTap: onTap,
+      header: _header(theme),
+      meta: _meta(),
+      details: _details(theme),
+      onEdit: onEdit,
+      onDelete: onDelete,
     );
   }
 
@@ -295,9 +262,9 @@ class _SourceCard extends StatelessWidget {
           ],
         ),
       ),
-      _chip(
-        source.disposition.label,
-        source.disposition == Disposition.operatorApproved
+      StatusChip(
+        label: source.disposition.label,
+        color: source.disposition == Disposition.operatorApproved
             ? theme.colorScheme.tertiary
             : theme.colorScheme.primary,
       ),
@@ -311,15 +278,15 @@ class _SourceCard extends StatelessWidget {
   );
 
   /// Show the kind, poll interval, max age and bounds if present.
-  Widget _meta(ThemeData theme) => Wrap(
+  Widget _meta() => Wrap(
     spacing: 16,
     runSpacing: 4,
     children: [
-      _kv(theme, 'kind', source.kind.isEmpty ? '-' : source.kind),
-      _kv(theme, 'every', _dur(source.pollInterval)),
-      if (source.maxAgeMs > 0) _kv(theme, 'max age', _dur(source.maxAge)),
+      MetaKeyValue('kind', source.kind.isEmpty ? '-' : source.kind),
+      MetaKeyValue('every', _dur(source.pollInterval)),
+      if (source.maxAgeMs > 0) MetaKeyValue('max age', _dur(source.maxAge)),
       if (source.maxValue != 0)
-        _kv(theme, 'bounds', '${_n(source.minValue)}-${_n(source.maxValue)}'),
+        MetaKeyValue('bounds', '${_n(source.minValue)}-${_n(source.maxValue)}'),
     ],
   );
 
@@ -327,10 +294,10 @@ class _SourceCard extends StatelessWidget {
   Widget _details(ThemeData theme) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      _detailRow(theme, 'URL', source.url),
+      EntityDetailRow(label: 'URL', value: source.url),
       if (source.authHeader.isNotEmpty)
         // Don't display the token.
-        _detailRow(theme, 'Auth', '${source.authHeader}: (hidden)'),
+        EntityDetailRow(label: 'Auth', value: '${source.authHeader}: (hidden)'),
       const SizedBox(height: 8),
       Text(
         'FIELD MAPPING',
@@ -360,111 +327,6 @@ class _SourceCard extends StatelessWidget {
         ),
       ),
     ],
-  );
-
-  /// Helper for formatting the detail row.
-  Widget _detailRow(ThemeData theme, String k, String v) => Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 44,
-          child: Text(
-            k,
-            style: TextStyle(
-              fontSize: 11,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            v,
-            style: TextStyle(
-              fontFamily: monoFamily,
-              fontSize: 11,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-
-  /// Action buttons to edit and delete the source.
-  Widget _actions(ThemeData theme) => Row(
-    children: [
-      OutlinedButton.icon(
-        onPressed: busy ? null : onEdit,
-        icon: const Icon(Icons.edit_outlined, size: 15),
-        label: const Text('Edit'),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: theme.colorScheme.primary,
-          side: BorderSide(color: theme.colorScheme.outlineVariant),
-          visualDensity: VisualDensity.compact,
-        ),
-      ),
-      const SizedBox(width: 8),
-      OutlinedButton.icon(
-        onPressed: busy ? null : onDelete,
-        icon: const Icon(Icons.delete_outline, size: 15),
-        label: const Text('Delete'),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: theme.colorScheme.error,
-          side: BorderSide(
-            color: theme.colorScheme.error.withValues(alpha: 0.4),
-          ),
-          visualDensity: VisualDensity.compact,
-        ),
-      ),
-      const Spacer(),
-      if (busy)
-        SizedBox(
-          width: 15,
-          height: 15,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-    ],
-  );
-
-  /// Format a key value for the meta field, like "kind": "rainfall"
-  static Widget _kv(ThemeData theme, String k, String v) => Text.rich(
-    TextSpan(
-      children: [
-        TextSpan(
-          text: '$k ',
-          style: TextStyle(
-            fontSize: 11,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        TextSpan(
-          text: v,
-          style: TextStyle(
-            fontFamily: monoFamily,
-            fontSize: 11,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-      ],
-    ),
-  );
-
-  /// The small chip in the top RHS showing disposition.
-  static Widget _chip(String label, Color color) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.14),
-      borderRadius: BorderRadius.circular(4),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w600),
-    ),
   );
 
   /// Helper to format the duration.

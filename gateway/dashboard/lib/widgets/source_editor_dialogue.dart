@@ -4,6 +4,9 @@
 // mapping then the user is blocked from adding it until the issues are fixed.
 
 import 'package:dashboard/widgets/console_field_text.dart';
+import 'package:dashboard/widgets/dialogue_actions.dart';
+import 'package:dashboard/widgets/dialogue_header.dart';
+import 'package:dashboard/widgets/dialogue_section_label.dart';
 import 'package:dashboard/widgets/status_issue_list.dart';
 import 'package:flutter/material.dart';
 
@@ -160,7 +163,13 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _title(theme),
+            DialogueHeader(
+              isNew: _isNew,
+              existingId: widget.existing?.id,
+              entityType: "external source",
+              enabled: _enabled,
+              onEnabledChanged: (v) => setState(() => _enabled = v),
+            ),
             const Divider(height: 1),
             Expanded(
               child: SingleChildScrollView(
@@ -190,58 +199,18 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
               ),
             ),
             const Divider(height: 1),
-            _actions(theme),
+            DialogueActions(
+              formOk: _fieldMapOk,
+              errorMessage: 'Fix the field mapping before saving',
+              submitLabel: _isNew ? 'Add source' : 'Save changes',
+              onSubmit: _submit,
+              onCancel: () => Navigator.pop(context),
+            ),
           ],
         ),
       ),
     );
   }
-
-  /// Title bar at the top of the dialogue.
-  Widget _title(ThemeData theme) => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-    child: Row(
-      children: [
-        Icon(
-          _isNew ? Icons.add_circle_outline : Icons.edit_outlined,
-          size: 20,
-          color: theme.colorScheme.primary,
-        ),
-        const SizedBox(width: 10),
-        Text(
-          _isNew ? 'Add external source' : 'Edit ${widget.existing!.id}',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const Spacer(),
-        // Enable button.
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              _enabled ? 'ENABLED' : 'DISABLED',
-              style: TextStyle(
-                fontSize: 11,
-                color: _enabled
-                    ? theme.colorScheme.secondary
-                    : theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            Switch(
-              value: _enabled,
-              onChanged: (v) => setState(() => _enabled = v),
-              activeThumbColor: theme.colorScheme.secondary,
-              inactiveThumbColor: theme.colorScheme.onSurfaceVariant,
-              inactiveTrackColor: theme.colorScheme.surfaceContainerHigh,
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
 
   /// Details column contains:
   /// - ID
@@ -254,7 +223,7 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
   Widget _detailsColumn(ThemeData theme) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      _sectionLabel('Source', theme),
+      DialogueSectionLabel('Source'),
       ConsoleTextField(
         controller: _id,
         label: 'ID',
@@ -279,7 +248,7 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
         help: 'Tag used to match policy rules',
       ),
       const SizedBox(height: 16),
-      _sectionLabel('Authentication (optional)', theme),
+      DialogueSectionLabel('Authentication (optional)'),
       ConsoleTextField(
         controller: _authHeader,
         label: 'Header name',
@@ -293,7 +262,7 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
         help: 'Our credential to their API, stored server-side',
       ),
       const SizedBox(height: 16),
-      _sectionLabel('Polling', theme),
+      DialogueSectionLabel('Polling'),
       Row(
         children: [
           Expanded(
@@ -318,7 +287,7 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
         ],
       ),
       const SizedBox(height: 16),
-      _sectionLabel('Sanity bounds', theme),
+      DialogueSectionLabel('Sanity bounds'),
       Row(
         children: [
           Expanded(
@@ -341,7 +310,7 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
         ],
       ),
       const SizedBox(height: 16),
-      _sectionLabel('Disposition', theme),
+      DialogueSectionLabel('Disposition'),
       _dispositionPicker(theme),
     ],
   );
@@ -350,7 +319,7 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
   Widget _mappingColumn(ThemeData theme) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      _sectionLabel('Field mapping', theme),
+      DialogueSectionLabel('Field mapping'),
       Text(
         'Tells the validator where to find each value in this source\'s '
         'response.',
@@ -436,55 +405,5 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
         ),
       ],
     ],
-  );
-
-  /// Helper for consistent section labels.
-  Widget _sectionLabel(String s, ThemeData theme) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Text(
-      s.toUpperCase(),
-      style: TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 1,
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
-    ),
-  );
-
-  /// Either allow the field-map to be saved and sent to the server, or block if
-  /// there are any errors detected.
-  Widget _actions(ThemeData theme) => Padding(
-    padding: const EdgeInsets.all(16),
-    child: Row(
-      children: [
-        if (!_fieldMapOk)
-          Expanded(
-            child: Text(
-              'Fix the field mapping before saving',
-              style: TextStyle(fontSize: 12, color: theme.colorScheme.error),
-            ),
-          )
-        else
-          const Spacer(),
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            'Cancel',
-            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-          ),
-        ),
-        const SizedBox(width: 8),
-        FilledButton(
-          onPressed: _formOk ? _submit : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: theme.colorScheme.primary,
-            foregroundColor: theme.colorScheme.surface,
-            disabledBackgroundColor: theme.colorScheme.surfaceContainerHigh,
-          ),
-          child: Text(_isNew ? 'Add source' : 'Save changes'),
-        ),
-      ],
-    ),
   );
 }

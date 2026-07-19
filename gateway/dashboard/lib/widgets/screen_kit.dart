@@ -80,3 +80,128 @@ class Panel extends StatelessWidget {
     );
   }
 }
+
+/// Shared key value widget for displaying meta data.
+class MetaKeyValue extends StatelessWidget {
+  /// String for the key.
+  final String keyLabel;
+
+  /// String for the value.
+  final String valueLabel;
+
+  /// Constructor.
+  const MetaKeyValue(this.keyLabel, this.valueLabel, {super.key});
+
+  /// Build the UI.
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: '$keyLabel ',
+            style: TextStyle(
+              fontSize: 11,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          TextSpan(
+            text: valueLabel,
+            style: TextStyle(
+              fontFamily: monoFamily,
+              fontSize: 11,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Consistent chip widget.
+class StatusChip extends StatelessWidget {
+  /// Text inside the chip.
+  final String label;
+
+  /// Colour of the chip.
+  final Color color;
+
+  /// Constructor.
+  const StatusChip({super.key, required this.label, required this.color});
+
+  /// Build the chip UI.
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+/// Helper to format a row for the details in the cards for deep-dive screens.
+class EntityDetailRow extends StatelessWidget {
+  /// The label for the row.
+  final String label;
+
+  /// The value for the row.
+  final String value;
+
+  /// Optional width for the row for consistent spacing.
+  final double labelWidth;
+
+  /// Constructor.
+  const EntityDetailRow({
+    super.key,
+    required this.label,
+    required this.value,
+    this.labelWidth = 88,
+  });
+
+  /// Build the UI.
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: labelWidth,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontFamily: monoFamily,
+                fontSize: 11,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
