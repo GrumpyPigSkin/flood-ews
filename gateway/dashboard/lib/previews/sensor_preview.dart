@@ -93,18 +93,23 @@ class _StubTelemetrySource extends TelemetrySource {
   @override
   void start() {}
 
+  @override
   List<ReadingPoint> historyFor(String deviceEui) {
     return generateMockHistory(700);
   }
 
+  @override
   ({int fresh, int stale, int offline}) freshnessSummary() {
     return (fresh: 0, stale: 0, offline: 0);
   }
 
+  @override
   bool get hasStations => true;
 
+  @override
   bool get hasActiveAlert => false;
 
+  @override
   LinkState get connection => LinkState.connected;
 
   @override
