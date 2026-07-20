@@ -154,3 +154,20 @@ class StationState {
     return Freshness.fresh;
   }
 }
+
+/// One historical reading for a sensor, timestamped for plotting. Used for the
+/// chart.
+@immutable
+class ReadingPoint {
+  /// The time the entry was received.
+  final DateTime at;
+
+  /// The entry data.
+  final SensorEntry entry;
+
+  /// Constructor.
+  const ReadingPoint({required this.at, required this.entry});
+
+  /// Get the water level.
+  int get waterLevelMm => entry.waterLevelMm;
+}

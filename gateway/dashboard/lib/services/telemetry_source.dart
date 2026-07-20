@@ -26,6 +26,9 @@ abstract class TelemetrySource extends ChangeNotifier {
   /// Count of stations in each freshness bucket.
   ({int fresh, int stale, int offline}) freshnessSummary();
 
+  /// Get the reading history for a given sensor EUI.
+  List<ReadingPoint> historyFor(String deviceEui);
+
   /// Begin acquiring data.
   void start();
 }
@@ -43,6 +46,16 @@ mixin StationFold on ChangeNotifier implements TelemetrySource {
       ..sort((a, b) => a.deviceEui.compareTo(b.deviceEui));
     return list;
   }
+
+  /// List of sensor history, mapped by EUI.
+  final Map<String, List<ReadingPoint>> _historyByEui = {};
+
+  /// Max history to display on the chart.
+  static const int _maxHistoryPerStation = 100;
+
+  @override
+  List<ReadingPoint> historyFor(String deviceEui) =>
+      List.unmodifiable(_historyByEui[deviceEui] ?? const []);
 
   /// Are any stations present.
   @override
@@ -72,6 +85,7 @@ mixin StationFold on ChangeNotifier implements TelemetrySource {
   }
 
   /// Fold one uplink's sensor entries into per-station current state.
+  /// Store the sensor data into a per-sensor-data list.
   void foldUplink(Uplink u) {
     for (final e in u.entries) {
       stationsByEui[e.deviceEui] = StationState(
@@ -81,6 +95,13 @@ mixin StationFold on ChangeNotifier implements TelemetrySource {
         viaDevEui: u.devEui,
         alert: u.alert,
       );
+
+      /// Fill in the history.
+      final hist = _historyByEui.putIfAbsent(e.deviceEui, () => []);
+      hist.add(ReadingPoint(at: u.receivedAt, entry: e));
+      if (hist.length > _maxHistoryPerStation) {
+        hist.removeRange(0, hist.length - _maxHistoryPerStation);
+      }
     }
   }
 }
