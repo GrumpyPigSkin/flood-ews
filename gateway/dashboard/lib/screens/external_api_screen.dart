@@ -166,7 +166,10 @@ class _ExternalApiScreenState extends State<ExternalApiScreen> {
                 ),
                 // Iterate over the loaded sources.
                 child: c.sources.isEmpty
-                    ? const _EmptySources()
+                    ? const CenteredMessage(
+                        icon: Icons.cloud_off_outlined,
+                        text: 'No external sources configured',
+                      )
                     : ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -339,44 +342,4 @@ class _SourceCard extends StatelessWidget {
   /// Helper to display the min/max value.
   static String _n(double d) =>
       d == d.roundToDouble() ? d.toInt().toString() : d.toString();
-}
-
-/// Empty sources is shown where there are no sources current setup.
-class _EmptySources extends StatelessWidget {
-  const _EmptySources();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Center(
-        child: Column(
-          children: [
-            Icon(
-              Icons.cloud_off_outlined,
-              size: 36,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'No external sources configured',
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Add one to start pulling advisories from a partner API.',
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

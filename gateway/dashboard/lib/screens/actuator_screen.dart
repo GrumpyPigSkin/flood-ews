@@ -103,7 +103,10 @@ class _ActuatorsScreenState extends State<ActuatorsScreen> {
                   onPressed: c.isLoading ? null : c.load,
                 ),
                 child: c.actuators.isEmpty
-                    ? const _EmptyActuators()
+                    ? const CenteredMessage(
+                        icon: Icons.settings_input_component_outlined,
+                        text: 'No actuators configured',
+                      )
                     : _ActuatorGrid(controller: c, toast: _toast),
               ),
             ],
@@ -163,38 +166,6 @@ class _ActuatorGrid extends StatelessWidget {
           },
         );
       },
-    );
-  }
-}
-
-/// Widget for when no actuators are present.
-class _EmptyActuators extends StatelessWidget {
-  const _EmptyActuators();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Center(
-        child: Column(
-          children: [
-            Icon(
-              Icons.settings_input_component_outlined,
-              size: 36,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'No actuators configured',
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

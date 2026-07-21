@@ -177,7 +177,10 @@ class _EgressScreenState extends State<EgressScreen> {
                 ),
                 // List the targets or show the empty screen.
                 child: c.targets.isEmpty
-                    ? const _EmptyTargets()
+                    ? CenteredMessage(
+                        icon: Icons.cloud_upload_outlined,
+                        text: 'No egress targets configured.',
+                      )
                     : Column(
                         children: [
                           for (final t in c.targets)
@@ -343,46 +346,4 @@ class _TargetCard extends StatelessWidget {
       ),
     ],
   );
-}
-
-/// Empty screen for when there are no targets.
-class _EmptyTargets extends StatelessWidget {
-  const _EmptyTargets();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Center(
-        child: Column(
-          children: [
-            Icon(
-              Icons.cloud_upload_outlined,
-              size: 36,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'No egress targets configured',
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Add a Supabase target to store data, or a '
-              'webhook to notify an authority.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

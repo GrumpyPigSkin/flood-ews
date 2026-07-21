@@ -32,18 +32,9 @@ class SensorDetailScreen extends StatelessWidget {
               child: Center(
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.sensors_off,
-                      size: 36,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'No stations reporting yet',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 13,
-                      ),
+                    const CenteredMessage(
+                      icon: Icons.sensors_off,
+                      text: 'No stations reporting yet',
                     ),
                   ],
                 ),
