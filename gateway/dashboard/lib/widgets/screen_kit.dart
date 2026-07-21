@@ -69,7 +69,7 @@ class Panel extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                if (trailing != null) trailing!,
+                ?trailing,
               ],
             ),
           ),
@@ -198,6 +198,38 @@ class EntityDetailRow extends StatelessWidget {
                 fontSize: 11,
                 color: theme.colorScheme.onSurface,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Small helper for when no data is present.
+class CenteredMessage extends StatelessWidget {
+  // Icon to show.
+  final IconData icon;
+
+  // Message.
+  final String text;
+  const CenteredMessage({required this.icon, required this.text});
+
+  // Build the UI.
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 48, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(height: 12),
+          Text(
+            text,
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 15,
             ),
           ),
         ],
