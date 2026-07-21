@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/go-chi/jwtauth/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // LiveStore holds the latest per-station state for dashboard reads.
@@ -144,6 +145,17 @@ func (s *Server) Routes() http.Handler {
 	return mux
 }
 
+// Check the password the client sent us against the stored admin password.
+func checkPassword(hashedAdminPassword, passwordFromClient string) bool {
+
+	if hashedAdminPassword == "" {
+		return false
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(hashedAdminPassword), []byte(passwordFromClient))
+	return err == nil
+}
+
 // Handle a login request, can only login locally.
 func (s *Server) handleLocalLogin(w http.ResponseWriter, r *http.Request) {
 
@@ -153,8 +165,9 @@ func (s *Server) handleLocalLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the admin password from the environment variables.
-	if req.Password != s.adminPassword {
+	// Check the incoming password against the stored password.
+	// We expect the client to hash the plain text first as SHA256.
+	if !checkPassword(s.adminPassword, req.Password) {
 		s.writeErr(w, http.StatusUnauthorized, nil)
 		return
 	}
