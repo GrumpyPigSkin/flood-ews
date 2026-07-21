@@ -213,7 +213,9 @@ class CenteredMessage extends StatelessWidget {
 
   // Message.
   final String text;
-  const CenteredMessage({required this.icon, required this.text});
+
+  /// Constructor.
+  const CenteredMessage({super.key, required this.icon, required this.text});
 
   // Build the UI.
   @override

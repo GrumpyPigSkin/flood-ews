@@ -16,7 +16,6 @@ class SensorDetailScreen extends StatelessWidget {
   /// Build the UI.
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final source = context.watch<TelemetrySource>();
     final stations = source.stations;
 

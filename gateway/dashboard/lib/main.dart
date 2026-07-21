@@ -54,7 +54,7 @@ class FloodEwsApp extends StatelessWidget {
             create: (_) => AuthService(baseUrl: local.httpBase ?? ''),
           ),
           ProxyProvider<AuthService, GatewayApi>(
-            update: (_, auth, __) =>
+            update: (_, auth, _) =>
                 GatewayApi(baseUrl: local.httpBase ?? '', auth: auth),
           ),
         ],

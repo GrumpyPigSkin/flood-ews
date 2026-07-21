@@ -48,7 +48,9 @@ Widget previewActuatorCardEnabled() {
           ),
         ),
         busy: false,
+        // ignore: avoid_print
         onActuate: (target) async => print('Actuated to: $target'),
+        // ignore: avoid_print
         onSetEnabled: (enabled) async => print('Set enabled: $enabled'),
       ),
     ),

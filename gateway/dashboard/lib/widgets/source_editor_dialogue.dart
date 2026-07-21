@@ -381,25 +381,35 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
     children: [
       for (int i = 0; i < Disposition.values.length; i++) ...[
         if (i > 0) const SizedBox(height: 8),
-        RadioListTile<Disposition>(
-          value: Disposition.values[i],
+        RadioGroup<Disposition>(
           groupValue: _disposition,
-          onChanged: (v) => setState(() => _disposition = v!),
-          dense: true,
-          activeColor: theme.colorScheme.primary,
-          tileColor: theme.colorScheme.surfaceContainerHigh,
-          selectedTileColor: theme.colorScheme.surfaceContainerHigh,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          title: Text(
-            // Use the name from the enumeration.
-            Disposition.values[i].label,
-            style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
-          ),
-          subtitle: Text(
-            Disposition.values[i].help,
-            style: TextStyle(
-              fontSize: 11,
-              color: theme.colorScheme.onSurfaceVariant,
+          onChanged: (Disposition? v) {
+            if (v != null) {
+              setState(() => _disposition = v);
+            }
+          },
+          child: RadioListTile<Disposition>(
+            value: Disposition.values[i],
+            dense: true,
+            activeColor: theme.colorScheme.primary,
+            tileColor: theme.colorScheme.surfaceContainerHigh,
+            selectedTileColor: theme.colorScheme.surfaceContainerHigh,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            title: Text(
+              Disposition.values[i].label,
+              style: TextStyle(
+                fontSize: 13,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            subtitle: Text(
+              Disposition.values[i].help,
+              style: TextStyle(
+                fontSize: 11,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ),
