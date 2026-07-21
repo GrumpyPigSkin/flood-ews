@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:dashboard/config/app_config.dart';
+import 'package:dashboard/screens/dashboard_screen.dart';
 import 'package:dashboard/screens/sensor_detail_screen.dart';
 import 'package:dashboard/services/telemetry_source.dart';
 import 'package:dashboard/widgets/sensor_detail_card.dart';
@@ -81,6 +83,29 @@ Widget previewSensorScreen() {
       body: ChangeNotifierProvider<TelemetrySource>.value(
         value: stubApi,
         child: SensorDetailScreen(),
+      ),
+    ),
+  );
+}
+
+void cb() {}
+
+/// Dashboard card preview
+@Preview(name: 'Dashboard Screen', size: Size(800, 520))
+Widget previewDashboardScreen() {
+  final stubApi = _StubTelemetrySource();
+  final stubConfig = LocalConfig(wsUrl: "");
+
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: buildTheme(),
+    home: Scaffold(
+      body: MultiProvider(
+        providers: [
+          ChangeNotifierProvider<TelemetrySource>.value(value: stubApi),
+          Provider<AppConfig>.value(value: stubConfig),
+        ],
+        child: const DashboardScreen(),
       ),
     ),
   );
@@ -172,4 +197,37 @@ class _StubTelemetrySource extends TelemetrySource {
       ),
     ),
   ];
+
+  @override
+  ({double meanMm, int peakMm, StationState? peakStation, int reporting})
+  aggregate() {
+    final now = DateTime.now();
+
+    final activeStations = stations.where(
+      (s) => s.freshnessAt(now) != Freshness.offline,
+    );
+
+    var sum = 0;
+    var count = 0;
+    StationState? peak;
+
+    for (final s in activeStations) {
+      sum += s.waterLevelMm;
+      count++;
+      if (peak == null || s.waterLevelMm > peak.waterLevelMm) {
+        peak = s;
+      }
+    }
+
+    if (count == 0) {
+      return (meanMm: 0.0, peakMm: 0, peakStation: null, reporting: 0);
+    }
+
+    return (
+      meanMm: sum / count,
+      peakMm: peak!.waterLevelMm,
+      peakStation: peak,
+      reporting: count,
+    );
+  }
 }

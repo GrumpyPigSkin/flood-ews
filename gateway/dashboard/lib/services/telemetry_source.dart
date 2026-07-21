@@ -26,6 +26,13 @@ abstract class TelemetrySource extends ChangeNotifier {
   /// Count of stations in each freshness bucket.
   ({int fresh, int stale, int offline}) freshnessSummary();
 
+  /// Aggregate the level across sensor stations for the dashboard.
+  /// meanMm/peakMm are computed over non-offline stations. PeakStation names
+  /// the highest reading. Reporting is the number of sensors that made up the
+  /// aggregate.
+  ({double meanMm, int peakMm, StationState? peakStation, int reporting})
+  aggregate();
+
   /// Get the reading history for a given sensor EUI.
   List<ReadingPoint> historyFor(String deviceEui);
 
@@ -53,9 +60,49 @@ mixin StationFold on ChangeNotifier implements TelemetrySource {
   /// Max history to display on the chart.
   static const int _maxHistoryPerStation = 100;
 
+  /// Get the reading history for a given sensor EUI.
   @override
   List<ReadingPoint> historyFor(String deviceEui) =>
       List.unmodifiable(_historyByEui[deviceEui] ?? const []);
+
+  /// Aggregate readings into a mean, peak and some additional data for the
+  /// dashboard screen.
+  @override
+  ({double meanMm, int peakMm, StationState? peakStation, int reporting})
+  aggregate() {
+    final now = DateTime.now();
+
+    // Is the reading fresh.
+    final activeStations = stationsByEui.values.where(
+      (s) => s.freshnessAt(now) != Freshness.offline,
+    );
+
+    var sum = 0;
+    var count = 0;
+    StationState? peak;
+    // Iterate over each sensor station, get the peak value across them,
+    // accumulate the water level.
+    for (final s in activeStations) {
+      sum += s.waterLevelMm;
+      count++;
+      if (peak == null || s.waterLevelMm > peak.waterLevelMm) {
+        peak = s;
+      }
+    }
+
+    // If there are no sensors reporting return all 0's
+    if (count == 0) {
+      return (meanMm: 0.0, peakMm: 0, peakStation: null, reporting: 0);
+    }
+
+    // Calculate the mean and return.
+    return (
+      meanMm: sum / count,
+      peakMm: peak!.waterLevelMm,
+      peakStation: peak,
+      reporting: count,
+    );
+  }
 
   /// Are any stations present.
   @override
