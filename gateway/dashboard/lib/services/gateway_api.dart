@@ -86,7 +86,7 @@ class GatewayApi {
       body: {
         'actuator_id': actuatorId,
         'target_state': targetState,
-        if (reason != null) 'reason': reason,
+        'reason': ?reason,
       },
     );
     return jsonDecode(resp.body) as Map<String, dynamic>;

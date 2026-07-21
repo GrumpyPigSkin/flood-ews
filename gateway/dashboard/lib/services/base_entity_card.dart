@@ -80,7 +80,7 @@ class BaseEntityCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     Divider(height: 1, color: theme.colorScheme.outlineVariant),
                     const SizedBox(height: 10),
-                    if (details != null) details!,
+                    ?details,
                     const SizedBox(height: 12),
                     _actions(theme),
                   ],
