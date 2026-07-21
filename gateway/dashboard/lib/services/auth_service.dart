@@ -13,6 +13,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -72,13 +73,16 @@ class AuthService extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
+    // Hash before sending.
+    final hashedPassword = preHashPassword(password);
+
     try {
       // Try and login using the given basUrl and password.
       final resp = await _http
           .post(
             Uri.parse('$baseUrl/v1/auth/login'),
             headers: const {'Content-Type': 'application/json'},
-            body: jsonEncode({'password': password}),
+            body: jsonEncode({'password': hashedPassword}),
           )
           .timeout(const Duration(seconds: 8));
 
@@ -169,4 +173,10 @@ class AuthService extends ChangeNotifier {
     _http.close();
     super.dispose();
   }
+}
+
+String preHashPassword(String rawPassword) {
+  final bytes = utf8.encode(rawPassword);
+  final digest = sha256.convert(bytes);
+  return digest.toString();
 }

@@ -41,6 +41,7 @@ dependencies:
   provider: ^6.1.5+1
   collection: ^1.19.1
   fl_chart: ^1.2.0
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:
