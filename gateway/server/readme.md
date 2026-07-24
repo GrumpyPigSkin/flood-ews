@@ -63,7 +63,7 @@ manipulating the database based on my queries and schema
 
 ## Telemetry ##
 
-This listens to Data from Chirpstacks MQTT forwarder. This then serves the data to the upstream UI websocket, handles replays when connected, and sends the data onwards to supabase.
+This listens to Data from Chirpstacks MQTT forwarder. This then serves the data to the upstream UI websocket, handles replays when connected, and sends the data onwards to supabase or external webhooks.
 
 ## Building and Testing ##
 
