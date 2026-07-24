@@ -35,12 +35,9 @@ sealed class AppConfig {
       );
     }
 
-    return const LocalConfig(
-      wsUrl: String.fromEnvironment(
-        'WS_URL',
-        defaultValue: 'ws://127.0.0.1:8081/ws',
-      ),
-    );
+    final wsUri = _getWebSocketUrl();
+
+    return LocalConfig(wsUrl: wsUri);
   }
 }
 
@@ -109,4 +106,17 @@ final class CloudConfig extends AppConfig {
   /// Role is always cloud.
   @override
   String get roleLabel => 'cloud';
+}
+
+/// Get the websocket URL.
+/// This needs to point to the server where we are hosted.
+/// Can't use generic 127.0.0.1 because this runs on the client not the server.
+String _getWebSocketUrl() {
+  final host = Uri.base.host;
+  final port = Uri.base.port == 80 || Uri.base.port == 443
+      ? ''
+      : ':${Uri.base.port}';
+  final scheme = Uri.base.scheme == 'https' ? 'wss' : 'ws';
+
+  return '$scheme://$host$port/ws';
 }
