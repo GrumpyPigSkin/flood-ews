@@ -1,0 +1,12 @@
+[Unit]
+Description=ChirpStack Concentratord
+After=network.target
+
+[Service]
+ExecStart=/home/oliver/chirpstack/chirpstack-concentratord-sx1302 -c /home/oliver/chirpstack/chirpstack-config.toml
+Restart=always
+RestartSec=5
+User=oliver
+
+[Install]
+WantedBy=multi-user.target

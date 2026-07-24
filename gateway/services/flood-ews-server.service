@@ -1,0 +1,18 @@
+[Unit]
+Description=Flood EWS Go Backend API
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/flood-ews-server
+ExecStart=/var/www/flood-ews-server/flood-ews-server
+Restart=always
+RestartSec=5s
+KillMode=mixed
+
+EnvironmentFile=/var/www/flood-ews-server/.env
+
+[Install]
+WantedBy=multi-user.target

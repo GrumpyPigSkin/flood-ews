@@ -1,0 +1,13 @@
+[Unit]
+Description=ChirpStack MQTT Forwarder
+After=chirpstack-docker.service
+Requires=chirpstack-docker.service
+
+[Service]
+ExecStart=/home/oliver/chirpstack/chirpstack-mqtt-forwarder -c /home/oliver/chirpstack/chirpstack-mqtt-forwarder.toml
+Restart=always
+RestartSec=5
+User=oliver
+
+[Install]
+WantedBy=multi-user.target
