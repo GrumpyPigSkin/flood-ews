@@ -144,6 +144,7 @@ func setupTestStore(t *testing.T) *store.Store {
 func TestLocalLogin_And_JWT_Authorization(t *testing.T) {
 	// Set our expected environment variable for password validation
 	const testPass = "super-secret-password"
+	const hashedPass = "$2a$12$Ym5CyE6PY8tzI6IRDlbo6ONFRuDiqN98.XSrKSF5dbKnf8fdhUgcK"
 
 	jwtSecret := "my-jwt-test-key"
 
@@ -157,7 +158,7 @@ func TestLocalLogin_And_JWT_Authorization(t *testing.T) {
 	liveStore := NewLiveStore()
 
 	// Pass initialized dependencies instead of nil
-	srv := NewServer(mockStore, liveStore, nil, nil, nil, testLogger, jwtSecret, testPass, true)
+	srv := NewServer(mockStore, liveStore, nil, nil, nil, testLogger, jwtSecret, hashedPass, true)
 	router := srv.Routes()
 
 	// Attempt login with a bad password
