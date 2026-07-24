@@ -2,7 +2,7 @@
 -- the accessors required for updating data.
 
 -- An external source to fetch data from.
-CREATE TABLE external_source (
+CREATE TABLE IF NOT EXISTS external_source (
   id            TEXT PRIMARY KEY,
   name          TEXT NOT NULL,
   enabled       INTEGER NOT NULL DEFAULT 1,
@@ -19,7 +19,7 @@ CREATE TABLE external_source (
 );
 
 -- A physical actuator
-CREATE TABLE actuator (
+CREATE TABLE IF NOT EXISTS actuator (
   id             TEXT PRIMARY KEY,
   name           TEXT NOT NULL,
   enabled        INTEGER NOT NULL DEFAULT 1,
@@ -28,7 +28,7 @@ CREATE TABLE actuator (
 );
 
 -- Rule for the policy engine.
-CREATE TABLE policy_rule (
+CREATE TABLE IF NOT EXISTS policy_rule (
   id                TEXT PRIMARY KEY,
   name              TEXT NOT NULL,
   enabled           INTEGER NOT NULL DEFAULT 1,
@@ -42,7 +42,7 @@ CREATE TABLE policy_rule (
 );
 
 -- Audit log for tracking changes.
-CREATE TABLE audit_log (
+CREATE TABLE IF NOT EXISTS audit_log (
   id      INTEGER PRIMARY KEY AUTOINCREMENT,
   at      TEXT NOT NULL,
   actor   TEXT NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE audit_log (
 );
 
 -- A target to push data to. Supabase or some third party API
-CREATE TABLE egress_target (
+CREATE TABLE IF NOT EXISTS egress_target (
   id            TEXT PRIMARY KEY,
   name          TEXT NOT NULL,
   enabled       INTEGER NOT NULL DEFAULT 1,
