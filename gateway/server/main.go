@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/joho/godotenv"
 
 	"server/actuator"
 	"server/advisory"
@@ -43,9 +44,15 @@ func env(k, def string) string {
 }
 
 func main() {
+
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+
+	err := godotenv.Load()
+	if err != nil {
+		logger.Error("No .env file found.")
+	}
 
 	// Config store.
 	st, err := store.Open(ctx, env("CONFIG_DB", "gateway.db"))
@@ -150,7 +157,6 @@ func main() {
 
 	apiSrv := api.NewServer(st, live, p, daemon, engine, logger, secretKey, adminPassword, isLocal)
 
-	// TODO: Remove when I move backend to RPI!!!
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(_ *http.Request) bool { return true },
 	}
