@@ -1,0 +1,54 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    # Responds to domain, local IP, or hostname
+    server_name flood-ews-hub.local 192.168.1.109 _;
+
+    # Flutter Web static files
+    root /var/www/flood-ews-client;
+    index index.html;
+
+    # Reverse proxy API endpoints to the Go backend.
+    location /v1/ {
+        proxy_pass http://127.0.0.1:8081/v1/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Healthz message.
+    location /healthz {
+        proxy_pass http://127.0.0.1:8081/healthz;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
+    # Recent readings replay.
+    location /recent {
+        proxy_pass http://127.0.0.1:8081/recent;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
+
+    # Reverse proxy WebSockets to Go backend
+    location /ws {
+        proxy_pass http://127.0.0.1:8081/ws;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_read_timeout 86400s;
+    }
+
+    # Flutter Web SPA Routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Enable Gzip compression for faster loading over Wi-Fi
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript;
+}
