@@ -21,6 +21,8 @@ The Cloud version is deployed to Cloudflare pages and connect to a SupaBase
 instance. Not directly to the RPi gateway. This offers just a read endpoint to
 read the latest values sent from the server.
 
+Cloud location: [dashboard](https://1d6b0dd3.flood-ews-dashboard.pages.dev/)
+
 ## nginx ##
 
 Contains the configuration file for Nginx running on the RPi. This serves the
