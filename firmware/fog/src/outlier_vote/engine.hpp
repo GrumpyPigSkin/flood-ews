@@ -237,13 +237,13 @@ private:
 
     // std::nth_element only partially sorts up to the exact index we care about
     // the middle.
-    auto *const mid = buf.begin() + (num_sensors / 2);
+    auto const mid = buf.begin() + (num_sensors / 2);
     std::nth_element(buf.begin(), mid, buf.begin() + num_sensors);
 
     // Handle the even size case like n == 2
     if (num_sensors % 2 == 0) {
       // We need the element immediately preceding the middle point as well.
-      auto *const max_it = std::max_element(buf.begin(), mid);
+      auto const max_it = std::max_element(buf.begin(), mid);
       return static_cast<std::uint16_t>(
           (static_cast<std::uint32_t>(*max_it) + *mid) / 2);
     }
