@@ -148,12 +148,66 @@ template <typename Cfg> void Server<Cfg>::become_leader() noexcept {
     }
   }
 
+  const Time now = m_cbs.m_now();
+  for (std::size_t i = 0; i < m_n_nodes; ++i) {
+    m_nodes[i].last_contact = now;
+  }
+  m_leader_since = now;
+
   // force an immediate heartbeat
   m_last_heartbeat_sent = 0;
 }
 
 template <typename Cfg>
+bool Server<Cfg>::request_vote_guard(const RequestVote &rv) noexcept {
+
+  // Handle a pre-vote request.
+  const Time now = m_cbs.m_now();
+  if (rv.m_pre_vote) {
+    // Would we vote in a real election?
+    bool would_grant = false;
+    if (!leader_is_live(now) && rv.m_term >= m_current_term) {
+      const Index my_last_idx = m_log.last_index();
+      const Term my_last_trm = m_log.last_term();
+      would_grant = (rv.m_last_log_term > my_last_trm) ||
+                    (rv.m_last_log_term == my_last_trm &&
+                     rv.m_last_log_index >= my_last_idx);
+    }
+    MessageT reply{};
+    reply.from = m_self_id;
+    reply.to = rv.m_candidate_id;
+    reply.payload = RequestVoteResp{m_current_term, would_grant, true};
+    emit(reply);
+    return true;
+  }
+
+  // Guard against a disruptive candidate. If we currently believe we have a
+  // live leader we should reject incoming calls from nodes with higher terms
+  // experiencing churn. This could happen when the disruptive node is able to
+  // send but is unable to receive.
+  if (leader_is_live(now) && rv.m_term > m_current_term) {
+    // Do not step down and do not adopt the term. Reply with our own term so
+    // the disruptive candidate learns nothing that helps it.
+    MessageT reply{};
+    reply.from = m_self_id;
+    reply.to = rv.m_candidate_id;
+    reply.payload = RequestVoteResp{m_current_term, false};
+    emit(reply);
+    return true;
+  }
+
+  return false;
+}
+
+template <typename Cfg>
 void Server<Cfg>::handle(const RequestVote &rv) noexcept {
+
+  // Guard against a disruptive leaders.
+  // Emits a response.
+  if (request_vote_guard(rv)) {
+    return;
+  }
+
   maybe_step_down(rv.m_term);
 
   MessageT reply{};
@@ -169,8 +223,8 @@ void Server<Cfg>::handle(const RequestVote &rv) noexcept {
     return;
   }
 
-  // If votedFor is null or candidateId, and the candidate's log is at least as
-  // up-to-date as ours, grant the vote (5.2, 5.4).
+  // If votedFor is null or candidateId, and the candidate's log is at least
+  // as up-to-date as ours, grant the vote (5.2, 5.4).
   if (m_voted_for == BAD_NODE || m_voted_for == rv.m_candidate_id) {
     const Index my_last_idx = m_log.last_index();
     const Term my_last_trm = m_log.last_term();
@@ -193,6 +247,23 @@ void Server<Cfg>::handle(const RequestVote &rv) noexcept {
 template <typename Cfg>
 void Server<Cfg>::handle(NodeId from, const RequestVoteResp &rr) noexcept {
 
+  if (rr.m_pre_vote) {
+    if (!m_pre_vote_active) {
+      return;
+    }
+    // A real leader out there will answer our probe with a higher term. At
+    // this point we only count grants.
+    if (rr.m_vote_granted && rr.m_term <= m_current_term + 1) {
+      ++m_pre_votes_granted;
+      if (m_pre_votes_granted >= majority()) {
+        m_pre_vote_active = false;
+        // Now increment term and run the real election
+        become_candidate();
+      }
+    }
+    return;
+  }
+
   if (m_state != State::CANDIDATE) {
     return;
   }
@@ -203,7 +274,8 @@ void Server<Cfg>::handle(NodeId from, const RequestVoteResp &rr) noexcept {
     return;
   }
 
-  // If their term is less than our term, they are replying to old data, ignore.
+  // If their term is less than our term, they are replying to old data,
+  // ignore.
   if (rr.m_term < m_current_term) {
     return;
   }

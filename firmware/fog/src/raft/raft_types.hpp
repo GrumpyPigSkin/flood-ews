@@ -133,14 +133,16 @@ struct RequestVote {
   NodeId m_candidate_id{};  // candidate requesting the vote
   Index m_last_log_index{}; // index of candidate's last log entry
   Term m_last_log_term{};   // term of candidate's last log entry
+  bool m_pre_vote{false};   // true = trial election, do not adopt m_term
 };
 
 /**
  * @brief Response for request vote.
  */
 struct RequestVoteResp {
-  Term m_term{};         // currentTerm, for candidate to update itself
-  bool m_vote_granted{}; // true means candidate received the vote
+  Term m_term{};          // currentTerm, for candidate to update itself
+  bool m_vote_granted{};  // true means candidate received the vote
+  bool m_pre_vote{false}; // echoes the request so the candidate routes it
 };
 
 /**
@@ -220,10 +222,12 @@ template <typename Cfg = DefaultConfig> struct Message {
  */
 struct Peer {
   NodeId id{BAD_NODE};
-  Index next_index{1};  // next entry to send (init: leader last + 1)
-  Index match_index{0}; // highest entry known replicated
-  Time last_contact{};  // last time we heard from this peer
-  bool vote_granted{};  // did this peer vote for us this term
+  Index next_index{1};          // next entry to send (init: leader last + 1)
+  Index match_index{0};         // highest entry known replicated
+  Time last_contact{};          // last time we heard from this peer
+  std::uint32_t snap_offset{0}; // Byte offset of the next InstallSnapshot
+                                // chunk to send this peer.
+  bool vote_granted{};          // did this peer vote for us this term
   bool is_self{};
 };
 

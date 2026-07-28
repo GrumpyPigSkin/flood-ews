@@ -37,6 +37,16 @@ template <typename Cfg> void Server<Cfg>::periodic() noexcept {
   const Time now = m_cbs.m_now();
 
   if (m_state == State::LEADER) {
+
+    // Handle when we haven't heard from followers in a while. On the event that
+    // we are a leader and we do not hear from followers we need to step down in
+    // case they can hear out heartbeats but we cannot hear them, causing a
+    // lock.
+    if (!contact_with_majority(now)) {
+      become_follower(m_current_term, BAD_NODE);
+      return;
+    }
+
     // Send heartbeats / pending entries on the heartbeat interval.
     if (now - m_last_heartbeat_sent >= Cfg::HEARTBEAT_INTERVAL_MS) {
       m_last_heartbeat_sent = now;
@@ -49,10 +59,68 @@ template <typename Cfg> void Server<Cfg>::periodic() noexcept {
   } else {
     // Follower/candidate: election timeout -> start (new) election (5.2).
     if (static_cast<std::int64_t>(now - m_election_deadline) >= 0) {
-      become_candidate();
+      start_pre_vote();
     }
   }
   apply_committed();
+}
+
+template <typename Cfg>
+bool Server<Cfg>::contact_with_majority(const Time now) const noexcept {
+  // The wait needs to be at least as long as the longest election timeout.
+  const Time window =
+      Cfg::ELECTION_TIMEOUT_MIN_MS + Cfg::ELECTION_TIMEOUT_SPREAD_MS;
+
+  // If we become leader we don't want to judge others before there has been at
+  // least the longest timeout.
+  if (static_cast<std::int64_t>(now - m_leader_since) <
+      static_cast<std::int64_t>(window)) {
+    return true;
+  }
+
+  // Count self.
+  std::size_t reachable = 1;
+  for (std::size_t i = 0; i < m_n_nodes; ++i) {
+    if (m_nodes[i].is_self) {
+      continue;
+    }
+    if (static_cast<std::int64_t>(now - m_nodes[i].last_contact) <
+        static_cast<std::int64_t>(window)) {
+      ++reachable;
+    }
+  }
+  return reachable > (m_n_nodes / 2);
+}
+
+template <typename Cfg> void Server<Cfg>::start_pre_vote() noexcept {
+  m_pre_vote_active = true;
+  // we would vote for ourselves
+  m_pre_votes_granted = 1;
+  reset_election_timer();
+
+  for (std::size_t i = 0; i < m_n_nodes; ++i) {
+    if (m_nodes[i].is_self) {
+      continue;
+    }
+    MessageT msg{};
+    msg.from = m_self_id;
+    msg.to = m_nodes[i].id;
+    msg.payload = RequestVote{
+        // Probe with term + 1: "if I ran at the next term, would you vote?"
+        .m_term = m_current_term + 1,
+        .m_candidate_id = m_self_id,
+        .m_last_log_index = m_log.last_index(),
+        .m_last_log_term = m_log.last_term(),
+        .m_pre_vote = true,
+    };
+    emit(msg);
+  }
+
+  // Single-node cluster: our own pre-vote is already a majority.
+  if (m_pre_votes_granted >= majority()) {
+    m_pre_vote_active = false;
+    become_candidate();
+  }
 }
 
 template <typename Cfg>

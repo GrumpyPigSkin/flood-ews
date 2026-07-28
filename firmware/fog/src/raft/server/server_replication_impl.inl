@@ -88,6 +88,7 @@ void Server<Cfg>::handle(const AppendEntries<Cfg> &ae) noexcept {
   // Valid leader for >= our term: adopt term, become follower, reset timer.
   maybe_step_down(ae.m_term);
   become_follower(ae.m_term, ae.m_leader_id);
+  m_last_leader_contact = m_cbs.m_now();
 
   // Reply false if log lacks an entry at prevLogIndex whose term matches
   // prevLogTerm (5.3). Provide a back-up hint.

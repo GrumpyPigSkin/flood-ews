@@ -9,8 +9,7 @@
 
 template <typename Cfg>
 void Server<Cfg>::send_install_snapshot(const Peer &peer) noexcept {
-  // This build keeps the whole snapshot in m_snap_buf and sends it in one
-  // message.
+
   if (peer.is_self) {
     return;
   }
@@ -19,24 +18,33 @@ void Server<Cfg>::send_install_snapshot(const Peer &peer) noexcept {
     return; // no snapshot taken yet
   }
 
+  // Resume from where this peer was last acked. peer.snap_offset starts at 0
+  // and advances as InstallSnapshotResp comes back (see the resp handler).
+  const std::uint32_t offset = peer.snap_offset;
+  if (offset >= m_snap_len) {
+    return; // Nothing left.
+  }
+
+  const std::uint32_t remaining = m_snap_len - offset;
+  const auto chunk = static_cast<std::uint16_t>(
+      std::min<std::uint32_t>(remaining, Cfg::SNAPSHOT_CHUNK));
+
   InstallSnapshot<Cfg> is{};
   is.m_term = m_current_term;
   is.m_leader_id = m_self_id;
   is.m_last_included_index = m_log.base();
   is.m_last_included_term = m_log.base_term();
-  is.m_offset = 0;
+  is.m_offset = offset;
   is.m_total_len = m_snap_len;
-  is.m_done = true;
-  is.m_data_len = static_cast<std::uint16_t>(
-      std::min<std::uint32_t>(m_snap_len, Cfg::SNAPSHOT_CHUNK));
-  std::memcpy(is.m_data.data(), m_snap_buf.data(), is.m_data_len);
+  is.m_data_len = chunk;
+  is.m_done = (offset + chunk >= m_snap_len); // true only on the final chunk
+  std::memcpy(is.m_data.data(), m_snap_buf.data() + offset, chunk);
 
   MessageT msg{};
   msg.from = m_self_id;
   msg.to = peer.id;
   msg.payload = is;
   emit(msg);
-  apply_committed();
 }
 
 template <typename Cfg>
@@ -109,20 +117,29 @@ void Server<Cfg>::handle(NodeId from, const InstallSnapshotResp &rr) noexcept {
     maybe_step_down(rr.m_term);
     return;
   }
-
   if (m_state != State::LEADER) {
     return;
   }
-
   Peer *const peer = node_by_id(from);
   if (peer == nullptr) {
     return;
   }
   peer->last_contact = m_cbs.m_now();
+
+  // Advance this peer's snapshot cursor by the chunk we just sent.
+  const std::uint32_t sent_through = std::min<std::uint32_t>(
+      peer->snap_offset + Cfg::SNAPSHOT_CHUNK, m_snap_len);
+  peer->snap_offset = sent_through;
+
+  if (peer->snap_offset < m_snap_len) {
+    send_install_snapshot(*peer); // more chunks to go
+    return;
+  }
+
+  // Snapshot fully transferred.
+  peer->snap_offset = 0;
   peer->next_index = std::max(rr.m_last_included_index + 1, peer->next_index);
   peer->match_index = std::max(rr.m_last_included_index, peer->match_index);
-
-  // continue normal replication
   send_append_entries(*peer);
   apply_committed();
 }

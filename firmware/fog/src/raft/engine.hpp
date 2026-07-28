@@ -113,26 +113,26 @@ private:
    * @return Callbacks<DefaultConfig>
    */
   Callbacks<DefaultConfig> make_cbs(OnStateChangeCallbackT osccb) {
-    return {
-        .m_send =
-            [this](const Server<>::MessageT &msg) { m_coap.send_msg(msg); },
-        .m_apply =
-            [this](const Server<>::EntryT &entry) {
-              if (m_on_apply) {
-                m_on_apply(entry);
-              }
-            },
-        .m_persist_state =
-            [this](Term current_term, NodeId voted_for) {
-              logging::inf("Persistence saved: .current_term={}, .voted_for={}",
-                           current_term, voted_for);
-              m_persistence.save({current_term, voted_for});
-            },
-        // Snapshotting / persisting is missing from the current implementation,
-        // to get this to work on hardware is a significant task.
-        .m_now = [] { return static_cast<Time>(k_uptime_get()); },
-        .m_rand = [] { return sys_rand32_get(); },
-        .m_on_state_change = std::move(osccb)};
+    return {.m_send =
+                [this](const Server<>::MessageT &msg) { m_coap.send_msg(msg); },
+            .m_apply =
+                [this](const Server<>::EntryT &entry) {
+                  if (m_on_apply) {
+                    m_on_apply(entry);
+                  }
+                },
+            .m_persist_state =
+                [this](Term current_term, NodeId voted_for) {
+                  logging::inf(
+                      "Persistence saved: .current_term={}, .voted_for={}",
+                      current_term, voted_for);
+                  m_persistence.save({current_term, voted_for});
+                },
+            .m_snapshot_save = [](std::uint8_t * /*buf*/,
+                                  std::uint32_t /*cap*/) { return 0; },
+            .m_now = [] { return static_cast<Time>(k_uptime_get()); },
+            .m_rand = [] { return sys_rand32_get(); },
+            .m_on_state_change = std::move(osccb)};
   }
 
   /**

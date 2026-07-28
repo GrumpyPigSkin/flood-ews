@@ -280,6 +280,49 @@ private:
     detail::call_if(m_cbs.m_send, msg);
   }
 
+  /**
+   * @brief Have we heard back from the majority of nodes?
+   * @param [in] now the time now.
+   */
+  [[nodiscard]] bool contact_with_majority(Time now) const noexcept;
+
+  /**
+   * @brief Do we currently believe a leader is live? True if we are the leader
+   * and still contact a majority, or we are a follower that heard from the
+   * leader within an election timeout. Used to reject disruptive RequestVotes,
+   * a partitioned node whose term has climbed in isolation must not be able to
+   * depose a healthy leader just by asking.
+   * @param [in] now
+   */
+  [[nodiscard]] bool leader_is_live(Time now) const noexcept {
+
+    const Time window =
+        Cfg::ELECTION_TIMEOUT_MIN_MS + Cfg::ELECTION_TIMEOUT_SPREAD_MS;
+    // We are leader, see if we have contact with the majority.
+    if (m_state == State::LEADER) {
+      return contact_with_majority(now);
+    }
+
+    // Did we last see the leader in the required time?
+    return m_current_leader != BAD_NODE &&
+           static_cast<std::int64_t>(now - m_last_leader_contact) <
+               static_cast<std::int64_t>(window);
+  }
+
+  /**
+   * @brief Start a dummy election without incrementing and persisting our term.
+   */
+  void start_pre_vote() noexcept;
+
+  /**
+   * @brief Handle pre-voting and guard against a candidate sending higher terms
+   * when already have a leader, causing the current leader to step down.
+   * @note This function emits so is safe to return from directly.
+   * @param [in] rv The request to vote.
+   * @return true If we needed to guard or we responded to a pre-vote.
+   */
+  bool request_vote_guard(const RequestVote &rv) noexcept;
+
   /** @brief The callback supplied by the rest of the application. */
   CallbacksT m_cbs{};
 
@@ -322,10 +365,19 @@ private:
   /** @brief The last time we got a heart beat from the leader. */
   Time m_last_heartbeat_sent{0};
 
+  /** @brief When we became leader. */
+  Time m_leader_since{0};
+
+  /** @brief The last time we heard from a leader. */
+  Time m_last_leader_contact{0};
+
   /**
    * @brief The number of votes that have been granted to us to become leader.
    */
   std::size_t m_votes_granted{0};
+
+  /** @brief Votes granted in the current PRE-vote probe (§9.6). */
+  std::size_t m_pre_votes_granted{0};
 
   /**
    * @brief Chunk bytes assembled at their offsets; full snapshot once
@@ -347,6 +399,9 @@ private:
 
   /** @brief Is the sever in a valid state. */
   bool m_valid{false};
+
+  /** @brief True while running a pre-vote, before any real election. */
+  bool m_pre_vote_active{false};
 };
 
 /**
