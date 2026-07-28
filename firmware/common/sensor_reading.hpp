@@ -31,6 +31,20 @@ operator|(const E lhs, const E rhs) noexcept {
                         static_cast<underlying>(rhs));
 }
 
+/**
+ * @brief Enable bitwise AND operations on an enum class.
+ * @param [in] lhs
+ * @param [in] rhs
+ * @return std::enable_if_t<enable_bitmask_operators<E>::value, E>
+ */
+template <typename E>
+typename std::enable_if_t<enable_bitmask_operators<E>::value, E>
+operator&(const E lhs, const E rhs) noexcept {
+  using underlying = std::underlying_type_t<E>;
+  return static_cast<E>(static_cast<underlying>(lhs) &
+                        static_cast<underlying>(rhs));
+}
+
 /** @brief IEC 61850-7-3 Section 6.2 Quality — validity values */
 enum class IEC61850_Validity : std::uint8_t {
   VALIDITY_GOOD = 0,         // no abnormal condition detected
