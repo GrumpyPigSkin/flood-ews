@@ -3,6 +3,7 @@
 #include "common/ot_utils.hpp"
 #include "lorawan/modem.hpp"
 #include "lorawan/protocol.hpp"
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <cstdio>
@@ -71,6 +72,13 @@ constexpr std::string_view E5_TOK_NOT_JOINED = "Please join network first";
 constexpr std::string_view E5_STATUS_CMD = "AT+NJS=?\r\n";
 constexpr std::string_view E5_STATUS_JOINED = "+NJS: 1";
 
+// Disable duty cycle for testing.
+constexpr std::string_view E5_DUTY_CYCLE_OFF_CMD = "AT+LW=DC, OFF\r\n";
+constexpr std::string_view E5_DUTY_CYCLE_OFF_RSP = "+LW: DC, OFF, 0";
+
+constexpr std::string_view E5_JOIN_DUTY_CYCLE_OFF_CMD = "AT+LW=JDC, OFF\r\n";
+constexpr std::string_view E5_JOIN_DUTY_CYCLE_OFF_RSP = "+LW: JDC, OFF";
+
 constexpr std::string_view AT_PARAM_ERR = "AT_PARAM_ERROR";
 constexpr std::string_view AT_ERR = "AT_ERROR";
 /**
@@ -97,34 +105,38 @@ inline bool run_join(E5Modem &modem, const JoinParams &params,
                : std::string_view{};
   };
 
-  if (!modem.ok(CHECK_AT_STR, CHECK_AT_RSP, Timeouts::SHORT_MS)) {
-    return false;
-  }
+  struct E5Cmd {
+    std::string_view m_cmd;
+    std::string_view m_arg;
+    std::string_view m_rsp;
+    std::uint32_t m_timeout;
+  };
 
-  if (!modem.ok(SET_OTAA_STR, SET_OTAA_RSP, Timeouts::SHORT_MS)) {
-    return false;
-  }
+  std::array setup_commands = {
+      E5Cmd{CHECK_AT_STR, {}, CHECK_AT_RSP, Timeouts::SHORT_MS},
+      E5Cmd{SET_OTAA_STR, {}, SET_OTAA_RSP, Timeouts::SHORT_MS},
+      E5Cmd{SET_APP_EUI_CMD, std::string_view{eui.data(), eui.size()},
+            SET_APP_EUI_RSP, Timeouts::SHORT_MS},
+      E5Cmd{SET_DEV_EUI_CMD, std::string_view{eui.data(), eui.size()},
+            SET_DEV_EUI_RSP, Timeouts::SHORT_MS},
+      E5Cmd{SET_APP_KEY_CMD, params.app_key, SET_APP_KEY_RSP,
+            Timeouts::SHORT_MS},
+      E5Cmd{SET_DATA_RATE_CMD, {}, SET_DATA_RATE_RSP, Timeouts::SHORT_MS},
+      E5Cmd{SET_EU868_CMD, {}, SET_EU868_RSP, Timeouts::SHORT_MS},
+      E5Cmd{
+          E5_DUTY_CYCLE_OFF_CMD, {}, E5_DUTY_CYCLE_OFF_RSP, Timeouts::SHORT_MS},
+      E5Cmd{E5_JOIN_DUTY_CYCLE_OFF_CMD,
+            {},
+            E5_JOIN_DUTY_CYCLE_OFF_RSP,
+            Timeouts::SHORT_MS},
+  };
 
-  if (!modem.ok(fmt(SET_APP_EUI_CMD, eui.data()), SET_APP_EUI_RSP,
-                Timeouts::SHORT_MS)) {
-    return false;
-  }
-
-  if (!modem.ok(fmt(SET_DEV_EUI_CMD, eui.data()), SET_DEV_EUI_RSP,
-                Timeouts::SHORT_MS)) {
-    return false;
-  }
-
-  if (!modem.ok(fmt(SET_APP_KEY_CMD, params.app_key), SET_APP_KEY_RSP,
-                Timeouts::SHORT_MS)) {
-    return false;
-  }
-
-  if (!modem.ok(SET_DATA_RATE_CMD, SET_DATA_RATE_RSP, Timeouts::SHORT_MS)) {
-    return false;
-  }
-
-  if (!modem.ok(SET_EU868_CMD, SET_EU868_RSP, Timeouts::SHORT_MS)) {
+  if (!std::ranges::all_of(setup_commands, [&modem, fmt](const E5Cmd &cmd) {
+        if (cmd.m_arg.empty()) {
+          return modem.ok(cmd.m_cmd, cmd.m_rsp, cmd.m_timeout);
+        }
+        return modem.ok(fmt(cmd.m_cmd, cmd.m_arg), cmd.m_rsp, cmd.m_timeout);
+      })) {
     return false;
   }
 
