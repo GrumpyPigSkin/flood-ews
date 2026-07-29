@@ -37,6 +37,7 @@ public:
    */
   void init() {
     m_config_service.init();
+    m_config_service.init();
     m_alert_handler.init();
     if (!m_jsn_driver.init()) {
       logging::err("Failed to start the sensor, aborting app.");
