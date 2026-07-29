@@ -22,6 +22,7 @@
 #include <optional>
 #include <print>
 #include <random>
+#include <ranges>
 #include <span>
 #include <stop_token>
 #include <string_view>
