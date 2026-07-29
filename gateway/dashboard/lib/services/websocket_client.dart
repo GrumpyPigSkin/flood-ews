@@ -92,7 +92,7 @@ class WebsocketClient {
 
   /// On a new message, parse the JSON and add it to our stream.
   void _onMessage(dynamic raw) {
-    if (raw! is String) return;
+    if (raw is! String) return;
     try {
       final j = jsonDecode(raw);
       if (j is Map<String, dynamic>) {
