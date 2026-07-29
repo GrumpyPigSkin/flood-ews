@@ -1,8 +1,11 @@
 #pragma once
 
 #include "common/sensor_reading.hpp"
-#include "zephyr/sys/time_units.h"
 #include <cstdint>
+
+#if defined(__ZEPHYR__)
+#include "zephyr/sys/time_units.h"
+#endif
 
 namespace edge::jsn {
 
@@ -82,7 +85,11 @@ calculate_reading(const bool is_valid, const std::uint16_t dist,
  * @return constexpr auto
  */
 [[nodiscard]] constexpr auto cyc_to_us_near32(const std::uint32_t value) {
+#if defined(__ZEPHYR__)
   return k_cyc_to_us_near32(value);
+#else
+  return value;
+#endif
 }
 
 } // namespace edge::jsn
