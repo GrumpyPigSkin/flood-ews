@@ -136,7 +136,7 @@ func main() {
 	go bridge.RunEgressFlusher(ctx, 5*time.Second)
 
 	mqttClient, err := bridge.ConnectMQTT(telemetry.MQTTOptions{
-		Broker:   env("MQTT_BROKER", "tcp://192.168.1.109:1883"),
+		Broker:   env("MQTT_BROKER", "tcp://127.0.0.1:1883"),
 		Username: env("MQTT_USERNAME", ""),
 		Password: env("MQTT_PASSWORD", ""),
 	})
