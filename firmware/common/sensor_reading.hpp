@@ -68,12 +68,18 @@ enum class IEC61850_DetailQual : std::uint8_t {
 template <>
 struct enable_bitmask_operators<IEC61850_DetailQual> : std::true_type {};
 
+/**
+ * @brief Internal to edge for just the water level and validity + qual.
+ */
 struct SensorReading {
   std::uint16_t m_water_level;
   IEC61850_Validity m_validity;
   IEC61850_DetailQual m_detail;
 };
 
+/**
+ * @brief The sensor reading that is sent across Thread.
+ */
 struct SensorReadingWire {
   std::uint64_t m_eui;
   std::uint64_t m_timestamp;
