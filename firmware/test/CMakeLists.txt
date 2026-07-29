@@ -68,3 +68,9 @@ add_executable(test_outlier_vote outlier_vote/test_outlier_vote.cpp)
 target_link_libraries(test_outlier_vote PRIVATE test_common GTest::gtest_main)
 add_test(NAME test_outlier_vote COMMAND test_outlier_vote)
 set_tests_properties(test_outlier_vote PROPERTIES LABELS "unit;smoke")
+
+# JSN tests.
+add_executable(test_jsn jsn/test_jsn.cpp)
+target_link_libraries(test_jsn PRIVATE test_common GTest::gtest_main)
+add_test(NAME test_jsn COMMAND test_jsn)
+set_tests_properties(test_jsn PROPERTIES LABELS "unit;smoke")
