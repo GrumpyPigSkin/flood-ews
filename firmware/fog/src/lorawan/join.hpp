@@ -79,6 +79,9 @@ constexpr std::string_view E5_DUTY_CYCLE_OFF_RSP = "+LW: DC, OFF, 0";
 constexpr std::string_view E5_JOIN_DUTY_CYCLE_OFF_CMD = "AT+LW=JDC, OFF\r\n";
 constexpr std::string_view E5_JOIN_DUTY_CYCLE_OFF_RSP = "+LW: JDC, OFF";
 
+constexpr std::string_view E5_DISABLE_AUTO_DATA_RATE_CMD = "AT+ADR=OFF\r\n";
+constexpr std::string_view E5_DISABLE_AUTO_DATA_RATE_RSP = "+ADR: OFF";
+
 constexpr std::string_view AT_PARAM_ERR = "AT_PARAM_ERROR";
 constexpr std::string_view AT_ERR = "AT_ERROR";
 /**
@@ -120,6 +123,11 @@ inline bool run_join(E5Modem &modem, const JoinParams &params,
       E5Cmd{SET_DEV_EUI_CMD, std::string_view{eui.data(), eui.size()},
             SET_DEV_EUI_RSP, Timeouts::SHORT_MS},
       E5Cmd{SET_APP_KEY_CMD, params.app_key, SET_APP_KEY_RSP,
+            Timeouts::SHORT_MS},
+      E5Cmd{SET_EU868_CMD, {}, SET_EU868_RSP, Timeouts::SHORT_MS},
+      E5Cmd{E5_DISABLE_AUTO_DATA_RATE_CMD,
+            {},
+            E5_DISABLE_AUTO_DATA_RATE_RSP,
             Timeouts::SHORT_MS},
       E5Cmd{SET_DATA_RATE_CMD, {}, SET_DATA_RATE_RSP, Timeouts::SHORT_MS},
 #ifdef ENABLE_FAULT_INJECTION
