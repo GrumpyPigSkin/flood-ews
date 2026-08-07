@@ -64,7 +64,7 @@ function decodeUplink(input) {
       water_level_mm: rdU16LE(b, off + 8),  // Bytes 8-9
       validity: VALIDITY[validityCode] || ('UNKNOWN_' + validityCode),
       validity_code: validityCode,  // Byte 10
-      outlier: (detail & 0x01) !== 0,
+      outlier: (detail & 0x10) !== 0,
       detail: detail,                   // Byte 11
       timestamp: rdU32LE(b, off + 12),  // Bytes 12-15
     });
