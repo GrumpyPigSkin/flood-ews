@@ -45,12 +45,29 @@ operator&(const E lhs, const E rhs) noexcept {
                         static_cast<underlying>(rhs));
 }
 
-/** @brief IEC 61850-7-3 Section 6.2 Quality — validity values */
+/** @brief IEC 61850-7-3 Section 6.2 Quality - validity values */
 enum class IEC61850_Validity : std::uint8_t {
   VALIDITY_GOOD = 0,         // no abnormal condition detected
   VALIDITY_INVALID = 1,      // abnormal condition, value shall not be used
   VALIDITY_QUESTIONABLE = 2, // abnormal behaviour but could still be valid
 };
+
+/**
+ * @brief To string overload for IEC61850_Validity.
+ * @param [in] val The validity
+ * @return constexpr const char*
+ */
+constexpr const char *to_string(const IEC61850_Validity val) {
+  switch (val) {
+  case IEC61850_Validity::VALIDITY_GOOD:
+    return "VALIDITY_GOOD";
+  case IEC61850_Validity::VALIDITY_INVALID:
+    return "VALIDITY_INVALID";
+  case IEC61850_Validity::VALIDITY_QUESTIONABLE:
+    return "VALIDITY_QUESTIONABLE";
+  }
+  return "Unkown";
+}
 
 /** @brief IEC 61850-7-3 Section 6.2.3 Detail quality flags (bitmask) */
 enum class IEC61850_DetailQual : std::uint8_t {
@@ -61,6 +78,30 @@ enum class IEC61850_DetailQual : std::uint8_t {
   DETAIL_OLD_DATA = 0x08,     // value not updated in expected time
   DETAIL_OUTLIER = 0x10,      // Outlier in BZT.
 };
+
+/**
+ * @brief To string overload for IEC61850_DetailQual.
+ * @param [in] val The validity
+ * @return constexpr const char*
+ */
+constexpr const char *to_string(const IEC61850_DetailQual det) {
+  switch (det) {
+
+  case IEC61850_DetailQual::DETAIL_NONE:
+    return "DETAIL_NONE";
+  case IEC61850_DetailQual::DETAIL_OVERFLOW:
+    return "DETAIL_OVERFLOW";
+  case IEC61850_DetailQual::DETAIL_OUT_OF_RANGE:
+    return "DETAIL_OUT_OF_RANGE";
+  case IEC61850_DetailQual::DETAIL_FAILURE:
+    return "DETAIL_FAILURE";
+  case IEC61850_DetailQual::DETAIL_OLD_DATA:
+    return "DETAIL_OLD_DATA";
+  case IEC61850_DetailQual::DETAIL_OUTLIER:
+    return "DETAIL_OUTLIER";
+  }
+  return "Unkown";
+}
 
 /**
  * @brief Enable bitwise operations on IEC61850_DetailQual.
