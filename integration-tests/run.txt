@@ -1,0 +1,9 @@
+sudo ./build/posix/src/posix/ot-daemon -v 'spinel+hdlc+uart:///dev/ttyACM0?uart-baudrate=1000000'
+sudo ./build/posix/src/posix/ot-ctl
+dataset networkkey 00112233445566778899AABBCCDDEEFF
+dataset channel 15
+dataset panid 0x1234
+dataset extpanid 1111111122222222
+dataset commit active
+ifconfig up
+thread start

@@ -1,0 +1,30 @@
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+# Select ALL rule categories or specific broad sets
+select = [
+    "ALL",  # Opts into EVERY rule set supported by Ruff
+]
+
+# Explicitly disable rules that conflict with formatting or are mutually exclusive
+ignore = [
+    "D203",   # Conflict with D211 (one-blank-line-before-class)
+    "D213",   # Conflict with D212 (multi-line-summary-second-line)
+    "COM812", # Conflicts with Ruff formatter
+    "ISC001", # Conflicts with Ruff formatter
+    "CPY001",
+]
+
+# Configure docstring style (Google style or NumPy style)
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+# Treat comments starting with # FIX, # TODO, etc., strictly if desired
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+
+[tool.ruff.lint.per-file-ignores]
+"*.py" = ["S101"]
+"test_*.py" = ["S101"]
