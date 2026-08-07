@@ -8,6 +8,7 @@
 #include <mutex>
 
 #ifdef ENABLE_FAULT_INJECTION
+#include "common/logging.hpp"
 #include "fault_injection/fault_injection.hpp"
 #endif
 
@@ -49,10 +50,15 @@ public:
 #ifdef ENABLE_FAULT_INJECTION
     const auto fault_message = m_fault_injection.get_fault();
     if (fault_message.m_active) {
-      to_wire.m_water_level_mm = fault_message.m_bad_reading.m_water_level;
-      to_wire.m_validity = fault_message.m_bad_reading.m_validity;
-      to_wire.m_detail = fault_message.m_bad_reading.m_detail;
-      to_wire.m_seq = fault_message.m_bad_reading.m_seq;
+      const auto lvl = fault_message.m_bad_reading.m_water_level_mm;
+      const auto val = fault_message.m_bad_reading.m_validity;
+      const auto det = fault_message.m_bad_reading.m_detail;
+      logging::inf(
+          "Injecting fault: .m_water_level_mm={} .m_validity={} .m_detail={}",
+          lvl, common::to_string(val), common::to_string(det));
+      to_wire.m_water_level_mm = lvl;
+      to_wire.m_validity = val;
+      to_wire.m_detail = det;
     }
 #endif
 

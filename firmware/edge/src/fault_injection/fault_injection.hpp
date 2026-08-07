@@ -19,7 +19,7 @@ struct FaultMessage {
 };
 
 /** @brief URI for the fault endpoint. */
-constexpr auto *FAULT_URI = "fault";
+constexpr auto *FAULT_URI = "edge_fault";
 
 /**
  * @brief Enable testing by injecting malicious values into the sensor. When
@@ -61,8 +61,14 @@ private:
     m_message = msg;
   }
 
+  /**
+   * @brief Trampoline function to handle a fault injection request.
+   * @param [in] ctx
+   * @param [in] msg
+   * @param [in] info
+   */
   static void fault_request_handler(void *ctx, otMessage *msg,
-                                    otMessageInfo const * /*i*/) {
+                                    otMessageInfo const *info) {
     auto &self = *static_cast<FaultInjection *>(ctx);
     FaultMessage message{};
 
@@ -75,6 +81,9 @@ private:
 
     // Submit the reading.
     self.on_message(message);
+
+    // Send a response to confirm to the testing harness we got the message.
+    coap_resp_send(msg, info, nullptr, 0);
   }
 
   /**
