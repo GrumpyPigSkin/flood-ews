@@ -122,13 +122,14 @@ inline bool run_join(E5Modem &modem, const JoinParams &params,
       E5Cmd{SET_APP_KEY_CMD, params.app_key, SET_APP_KEY_RSP,
             Timeouts::SHORT_MS},
       E5Cmd{SET_DATA_RATE_CMD, {}, SET_DATA_RATE_RSP, Timeouts::SHORT_MS},
-      E5Cmd{SET_EU868_CMD, {}, SET_EU868_RSP, Timeouts::SHORT_MS},
+#ifdef ENABLE_FAULT_INJECTION
       E5Cmd{
           E5_DUTY_CYCLE_OFF_CMD, {}, E5_DUTY_CYCLE_OFF_RSP, Timeouts::SHORT_MS},
       E5Cmd{E5_JOIN_DUTY_CYCLE_OFF_CMD,
             {},
             E5_JOIN_DUTY_CYCLE_OFF_RSP,
             Timeouts::SHORT_MS},
+#endif
   };
 
   if (!std::ranges::all_of(setup_commands, [&modem, fmt](const E5Cmd &cmd) {

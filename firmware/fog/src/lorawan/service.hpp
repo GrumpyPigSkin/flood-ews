@@ -11,6 +11,10 @@
 #include <cstdint>
 #include <zephyr/kernel.h>
 
+#ifdef ENABLE_FAULT_INJECTION
+#include "fault_injection/fault_injection.hpp"
+#endif
+
 namespace fog::lora {
 
 inline constexpr std::size_t TX_QUEUE_DEPTH = 8;
@@ -62,6 +66,10 @@ public:
     k_thread_create(&m_thread_data, m_stack, K_THREAD_STACK_SIZEOF(m_stack),
                     &LoraWanService::thread_entry, this, nullptr, nullptr,
                     K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_NO_WAIT);
+
+#ifdef ENABLE_FAULT_INJECTION
+    m_fault_injection.init();
+#endif
   }
 
   /**
@@ -208,6 +216,17 @@ private:
         handle_downlink({dl_buf.data(), dl_len});
       }
 
+#ifdef ENABLE_FAULT_INJECTION
+      // Pause between sending the message and telling egress the message has
+      // been successfully sent for testing.
+      const auto fault = m_fault_injection.get_fault();
+      if (fault.m_pause_egress) {
+        m_fault_injection.clear_fault();
+        LOG_INF("FAULT:PAUSED_IN_WINDOW");
+        k_msleep(fault.m_sleep_time_ms);
+      }
+#endif
+
       m_on_complete(payload.m_sequence, payload.m_raft_log_index);
       return true;
     }
@@ -267,6 +286,10 @@ private:
   /** @brief Callback for when a message has been successfully sent. */
   std::function<void(std::uint32_t seq, std::uint64_t batch_index)>
       m_on_complete;
+
+#ifdef ENABLE_FAULT_INJECTION
+  fog::fault::FaultInjection m_fault_injection;
+#endif
 };
 
 } // namespace fog::lora

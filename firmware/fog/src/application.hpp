@@ -1,5 +1,7 @@
 #pragma once
 
+#define ENABLE_FAULT_INJECTION 1
+
 #include "common/alert.hpp"
 #include "common/logging.hpp"
 #include "common/ot_utils.hpp"
@@ -117,9 +119,18 @@ private:
       [this](const raft::State old_state, const raft::State new_state) {
         logging::inf("State changed from: {} to: {}", to_string(old_state),
                      to_string(new_state));
+
         if (new_state == raft::State::LEADER) {
+#ifdef ENABLE_FAULT_INJECTION
+          logging::inf("RAFT:BECAME_LEADER");
+#endif
           m_egress_coordinator.on_became_leader();
         }
+#ifdef ENABLE_FAULT_INJECTION
+        else if (new_state == raft::State::FOLLOWER) {
+          logging::inf("RAFT:BECAME_FOLLOWER");
+        }
+#endif
       },
       common::get_eui64_as_uint64()};
 
