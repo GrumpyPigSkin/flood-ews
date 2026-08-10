@@ -8,6 +8,7 @@
 //
 // Supabase needs a DSN and webhook might need an auth token.
 
+import 'package:dashboard/model/severity.dart';
 import 'package:dashboard/model/validator_issue.dart';
 import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
@@ -24,24 +25,6 @@ enum EgressType {
 
   static EgressType? fromWire(String? s) =>
       values.firstWhereOrNull((e) => e.wire == s);
-}
-
-/// Normalised severity, matching advisory.Severity's integer ordering on the
-/// Go side (0=unknown ... 4=critical). MinSeverity on a target means "only
-/// forward events at or above this level".
-enum Severity {
-  unknown(0, 'Unknown'),
-  info(1, 'Info'),
-  watch(2, 'Watch'),
-  warning(3, 'Warning'),
-  critical(4, 'Critical');
-
-  const Severity(this.level, this.label);
-  final int level;
-  final String label;
-
-  static Severity fromLevel(int n) =>
-      values.firstWhereOrNull((s) => s.level == n) ?? Severity.unknown;
 }
 
 @immutable
@@ -75,7 +58,7 @@ class EgressTarget {
   });
 
   /// Get the severity level.
-  Severity get minSeverityLevel => Severity.fromLevel(minSeverity);
+  Severity get minSeverityLevel => Severity.fromWire(minSeverity);
 
   /// Get an empty severity.
   factory EgressTarget.empty() => const EgressTarget(

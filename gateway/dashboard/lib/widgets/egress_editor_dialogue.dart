@@ -1,10 +1,12 @@
 // Add/edit an egress target.
 
 import 'package:dashboard/model/egress_target.dart';
+import 'package:dashboard/model/severity.dart';
 import 'package:dashboard/widgets/console_field_text.dart';
 import 'package:dashboard/widgets/dialogue_actions.dart';
 import 'package:dashboard/widgets/dialogue_header.dart';
 import 'package:dashboard/widgets/dialogue_section_label.dart';
+import 'package:dashboard/widgets/severity_picker.dart';
 import 'package:flutter/material.dart';
 
 /// Result of the editor. The target plus optional secrets, DSN and Auth Token.
@@ -175,7 +177,24 @@ class _EgressEditorDialogueState extends State<EgressEditorDialogue> {
                     _typeSpecificFields(theme),
                     const SizedBox(height: 16),
                     DialogueSectionLabel('Forwarding threshold'),
-                    _severityPicker(theme),
+                    SeverityPicker(
+                      selectedSeverity: Severity.values.firstWhere(
+                        (s) => s.wire == _minSeverity,
+                      ),
+                      onSelected: (severity) {
+                        setState(() => _minSeverity = severity.wire);
+                      },
+                      headerText: _type == EgressType.webhook
+                          ? 'Only events at or above this severity are forwarded.'
+                          : 'Only events at or above this severity are written to the read-model.',
+                      headerStyle: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      chipAlpha: 0.25,
+                      highlightActiveBorder: true,
+                      padding: EdgeInsets.zero,
+                    ),
                   ],
                 ),
               ),
@@ -307,47 +326,6 @@ class _EgressEditorDialogueState extends State<EgressEditorDialogue> {
       ),
     );
   }
-
-  Widget _severityPicker(ThemeData theme) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Text(
-        _type == EgressType.webhook
-            ? 'Only events at or above this severity are forwarded.'
-            : 'Only events at or above this severity are written to the '
-                  'read-model.',
-        style: TextStyle(
-          fontSize: 12,
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-      ),
-      const SizedBox(height: 10),
-      Wrap(
-        spacing: 8,
-        children: [
-          for (final s in Severity.values)
-            ChoiceChip(
-              label: Text(s.label),
-              selected: _minSeverity == s.level,
-              onSelected: (_) => setState(() => _minSeverity = s.level),
-              backgroundColor: theme.colorScheme.surfaceContainerHigh,
-              selectedColor: theme.colorScheme.primary.withValues(alpha: 0.25),
-              side: BorderSide(
-                color: _minSeverity == s.level
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.outlineVariant,
-              ),
-              labelStyle: TextStyle(
-                fontSize: 12,
-                color: _minSeverity == s.level
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-        ],
-      ),
-    ],
-  );
 }
 
 /// Helper widget for showing data for either Supabase or Webhook.
