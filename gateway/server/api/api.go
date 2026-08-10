@@ -131,6 +131,7 @@ func (s *Server) Routes() http.Handler {
 		cfg.Handle("PUT /v1/config/sources", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleUpsertSource)))))
 		cfg.Handle("DELETE /v1/config/sources/{id}", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleDeleteSource)))))
 		cfg.Handle("PUT /v1/config/targets", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleUpsertTarget)))))
+		cfg.Handle("PUT /v1/config/targets/{id}", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleDeleteTarget)))))
 		cfg.Handle("PUT /v1/config/actuators", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleUpsertActuator)))))
 		cfg.Handle("DELETE /v1/config/actuators/{id}", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleDeleteActuator)))))
 		cfg.Handle("PUT /v1/config/rules", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleUpsertRule)))))
@@ -254,6 +255,19 @@ func (s *Server) handleDeleteSource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resync the sources asynchronously.
+	bgCtx := context.WithoutCancel(r.Context())
+	go s.resyncPoller(bgCtx)
+	writeJSON(w, http.StatusOK, map[string]string{"status": "deleted", "id": id})
+}
+
+func (s *Server) handleDeleteTarget(w http.ResponseWriter, r *http.Request) {
+
+	id := r.PathValue("id")
+	if err := s.store.DeleteTarget(r.Context(), id, s.actorFrom(r)); err != nil {
+		s.writeErr(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	bgCtx := context.WithoutCancel(r.Context())
 	go s.resyncPoller(bgCtx)
 	writeJSON(w, http.StatusOK, map[string]string{"status": "deleted", "id": id})
