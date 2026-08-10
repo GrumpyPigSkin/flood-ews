@@ -4,6 +4,7 @@ import 'package:dashboard/screens/actuator_screen.dart';
 import 'package:dashboard/screens/dashboard_screen.dart';
 import 'package:dashboard/screens/egress_screen.dart';
 import 'package:dashboard/screens/external_api_screen.dart';
+import 'package:dashboard/screens/policy_screen.dart';
 import 'package:dashboard/screens/sensor_detail_screen.dart';
 import 'package:dashboard/services/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ class _OperatorConsoleState extends State<OperatorConsole> {
     'Dashboard',
     'Sensors',
     'Actuators',
+    'Policies',
     'External APIs',
     'Egress',
   ];
@@ -39,6 +41,7 @@ class _OperatorConsoleState extends State<OperatorConsole> {
     DashboardScreen(),
     SensorDetailScreen(),
     ActuatorsScreen(),
+    PolicyScreen(),
     ExternalApiScreen(),
     EgressScreen(),
   ];
@@ -100,6 +103,11 @@ class _OperatorConsoleState extends State<OperatorConsole> {
                 NavigationRailDestination(
                   icon: Icon(Icons.settings_input_component_outlined),
                   selectedIcon: Icon(Icons.settings_input_component),
+                  label: Text('Actuators'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.rule_outlined),
+                  selectedIcon: Icon(Icons.rule),
                   label: Text('Actuators'),
                 ),
                 NavigationRailDestination(
