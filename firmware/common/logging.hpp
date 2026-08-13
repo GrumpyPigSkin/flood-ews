@@ -6,6 +6,7 @@
 #include "zephyr/logging/log_core.h"
 #include <fmt/compile.h>
 #include <fmt/core.h>
+#include <fmt/ranges.h>
 #include <stdio.h>
 #include <zephyr/logging/log.h>
 
