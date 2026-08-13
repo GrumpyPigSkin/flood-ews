@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
@@ -127,7 +128,15 @@ struct SensorReadingWire {
   std::uint16_t m_water_level_mm;
   IEC61850_Validity m_validity;
   IEC61850_DetailQual m_detail;
-  std::uint8_t m_seq;
+  std::uint32_t m_seq;
+};
+
+/**
+ * @brief The signed sensor payload for identity validation.
+ */
+struct SensorReadingSigned {
+  SensorReadingWire m_reading;
+  std::array<std::uint8_t, 64> m_signature;
 };
 
 /** @brief The CoAP URI for sensor data. */
