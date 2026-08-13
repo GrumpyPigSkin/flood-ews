@@ -1,5 +1,4 @@
 #include "coap.hpp"
-#include "common/coap_utils.h"
 #include "common/mutex.hpp"
 #include "common/overload.hpp"
 #include "openthread.h"
@@ -17,20 +16,6 @@ constexpr auto *RAFT_APPEND_URI = "raft/a";
 constexpr auto *RAFT_APPEND_RESPONSE_URI = "raft/ar";
 constexpr auto *RAFT_SNAP_URI = "raft/s";
 constexpr auto *RAFT_SNAP_RESP_URI = "raft/sr";
-
-/**
- * @brief Generic PUT to send T over Thread to other nodes.
- * @param [in] addr
- * @param [in] uri
- * @param [in] payload
- */
-template <typename T>
-void coap_put(const otIp6Address &addr, const char *uri, const T &payload) {
-
-  coap_put_req_send({addr, false}, uri,
-                    reinterpret_cast<const uint8_t *>(&payload), sizeof(T),
-                    nullptr, nullptr);
-}
 
 /**
  * @brief Handlers for each URI endpoint.
