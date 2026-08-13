@@ -5,6 +5,7 @@
 #include "common/logging.hpp"
 #include "common/message_queue.hpp"
 #include "common/periodic_task.hpp"
+#include "common/security/trusted_device_store.hpp"
 #include "common/work_task.hpp"
 #include "fs/persist.hpp"
 #include "raft_types.hpp"
@@ -41,9 +42,10 @@ public:
    * @param [in] cb Called when apply is called.
    * @param [in] self_id This nodes ID
    */
-  Engine(OnApplyCallbackT oacb, OnStateChangeCallbackT sccb, NodeId self_id)
+  Engine(OnApplyCallbackT oacb, OnStateChangeCallbackT sccb, NodeId self_id,
+         common::TrustedDeviceStore &tds)
       : m_coap([this](const auto &msg) { return receive(msg); },
-               m_network_service),
+               m_network_service, tds),
         m_server(self_id, EXPECTED_EUIS, make_cbs(std::move(sccb))),
         m_tick([this] { m_server.periodic(); }),
         m_message_pending_work([this] { drain(); }),

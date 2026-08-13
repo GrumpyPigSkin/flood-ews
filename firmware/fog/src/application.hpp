@@ -5,6 +5,8 @@
 #include "common/alert.hpp"
 #include "common/logging.hpp"
 #include "common/ot_utils.hpp"
+#include "common/security/trusted_device_store.hpp"
+#include "common/security/trusted_devices.hpp"
 #include "common/sensor_reading.hpp"
 #include "egress/egress_coordinator.hpp"
 #include "lorawan/service.hpp"
@@ -14,6 +16,7 @@
 #include "outlier_vote/service.hpp"
 #include "raft/engine.hpp"
 #include "raft/raft_types.hpp"
+#include "secrets/provisioned_keys.hpp"
 #include "sensor/service.hpp"
 #include "utils/time_sync.h"
 #include <cassert>
@@ -22,11 +25,20 @@ namespace fog {
 
 class Application {
 
-  static constexpr std::string_view LORAWAN_APP_KEY =
-      "19305880A5D620295373F6BC388F4AA1";
-
 public:
   void init() {
+    if (const auto err = m_trusted_device_store.init(IDENTITY_KEY_ID);
+        err != PSA_SUCCESS) {
+      logging::err("Failed to initialise trust store.");
+      return;
+    }
+
+    if (const auto err = m_trusted_device_store.trust_peers(TRUSTED_DEVICES);
+        err != PSA_SUCCESS) {
+      logging::err("Failed to initialise trust store.");
+      return;
+    }
+
     m_uart.init();
     m_sensor_service.init();
     m_raft_engine.init();
@@ -132,7 +144,7 @@ private:
         }
 #endif
       },
-      common::get_eui64_as_uint64()};
+      common::get_eui64_as_uint64(), m_trusted_device_store};
 
   vote::VoteService m_vote_service{
       [this](const batch::SensorBatch &batch) {
@@ -148,9 +160,11 @@ private:
       }};
 
   sensor::Service m_sensor_service{
-      common::SENSOR_URI, [this](const common::SensorReadingWire &reading) {
+      common::SENSOR_URI,
+      [this](const common::SensorReadingWire &reading) {
         m_vote_service.accumulate(reading);
-      }};
+      },
+      m_trusted_device_store};
 
   egress::EgressCoordinator<raft::Server<>::EntryT, batch::SensorBatch>
       m_egress_coordinator{make_egress_hooks()};
@@ -170,6 +184,8 @@ private:
       }
     }
   }};
+
+  common::TrustedDeviceStore m_trusted_device_store;
 
   bool m_alert_active;
 };

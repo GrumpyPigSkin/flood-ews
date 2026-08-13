@@ -1,6 +1,7 @@
 #include "application.hpp"
 #include "common/coap_utils.h"
 #include "common/logging.hpp"
+#include "psa/crypto.h"
 #include <optional>
 
 namespace {
@@ -61,7 +62,7 @@ int main(void) {
     return ret;
   }
 
-  auto on_apply = [](auto) { logging::inf("Apply called."); };
+  psa_crypto_init();
 
   app.emplace();
 
