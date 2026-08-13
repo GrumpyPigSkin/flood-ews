@@ -1,7 +1,12 @@
+#define ENABLE_FAULT_INJECTION 1
+
 #include "common/coap_utils.h"
 #include "common/logging.hpp"
+#include "common/provisioned_key_setup.hpp"
 #include "edge.hpp"
+#include "fog/build/fog/tfm/api_ns/interface/include/psa/crypto.h"
 #include "openthread.h"
+#include <openthread/error.h>
 #include <openthread/link.h>
 #include <openthread/thread.h>
 #include <optional>
@@ -11,7 +16,7 @@ namespace {
 /** @brief The main application, delay construction. */
 std::optional<edge::Edge> App;
 
-auto *get_app() { return App.has_value() ? &*App : nullptr; }
+auto *get_app() { return App.has_value() ? &App.value() : nullptr; }
 
 /** @brief Flag to handle reattaching to openthread network. */
 bool s_initialised = false;
@@ -106,6 +111,8 @@ int main(void) {
     logging::err("Failed to initialise CSL");
     return err;
   }
+
+  psa_crypto_init();
 
   App.emplace();
 

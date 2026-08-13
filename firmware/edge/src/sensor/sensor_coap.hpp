@@ -1,14 +1,15 @@
 #pragma once
 
+#include "common/coap_utils.h"
+#include "common/logging.hpp"
 #include "common/mutex.hpp"
-#include <common/coap_utils.h>
-#include <common/ot_utils.hpp>
-#include <common/sensor_reading.hpp>
+#include "common/ot_utils.hpp"
+#include "common/security/trusted_device_store.hpp"
+#include "common/sensor_reading.hpp"
 #include <cstdint>
 #include <mutex>
 
 #ifdef ENABLE_FAULT_INJECTION
-#include "common/logging.hpp"
 #include "fault_injection/fault_injection.hpp"
 #endif
 
@@ -32,6 +33,16 @@ public:
 #ifdef ENABLE_FAULT_INJECTION
     m_fault_injection.init();
 #endif
+    if (const auto err = m_trusted_devices.init(IDENTITY_KEY_ID);
+        err != PSA_SUCCESS) {
+      logging::err("Failed to setup signature store");
+    }
+
+    const auto pub_key = m_trusted_devices.export_pubkey();
+    if (pub_key.has_value()) {
+      logging::inf("PUB KEY: {::#x}, .EUI = {:#x}", pub_key.value(),
+                   common::get_eui64_as_uint64());
+    }
   }
 
   /**
@@ -62,6 +73,20 @@ public:
     }
 #endif
 
+    // Sign the reding before we send it.
+    auto sig = m_trusted_devices.sign(
+        std::span(reinterpret_cast<std::uint8_t *>(&to_wire), sizeof(to_wire)));
+
+    if (!sig.has_value()) {
+      logging::err("Failed to sign reading");
+      return -1;
+    }
+
+    logging::inf("Signed reading: {}", sig.value());
+
+    const common::SensorReadingSigned signed_reading{
+        .m_reading = to_wire, .m_signature = sig.value()};
+
     // Increment the sequence id.
     m_seq_id++;
 
@@ -71,8 +96,8 @@ public:
 
     std::lock_guard guard{m_otmx};
     return coap_put_req_send(addr, m_uri_path,
-                             reinterpret_cast<const uint8_t *>(&to_wire),
-                             sizeof(to_wire), nullptr, nullptr);
+                             reinterpret_cast<const uint8_t *>(&signed_reading),
+                             sizeof(signed_reading), nullptr, nullptr);
   }
 
 private:
@@ -80,7 +105,7 @@ private:
   std::uint64_t m_eui{};
 
   /** @brief The sequence for this message. */
-  std::uint8_t m_seq_id{};
+  std::uint32_t m_seq_id{1};
 
   /** @brief The address to send to. */
   const char *m_address{nullptr};
@@ -91,6 +116,9 @@ private:
 #ifdef ENABLE_FAULT_INJECTION
   fault::FaultInjection m_fault_injection;
 #endif
+
+  /** @brief Used for signing only. */
+  common::TrustedDeviceStore m_trusted_devices;
 
   /** @brief Lock for openthread API access. */
   mutable common::openthread_mutex m_otmx;
