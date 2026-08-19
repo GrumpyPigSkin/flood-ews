@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common/expected.hpp"
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <span>
 #include <string_view>
 #include <variant>
@@ -94,7 +94,7 @@ enum class Error : std::uint8_t {
  * Error.
  * @tparam T
  */
-template <typename T> using Result = tl::expected<T, Error>;
+template <typename T> using Result = std::expected<T, Error>;
 
 /**
  * @brief The current entry type, heartbeats are NOOPS.

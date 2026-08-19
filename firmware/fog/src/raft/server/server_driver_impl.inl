@@ -129,19 +129,19 @@ Server<Cfg>::submit(const EntryType type,
                     const std::span<const std::byte> data) noexcept {
 
   if (!m_running) {
-    return tl::unexpected(Error::SHUTDOWN);
+    return std::unexpected(Error::SHUTDOWN);
   }
 
   if (m_state != State::LEADER) {
-    return tl::unexpected(Error::NOT_LEADER);
+    return std::unexpected(Error::NOT_LEADER);
   }
 
   if (data.size() > Cfg::MAX_ENTRY_DATA) {
-    return tl::unexpected(Error::BAD_ARG);
+    return std::unexpected(Error::BAD_ARG);
   }
 
   if (m_log.full()) {
-    return tl::unexpected(Error::LOG_FULL);
+    return std::unexpected(Error::LOG_FULL);
   }
 
   EntryT entry{
@@ -156,7 +156,7 @@ Server<Cfg>::submit(const EntryType type,
   }
 
   if (!ok(m_log.push(entry))) {
-    return tl::unexpected(Error::LOG_FULL);
+    return std::unexpected(Error::LOG_FULL);
   }
 
   detail::call_if(m_cbs.m_persist_log_append, entry);
