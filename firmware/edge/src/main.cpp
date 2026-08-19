@@ -2,7 +2,6 @@
 
 #include "common/coap_utils.h"
 #include "common/logging.hpp"
-#include "common/provisioned_key_setup.hpp"
 #include "edge.hpp"
 #include "fog/build/fog/tfm/api_ns/interface/include/psa/crypto.h"
 #include "openthread.h"
