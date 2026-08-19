@@ -6,13 +6,17 @@
 #include "psa/crypto_struct.h"
 #include "psa/crypto_types.h"
 #include "psa/crypto_values.h"
-#include "tfm_crypto_defs.h"
 #include <array>
 #include <cstdint>
 #include <cstring>
 #include <expected>
 #include <mutex>
 #include <span>
+#include <zephyr/drivers/hwinfo.h>
+
+#ifdef SECURE_SIGN
+#include "tfm_crypto_defs.h"
+#endif
 
 #ifndef IDENTITY_KEY_ID
 #define IDENTITY_KEY_ID (PSA_KEY_ID_USER_MIN + 1)
@@ -277,9 +281,22 @@ private:
       return std::unexpected(status);
     }
 
+#ifdef SECURE_SIGN
     // Pass the hardware built-in unique key (HUK) as secret input.
     status = psa_key_derivation_input_key(&op, PSA_KEY_DERIVATION_INPUT_SECRET,
                                           TFM_BUILTIN_KEY_ID_HUK);
+#else
+    // Use the hardware key with is persistent between mass erase.
+    std::array<std::uint8_t, 16> hw_id{};
+    const ssize_t hw_id_len = hwinfo_get_device_id(hw_id.data(), hw_id.size());
+    if (hw_id_len < 0) {
+      return std::unexpected(PSA_ERROR_HARDWARE_FAILURE);
+    }
+
+    status = psa_key_derivation_input_bytes(
+        &op, PSA_KEY_DERIVATION_INPUT_SECRET, hw_id.data(),
+        static_cast<std::size_t>(hw_id_len));
+#endif
     if (status != PSA_SUCCESS) {
       psa_key_derivation_abort(&op);
       return std::unexpected(status);
