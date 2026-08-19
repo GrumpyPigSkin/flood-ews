@@ -18,6 +18,14 @@ config OT_COAP_SAMPLE_SW
 	bool "Enable switch support"
 	default y
 
+config ENABLE_FAULT_INJECTION
+	bool "Enable integration test injection"
+	default y
+
+config SECURE_SIGN
+	bool "Enable secure signing with HUK"
+	default n
+
 endmenu
 
 source "Kconfig.zephyr"
