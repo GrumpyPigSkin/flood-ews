@@ -49,7 +49,7 @@ void Server<Cfg>::maybe_step_down(const Term term) noexcept {
 template <typename Cfg>
 void Server<Cfg>::become_follower(const Term term,
                                   const NodeId leader) noexcept {
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
   logging::inf("RAFT:BECAME_FOLLOWER");
 #endif
   // Reset election state.
@@ -85,7 +85,7 @@ void Server<Cfg>::send_request_vote(const Peer &peer) noexcept {
 
 template <typename Cfg> void Server<Cfg>::become_candidate() noexcept {
   // (F2 Candidates) On conversion to candidate, start an election.
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
   logging::inf("RAFT:BECAME_CANDIDATE");
 #endif
   set_state(State::CANDIDATE);
@@ -125,7 +125,7 @@ template <typename Cfg> void Server<Cfg>::become_leader() noexcept {
 
   const Index last = m_log.last_index();
 
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
   logging::inf("RAFT:BECAME_LEADER");
 #endif
   set_state(State::LEADER);

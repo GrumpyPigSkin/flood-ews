@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <zephyr/kernel.h>
 
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
 #include "fault_injection/fault_injection.hpp"
 #endif
 
@@ -67,7 +67,7 @@ public:
                     &LoraWanService::thread_entry, this, nullptr, nullptr,
                     K_LOWEST_APPLICATION_THREAD_PRIO, 0, K_NO_WAIT);
 
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
     m_fault_injection.init();
 #endif
   }
@@ -216,7 +216,7 @@ private:
         handle_downlink({dl_buf.data(), dl_len});
       }
 
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
       // Pause between sending the message and telling egress the message has
       // been successfully sent for testing.
       const auto fault = m_fault_injection.get_fault();
@@ -287,7 +287,7 @@ private:
   std::function<void(std::uint32_t seq, std::uint64_t batch_index)>
       m_on_complete;
 
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
   fog::fault::FaultInjection m_fault_injection;
 #endif
 };

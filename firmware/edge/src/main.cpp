@@ -1,9 +1,6 @@
-#define ENABLE_FAULT_INJECTION 1
-
 #include "common/coap_utils.h"
 #include "common/logging.hpp"
 #include "edge.hpp"
-#include "fog/build/fog/tfm/api_ns/interface/include/psa/crypto.h"
 #include "openthread.h"
 #include <openthread/error.h>
 #include <openthread/link.h>

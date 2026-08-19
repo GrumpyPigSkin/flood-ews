@@ -69,7 +69,7 @@ public:
 
   /** @brief Constexpr default values. */
 
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
   static constexpr Field SLEEP_S{1, 3600, 60};
 #else
   static constexpr Field SLEEP_S{1, 3600, 300};

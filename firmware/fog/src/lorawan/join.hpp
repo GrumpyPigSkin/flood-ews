@@ -130,7 +130,7 @@ inline bool run_join(E5Modem &modem, const JoinParams &params,
             E5_DISABLE_AUTO_DATA_RATE_RSP,
             Timeouts::SHORT_MS},
       E5Cmd{SET_DATA_RATE_CMD, {}, SET_DATA_RATE_RSP, Timeouts::SHORT_MS},
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
       E5Cmd{
           E5_DUTY_CYCLE_OFF_CMD, {}, E5_DUTY_CYCLE_OFF_RSP, Timeouts::SHORT_MS},
       E5Cmd{E5_JOIN_DUTY_CYCLE_OFF_CMD,

@@ -19,7 +19,7 @@ using Eui = std::uint64_t;
 struct Config {
   std::uint16_t m_tolerance_mm = 200;        // |reading - median| outlier bound
   std::uint16_t m_alert_threshold_mm = 1500; // good reading above this -> alert
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
   std::uint32_t m_collection_window_ms =
       60000; // Time to wait before snapshotting samples and voting.
 #else

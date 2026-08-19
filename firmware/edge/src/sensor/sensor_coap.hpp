@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <mutex>
 
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
 #include "fault_injection/fault_injection.hpp"
 #endif
 
@@ -30,7 +30,7 @@ public:
         m_uri_path{uri_path} {}
 
   void init() {
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
     m_fault_injection.init();
 #endif
     if (const auto err = m_trusted_devices.init(m_eui); err != PSA_SUCCESS) {
@@ -56,7 +56,7 @@ public:
                                       .m_detail = reading.m_detail,
                                       .m_seq = m_seq_id};
 
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
     const auto fault_message = m_fault_injection.get_fault();
     if (fault_message.m_active) {
       const auto lvl = fault_message.m_bad_reading.m_water_level_mm;
@@ -65,7 +65,7 @@ public:
       const auto seq = fault_message.m_bad_reading.m_seq;
       logging::inf("Injecting fault: .m_water_level_mm={} .m_validity={} "
                    ".m_detail={}, .m_seq={}",
-                   lvl, common::to_string(val), common::to_string(det), m_seq);
+                   lvl, common::to_string(val), common::to_string(det), seq);
       to_wire.m_water_level_mm = lvl;
       to_wire.m_validity = val;
       to_wire.m_detail = det;
@@ -85,7 +85,15 @@ public:
     logging::inf("Signed reading: {}", sig.value());
 
     const common::SensorReadingSigned signed_reading{
-        .m_reading = to_wire, .m_signature = sig.value()};
+        .m_reading = to_wire,
+        .m_signature =
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
+            // Conditionally ruin the hash.
+        (fault_message.m_active && fault_message.m_ruin_hash)
+            ? std::array<std::uint8_t, 64>{}
+            :
+#endif
+            sig.value()};
 
     // Increment the sequence id.
     m_seq_id++;
@@ -113,7 +121,7 @@ private:
   /** @brief The uri to send to. */
   const char *m_uri_path{nullptr};
 
-#ifdef ENABLE_FAULT_INJECTION
+#ifdef CONFIG_ENABLE_FAULT_INJECTION
   fault::FaultInjection m_fault_injection;
 #endif
 

@@ -16,6 +16,7 @@ namespace edge::fault {
 struct FaultMessage {
   common::SensorReadingWire m_bad_reading;
   bool m_active;
+  bool m_ruin_hash;
 };
 
 /** @brief URI for the fault endpoint. */
