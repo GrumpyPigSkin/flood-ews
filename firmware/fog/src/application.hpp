@@ -27,8 +27,8 @@ class Application {
 
 public:
   void init() {
-    if (const auto err = m_trusted_device_store.init(IDENTITY_KEY_ID);
-        err != PSA_SUCCESS) {
+    const auto eui = common::get_eui64_as_uint64();
+    if (const auto err = m_trusted_device_store.init(eui); err != PSA_SUCCESS) {
       logging::err("Failed to initialise trust store.");
       return;
     }
@@ -37,6 +37,12 @@ public:
         err != PSA_SUCCESS) {
       logging::err("Failed to initialise trust store.");
       return;
+    }
+
+    const auto pub_key = m_trusted_device_store.export_pubkey();
+    if (pub_key.has_value()) {
+      logging::inf(".eui={:#x}, .pub_key={::#x}", common::get_eui64_as_uint64(),
+                   pub_key.value());
     }
 
     m_uart.init();

@@ -33,15 +33,13 @@ public:
 #ifdef ENABLE_FAULT_INJECTION
     m_fault_injection.init();
 #endif
-    if (const auto err = m_trusted_devices.init(IDENTITY_KEY_ID);
-        err != PSA_SUCCESS) {
+    if (const auto err = m_trusted_devices.init(m_eui); err != PSA_SUCCESS) {
       logging::err("Failed to setup signature store");
     }
 
     const auto pub_key = m_trusted_devices.export_pubkey();
     if (pub_key.has_value()) {
-      logging::inf("PUB KEY: {::#x}, .EUI = {:#x}", pub_key.value(),
-                   common::get_eui64_as_uint64());
+      logging::inf(".eui={:#x}, .pub_key={::#x}", m_eui, pub_key.value());
     }
   }
 
@@ -64,12 +62,14 @@ public:
       const auto lvl = fault_message.m_bad_reading.m_water_level_mm;
       const auto val = fault_message.m_bad_reading.m_validity;
       const auto det = fault_message.m_bad_reading.m_detail;
-      logging::inf(
-          "Injecting fault: .m_water_level_mm={} .m_validity={} .m_detail={}",
-          lvl, common::to_string(val), common::to_string(det));
+      const auto seq = fault_message.m_bad_reading.m_seq;
+      logging::inf("Injecting fault: .m_water_level_mm={} .m_validity={} "
+                   ".m_detail={}, .m_seq={}",
+                   lvl, common::to_string(val), common::to_string(det), m_seq);
       to_wire.m_water_level_mm = lvl;
       to_wire.m_validity = val;
       to_wire.m_detail = det;
+      to_wire.m_seq = seq != 0 ? seq : to_wire.m_seq;
     }
 #endif
 

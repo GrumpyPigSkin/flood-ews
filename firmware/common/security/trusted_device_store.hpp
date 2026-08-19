@@ -1,15 +1,16 @@
 #pragma once
 
-#include "common/expected.hpp"
 #include "common/mutex.hpp"
 #include "common/security/trusted_devices.hpp"
 #include "psa/crypto.h"
 #include "psa/crypto_struct.h"
 #include "psa/crypto_types.h"
 #include "psa/crypto_values.h"
+#include "tfm_crypto_defs.h"
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <expected>
 #include <mutex>
 #include <span>
 
@@ -31,42 +32,46 @@ public:
   static constexpr std::size_t KEY_BITS = 256;
   static constexpr std::size_t BUFFER_LEN = 512;
   static constexpr std::size_t DIGEST_SIZE = 32;
+  static constexpr std::size_t SEED_LEN = 32;
+  static constexpr const char *DEVICE_LABEL = "flood-ews-sign-v1";
 
   using SignatureT = std::array<std::uint8_t, SIG_LEN>;
 
   /**
-   * @brief Initialise the device, fetch the key from device, or generate a new
-   * one if one isn't stored.
-   * @param [in] persistent_id The ID to store the key at.
+   * @brief Initialise the key, this is derived from a fixed seed per device so
+   * it is deterministic but still cryptographically secure.
+   * @param [in] eui The eui used to generate the key.
    * @return psa_status_t
    */
-  [[nodiscard]] psa_status_t init(const psa_key_id_t persistent_id) noexcept {
-    psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
-    const auto status = psa_get_key_attributes(persistent_id, &attr);
+  [[nodiscard]] psa_status_t init(const std::uint64_t eui) noexcept {
 
-    if (status == PSA_SUCCESS) {
-      m_my_key_id = persistent_id;
-      psa_reset_key_attributes(&attr);
-      return PSA_SUCCESS;
+    const auto seed_exp = derive_identity_seed(eui);
+    if (!seed_exp.has_value()) {
+      return seed_exp.error();
     }
 
-    psa_reset_key_attributes(&attr);
+    const auto &seed = seed_exp.value();
+
+    psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
     psa_set_key_type(&attr, PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1));
     psa_set_key_bits(&attr, KEY_BITS);
     psa_set_key_algorithm(&attr, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
     psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_SIGN_HASH |
                                        PSA_KEY_USAGE_SIGN_MESSAGE);
-    psa_set_key_lifetime(&attr, PSA_KEY_LIFETIME_PERSISTENT);
-    psa_set_key_id(&attr, persistent_id);
+    // Volatile so nothing sensitive is ever stored.
+    psa_set_key_lifetime(&attr, PSA_KEY_LIFETIME_VOLATILE);
 
-    return psa_generate_key(&attr, &m_my_key_id);
+    const auto status =
+        psa_import_key(&attr, seed.data(), seed.size(), &m_my_key_id);
+
+    return status;
   }
 
   /**
    * @brief Get the public key for the stored key.
-   * @return tl::expected<PubKeyT, psa_status_t>
+   * @return std::expected<PubKeyT, psa_status_t>
    */
-  [[nodiscard]] tl::expected<PubKeyT, psa_status_t>
+  [[nodiscard]] std::expected<PubKeyT, psa_status_t>
   export_pubkey() const noexcept {
     std::size_t out_len = 0;
     PubKeyT out;
@@ -74,7 +79,7 @@ public:
     if (const auto err = psa_export_public_key(m_my_key_id, out.data(),
                                                out.size(), &out_len);
         err != PSA_SUCCESS) {
-      return tl::unexpected(err);
+      return std::unexpected(err);
     }
 
     return out;
@@ -100,17 +105,17 @@ public:
   /**
    * @brief Create a signature for the given payload bytes.
    * @param [in] rpc_bytes The payload to sign.
-   * @return tl::expected<SignatureT, psa_status_t> The signature or the error
+   * @return std::expected<SignatureT, psa_status_t> The signature or the error
    * on failure.
    */
-  [[nodiscard]] tl::expected<SignatureT, psa_status_t>
+  [[nodiscard]] std::expected<SignatureT, psa_status_t>
   sign(const std::span<const uint8_t> rpc_bytes) const noexcept {
     const std::scoped_lock guard(m_mutex);
     std::array<std::uint8_t, DIGEST_SIZE> digest;
     std::size_t digest_len = 0;
     auto status = compute_digest(rpc_bytes, digest, digest_len);
     if (status != PSA_SUCCESS) {
-      return tl::unexpected(status);
+      return std::unexpected(status);
     }
 
     SignatureT sig_out;
@@ -120,7 +125,7 @@ public:
                            sig_out.size(), &sig_len);
 
     if (status != PSA_SUCCESS) {
-      return tl::unexpected(status);
+      return std::unexpected(status);
     }
 
     return sig_out;
@@ -237,6 +242,70 @@ private:
       }
     }
     return nullptr;
+  }
+
+  /**
+   * @brief Generate a seed to create the key-pair using: The devices EUI-64,
+   * the DEVICE_ID salt, and the secret HUK stored inside the KMU. This creates
+   * a cryptographically secure but deterministic keypair.
+   * @param [in] eui The devices eui.
+   * @return std::expected<std::array<std::uint8_t, SEED_LEN>, psa_status_t>
+   */
+  [[nodiscard]] static std::expected<std::array<std::uint8_t, SEED_LEN>,
+                                     psa_status_t>
+  derive_identity_seed(const std::uint64_t eui) noexcept {
+
+    std::array<std::uint8_t, SEED_LEN> seed_out{};
+
+    // Initialize PSA Key Derivation operation
+    psa_key_derivation_operation_t op = PSA_KEY_DERIVATION_OPERATION_INIT;
+
+    // Setup derivation algorithm.
+    psa_status_t status =
+        psa_key_derivation_setup(&op, PSA_ALG_HKDF(PSA_ALG_SHA_256));
+    if (status != PSA_SUCCESS) {
+      return std::unexpected(status);
+    }
+
+    // Add Salt (DEVICE_LABEL)
+    status = psa_key_derivation_input_bytes(
+        &op, PSA_KEY_DERIVATION_INPUT_SALT,
+        reinterpret_cast<const std::uint8_t *>(DEVICE_LABEL),
+        std::strlen(DEVICE_LABEL));
+    if (status != PSA_SUCCESS) {
+      psa_key_derivation_abort(&op);
+      return std::unexpected(status);
+    }
+
+    // Pass the hardware built-in unique key (HUK) as secret input.
+    status = psa_key_derivation_input_key(&op, PSA_KEY_DERIVATION_INPUT_SECRET,
+                                          TFM_BUILTIN_KEY_ID_HUK);
+    if (status != PSA_SUCCESS) {
+      psa_key_derivation_abort(&op);
+      return std::unexpected(status);
+    }
+
+    // Add Info parameter (EUI)
+    status = psa_key_derivation_input_bytes(
+        &op, PSA_KEY_DERIVATION_INPUT_INFO,
+        reinterpret_cast<const std::uint8_t *>(&eui), sizeof(eui));
+    if (status != PSA_SUCCESS) {
+      psa_key_derivation_abort(&op);
+      return std::unexpected(status);
+    }
+
+    // Extract derived seed output
+    status =
+        psa_key_derivation_output_bytes(&op, seed_out.data(), seed_out.size());
+
+    // Clean up operation state
+    psa_key_derivation_abort(&op);
+
+    if (status != PSA_SUCCESS) {
+      return std::unexpected(status);
+    }
+
+    return seed_out;
   }
 
   /** @brief This nodes key id. */
