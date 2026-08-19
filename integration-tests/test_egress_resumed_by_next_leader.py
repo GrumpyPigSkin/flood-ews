@@ -226,7 +226,7 @@ async def test_leader_killed_while_paused_in_egress_window(  # noqa: C901, PLR09
         finally:
             Path("test_egress").mkdir(exist_ok=True)  # noqa: ASYNC240
             for n in nodes:
-                n.rtt.dump_to_file("test_egress/%s.log", n.cfg.name)
+                n.rtt.dump_to_file(f"test_egress/{n.cfg.name}.log")
                 logger.info(
                     "Dumped RTT history for %s to test_egress/%s.log",
                     n.cfg.name,
