@@ -13,7 +13,7 @@ firmware with the fault logic. These tests also need to be run from the Raspberr
 PI running the gateway software.
 
 To enable the fault logic compile the firmware with the definition
-`-DENABLE_FAULT_INJECTION` this will enable the CoAP endpoint and log messages
+`-DCONFIG_ENABLE_FAULT_INJECTION` this will enable the CoAP endpoint and log messages
 to run the test.
 
 ### Hardware required

@@ -19,7 +19,7 @@ class SensorFaultInjector:
     `edge_fault` and expects a whole FaultMessage as the payload. It stores the
     message and, while m_active is set, overrides every outgoing reading in
     CoapService::send_sensor_data. So the fault is sticky until cleared. This
-    resource only exists in a build with ENABLE_FAULT_INJECTION defined.
+    resource only exists in a build with CONFIG_ENABLE_FAULT_INJECTION defined.
     """
 
     FAULT_URI = "edge_fault"
@@ -69,6 +69,7 @@ class SensorFaultInjector:
         detail: DetailQual = DetailQual.NONE,
         seq: int = 0,
         timestamp: int = 0,
+        sign: bool=False
     ) -> any:
         """Activate a fault on the sensor reading.
 
@@ -81,6 +82,7 @@ class SensorFaultInjector:
             detail (DetailQual, optional): The new detail. Defaults to DetailQual.NONE.
             seq (int, optional): The overridden sequence ID. Defaults to 0.
             timestamp (int, optional): The timestamp. Defaults to 0.
+            sign(int, optional): Whether to tamper with the signature.
 
         Returns:
             any: The response code.
@@ -93,6 +95,7 @@ class SensorFaultInjector:
             detail=detail,
             seq=seq,
             active=True,
+            sign=sign
         )
         return await self._put(payload)
 

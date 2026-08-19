@@ -40,9 +40,9 @@ class DetailQual(IntEnum):
 
 
 # little-endian, standard sizes: Q eui | Q timestamp | H water_level | B
-# validity | B detail | B seq | 3x SensorReadingWire tail pad | B active | 7x
+# validity | B detail | I seq | B active | B sign | 6x
 # FaultMessage tail pad
-FOG_FAULT_FMT = "<QQHBBB3xB7x"
+FOG_FAULT_FMT = "<QQHBBIBB6x"
 FOG_FAULT_SIZE = struct.calcsize(FOG_FAULT_FMT)
 FOG_FAULT_EXPECTED_SIZE = 32
 assert FOG_FAULT_SIZE == FOG_FAULT_EXPECTED_SIZE, (
@@ -59,6 +59,7 @@ def pack_fault(  # noqa: PLR0913
     detail: DetailQual,
     seq: int,
     active: bool,
+    sign: bool,
 ) -> bytes:
     """Serialise a fault message.
 
@@ -70,6 +71,7 @@ def pack_fault(  # noqa: PLR0913
         detail (DetailQual): Detail flags
         seq (int): Seq (Ignored in FW currently)
         active (bool): Whether the fault is active.
+        sign (bool): Whether the fault should tamper with the message signature.
 
     Returns:
         bytes: The packed data.
@@ -81,8 +83,9 @@ def pack_fault(  # noqa: PLR0913
         water_level_mm & 0xFFFF,
         int(validity),
         int(detail),
-        seq & 0xFF,
+        seq & 0xFFFFFFFF,
         1 if active else 0,
+        1 if sign else 0
     )
 
 
@@ -96,4 +99,5 @@ def pack_clear() -> bytes:
         detail=DetailQual.NONE,
         seq=0,
         active=False,
+        sign=False
     )

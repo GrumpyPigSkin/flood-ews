@@ -16,7 +16,7 @@ class FogFaultInjector:
     unlink the edge fault is not sticky on the device, it activates once and
     clears itself. This is used to mark a synchronisation point between the test
     and the firmware for shutdown. This resource only exists in a build with
-    ENABLE_FAULT_INJECTION defined.
+    CONFIG_ENABLE_FAULT_INJECTION defined.
     """
 
     FAULT_URI = "fog_fault"
