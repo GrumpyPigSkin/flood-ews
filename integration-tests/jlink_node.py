@@ -7,6 +7,8 @@ Tests can then access log data and issue commands to the J-Links on each node to
 track state and put the nodes into fault conditions.
 """
 
+import asyncio
+import logging
 import queue
 import threading
 import time
@@ -16,6 +18,8 @@ from pathlib import Path
 import pylink
 
 from config import NodeCfg
+
+logger = logging.getLogger(__name__)
 
 NRF5340_APP = "nRF5340_xxAA_APP"
 RTT_POLL_INTERVAL = 0.01
@@ -168,6 +172,18 @@ class JLinkNode:
             self.rtt.stop()
         with suppress(Exception):
             self._jlink.close()
+
+    async def wait_for(self, marker: str, timeout: float) -> tuple[float, str]:
+        """Async wrapper around the blocking RTT `wait_for`.
+
+        Args:
+            marker (str): The string to look for.
+            timeout (float): Timeout to wait for.
+
+        Returns:
+            tuple[float, str]: The timestamp and the string.
+        """
+        return await asyncio.to_thread(self.rtt.wait_for, marker, timeout)
 
     @contextmanager
     def session(self) -> any:

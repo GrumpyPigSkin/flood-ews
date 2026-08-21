@@ -4,6 +4,7 @@ Handle messages sent to chirpstack and then passed downstream with the MQTT
 broker.
 """
 
+import asyncio
 import base64
 import json
 import threading
@@ -101,7 +102,7 @@ class ChirpStackHandler:
         with self._lock:
             return [u for u in self._uplinks if u.ts >= since]
 
-    def wait_for_uplink(
+    async def wait_for_uplink(
         self,
         since: float,
         timeout: float,
@@ -126,7 +127,7 @@ class ChirpStackHandler:
             for u in self.uplinks_since(since):
                 if predicate is None or predicate(u):
                     return u
-            time.sleep(0.05)
+            await asyncio.sleep(0.05)
         msg = f"no matching uplink within {timeout}s"
         raise TimeoutError(msg)
 

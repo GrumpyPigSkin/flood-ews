@@ -60,6 +60,13 @@ FOG_NODES = [
     ),
 ]
 
+# MAC addresses for the sensors in case there are extra nodes on the network.
+KNOWN_SENSOR_MACS = {
+    "ea88114cfd5b3f89",  # Sensor 1
+    "8664571121fbf910",  # Sensor 2
+    "6aa56bfcd0edaa23",  # Sensor 3
+}
+
 # ChirpStack MQTT
 MQTT_HOST = os.getenv("CHIRPSTACK_MQTT_HOST", "127.0.0.1")
 MQTT_PORT = int(os.getenv("CHIRPSTACK_MQTT_PORT", "1883"))

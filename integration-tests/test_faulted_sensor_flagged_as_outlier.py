@@ -17,27 +17,32 @@ it is sending good values.
     consecutive clear windows the sensor is readmitted and becomes good again.
 """
 
-import asyncio
 import logging
 import random
 
 import pytest
-from aiocoap import Context
 
-from config import CHANNEL, NETWORK_KEY, PANID, XPANID
-from conftest import wait_for_all_good, wait_for_entry_state_by_predicate
 from sensor_fault_injector import SensorFaultInjector
+from test_helpers import (
+    confirm_clean_baseline,
+    discover_sed_pool,
+    wait_for_entry_state_by_predicate,
+)
 
 BASELINE_WINDOW = 150.0  # watch ~2.5 reporting cycles for a clean start
 OUTLIER_DETECT_TIMEOUT = 150.0  # ~2.5 reporting cycles for QUESTIONABLE + OUTLIER
 INVALID_DETECT_TIMEOUT = 330.0  # ~5.5 reporting cycles further for INVALID
 VALID_DETECT_TIMEOUT = 660.0  # 10 reporting cycles to become "GOOD" again.
+FAULT_WATER_LVL_MM = 1000  # Water level to override.
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio
-async def test_faulted_sensor_flagged_as_outlier(chirpstack, otctl) -> None:  # noqa: ANN001
+async def test_faulted_sensor_flagged_as_outlier(
+    chirpstack,
+    otctl,
+    coap_context) -> None:
     """Integration Test.
 
     Test that a fault sensor is marked as an outlier, even if the sensor thinks
@@ -56,93 +61,47 @@ async def test_faulted_sensor_flagged_as_outlier(chirpstack, otctl) -> None:  # 
         5. After the sensor becomes invalid, the fault is then cleared, after ~6
         consecutive clear windows the sensor is readmitted and becomes good again.
     """
-    logger.info("Checking Thread attachment...")
-    if not otctl.is_attached():
-        otctl.connect_to_thread_network(NETWORK_KEY, CHANNEL, PANID, XPANID)
-    if not otctl.is_attached():
-        msg = "Failed to attach to Thread network"
-        raise RuntimeError(msg)
-
-    logger.info("Waiting up to %s s for a clean baseline...", BASELINE_WINDOW)
-    baseline_mark = chirpstack.mark()
-    await asyncio.to_thread(
-        wait_for_all_good, chirpstack, baseline_mark, BASELINE_WINDOW
-    )
-
-    logger.info("Baseline confirmed clean.")
-
-    logger.info("Discovering fault-injection targets...")
-    seds = otctl.get_seds()
-    pool = [{"role": "sed", **s} for s in seds]
-    assert pool, "no fault-injection targets found"
-
-    target = random.choice(pool)  # noqa: S311
+    await confirm_clean_baseline(chirpstack, BASELINE_WINDOW)
+    sed_pool = discover_sed_pool(otctl)
+    target = random.choice(sed_pool)  # noqa: S311
     logger.info("Selected target %s", target["address"])
+    sfi = SensorFaultInjector(node_ipv6=target["address"], ctx=coap_context)
 
-    ctx = await Context.create_client_context()
-    sfi = SensorFaultInjector(node_ipv6=target["address"], ctx=ctx)
     entry = None
-    try:
-        logger.info("Sending fault injection PUT...")
-        fault_mark = chirpstack.mark()
-        expected_water_lvl = 1000
-        response = await sfi.set_fault(
-            water_level_mm=expected_water_lvl,
-        )
-        logger.info("Fault PUT acknowledged: %s", response.code)
-
-        logger.info(
-            "Waiting up to %s s for outlier + QUESTIONABLE...", OUTLIER_DETECT_TIMEOUT
-        )
-        entry = await asyncio.to_thread(
-            wait_for_entry_state_by_predicate,
+    async with sfi.active(water_level_mm=FAULT_WATER_LVL_MM):
+        entry = await wait_for_entry_state_by_predicate(
             chirpstack,
-            fault_mark,
+            chirpstack.mark(),
             lambda e: (
-                e.get("water_level_mm") == expected_water_lvl
-                and e.get("outlier") is True
+                e.get("water_level_mm") == FAULT_WATER_LVL_MM and e.get("outlier") is True
             ),
             OUTLIER_DETECT_TIMEOUT,
         )
-        logger.info("outlier + QUESTIONABLE confirmed: %s", entry)
+
+        logger.info("outlier confirmed: %s", entry)
 
         logger.info(
             "Waiting up to %s s for validity to become INVALID...",
             INVALID_DETECT_TIMEOUT,
         )
-        fault_mark = chirpstack.mark()
-        entry = await asyncio.to_thread(
-            wait_for_entry_state_by_predicate,
+        entry = await wait_for_entry_state_by_predicate(
             chirpstack,
-            fault_mark,
+            chirpstack.mark(),
             lambda e: (
                 e.get("device_eui") == entry["device_eui"]
-                and e.get("water_level_mm") == expected_water_lvl
+                and e.get("water_level_mm") == FAULT_WATER_LVL_MM
                 and e.get("validity") == "INVALID"
             ),
             INVALID_DETECT_TIMEOUT,
         )
         logger.info("INVALID confirmed: %s", entry)
 
-    finally:
-        logger.info("Clearing fault...")
-        await sfi.clear()
-
-        if entry is not None:
-            logger.info(
-                "Waiting up to %s s for reading to become GOOD...", VALID_DETECT_TIMEOUT
-            )
-            fault_mark = chirpstack.mark()
-            entry = await asyncio.to_thread(
-                wait_for_entry_state_by_predicate,
-                chirpstack,
-                fault_mark,
-                lambda e: (
-                    e.get("device_eui") == entry["device_eui"]
-                    and e.get("validity") == "GOOD"
-                ),
-                VALID_DETECT_TIMEOUT,
-            )
-
-        await ctx.shutdown()
-        logger.info("Fault cleared.")
+    if entry is not None:
+        await wait_for_entry_state_by_predicate(
+            chirpstack,
+            chirpstack.mark(),
+            lambda e: (e.get("device_eui") == entry["device_eui"]
+                       and e.get("validity") == "GOOD"),
+            VALID_DETECT_TIMEOUT,
+        )
+        logger.info("Reading for %s recovered to GOOD.", entry["device_eui"])

@@ -5,11 +5,15 @@ to the fog layer to test the outlier vote logic.
 """
 
 import asyncio
+import logging
+from contextlib import asynccontextmanager
 
 from aiocoap import Code, Context, Message
 from aiocoap.numbers.types import Type
 
 from sensor_fault_wire import DetailQual, Validity, pack_clear, pack_fault
+
+logger = logging.getLogger(__name__)
 
 
 class SensorFaultInjector:
@@ -130,3 +134,13 @@ class SensorFaultInjector:
     async def clear(self) -> any:
         """Deactivate the fault so the node resumes real sensor readings."""
         return await self._put(pack_clear())
+
+    @asynccontextmanager
+    async def active(self, **kwargs: any) -> any:
+        """Activate a fault for the duration of the `async with` block."""
+        response = await self.set_fault(**kwargs)
+        logger.info("Fault PUT acknowledged: %s", response.code)
+        try:
+            yield self
+        finally:
+            await self.clear()
