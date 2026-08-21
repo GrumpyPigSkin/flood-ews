@@ -52,6 +52,7 @@ void Server<Cfg>::become_follower(const Term term,
 #ifdef CONFIG_ENABLE_FAULT_INJECTION
   logging::inf("RAFT:BECAME_FOLLOWER");
 #endif
+  m_pre_vote_active = false;
   // Reset election state.
   if (term > m_current_term) {
     m_current_term = term;
@@ -88,6 +89,7 @@ template <typename Cfg> void Server<Cfg>::become_candidate() noexcept {
 #ifdef CONFIG_ENABLE_FAULT_INJECTION
   logging::inf("RAFT:BECAME_CANDIDATE");
 #endif
+  m_pre_vote_active = false;
   set_state(State::CANDIDATE);
   m_current_term += 1;     // increment currentTerm
   m_voted_for = m_self_id; // vote for self
@@ -128,6 +130,7 @@ template <typename Cfg> void Server<Cfg>::become_leader() noexcept {
 #ifdef CONFIG_ENABLE_FAULT_INJECTION
   logging::inf("RAFT:BECAME_LEADER");
 #endif
+  m_pre_vote_active = false;
   set_state(State::LEADER);
   m_current_leader = m_self_id;
   m_leader_hint = m_self_id;
@@ -255,7 +258,7 @@ template <typename Cfg>
 void Server<Cfg>::handle(NodeId from, const RequestVoteResp &rr) noexcept {
 
   if (rr.m_pre_vote) {
-    if (!m_pre_vote_active) {
+    if (!m_pre_vote_active || m_state == State::LEADER) {
       return;
     }
     // A real leader out there will answer our probe with a higher term. At
