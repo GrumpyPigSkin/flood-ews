@@ -74,3 +74,9 @@ add_executable(test_jsn jsn/test_jsn.cpp)
 target_link_libraries(test_jsn PRIVATE test_common GTest::gtest_main)
 add_test(NAME test_jsn COMMAND test_jsn)
 set_tests_properties(test_jsn PROPERTIES LABELS "unit;smoke")
+
+# Replay tests.
+add_executable(test_replay security/test_sesnor_replay_detection.cpp)
+target_link_libraries(test_replay PRIVATE test_common GTest::gtest_main)
+add_test(NAME test_replay COMMAND test_replay)
+set_tests_properties(test_replay PROPERTIES LABELS "unit;smoke")
