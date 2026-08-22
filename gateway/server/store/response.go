@@ -239,3 +239,195 @@ func (s *Store) RecordControlAction(ctx context.Context, actor, actuatorID, targ
 		return nil
 	})
 }
+
+// Operator queue stuff
+
+var (
+	// Error when an item cannot be found in the queue.
+	ErrorPendingNotFound = fmt.Errorf("Operator Queue: item not found")
+
+	// Error when an item as already been resolved.
+	ErrorAlreadyResolved = fmt.Errorf("Operator Queue: item already resolved")
+
+	// Approved string got queue status
+	QueueItemApproved = "approved"
+
+	// Approved string got queue status
+	QueueItemRejected = "rejected"
+
+	// Pending string for queue status
+	QueueItemPending = "pending"
+
+	// Resolved string got queue status
+	QueueItemResolved = "resolved"
+)
+
+// An advisory queued for operator approval, the action can be empty if the
+// advisory was queued with no action against it yet.
+type PendingAdvisory struct {
+	ID          int64             `json:"id"`
+	SourceID    string            `json:"source_id"`
+	Kind        string            `json:"kind"`
+	Severity    advisory.Severity `json:"severity"`
+	Value       float64           `json:"value"`
+	Unit        string            `json:"unit"`
+	ObservedAt  time.Time         `json:"observed_at"`
+	ReceivedAt  time.Time         `json:"received_at"`
+	Disposition string            `json:"disposition"`
+	Raw         map[string]any    `json:"raw,omitempty"`
+	ActuatorID  string            `json:"actuator_id,omitempty"`
+	TargetState string            `json:"target_state,omitempty"`
+	RuleID      string            `json:"rule_id,omitempty"`
+	Status      string            `json:"status"`
+	ResolvedAt  *time.Time        `json:"resolved_at,omitempty"`
+	ResolvedBy  string            `json:"resolved_by,omitempty"`
+}
+
+// Convert a pending row to the usable type PendingAdvisory
+func pendingFromRow(r OperatorQueue) PendingAdvisory {
+	observed, _ := time.Parse(time.RFC3339Nano, r.ObservedAt)
+	received, _ := time.Parse(time.RFC3339Nano, r.ReceivedAt)
+
+	var raw map[string]any
+	_ = json.Unmarshal([]byte(r.RawJson), &raw)
+
+	var resolvedAt *time.Time
+	if r.ResolvedAt != "" {
+		if t, err := time.Parse(time.RFC3339Nano, r.ResolvedAt); err == nil {
+			resolvedAt = &t
+		}
+	}
+
+	return PendingAdvisory{
+		ID:          r.ID,
+		SourceID:    r.SourceID,
+		Kind:        r.Kind,
+		Severity:    advisory.Severity(r.Severity),
+		Value:       r.Value,
+		Unit:        r.Unit,
+		ObservedAt:  observed,
+		ReceivedAt:  received,
+		Disposition: r.Disposition,
+		Raw:         raw,
+		ActuatorID:  r.ActuatorID,
+		TargetState: r.TargetState,
+		RuleID:      r.RuleID,
+		Status:      r.Status,
+		ResolvedAt:  resolvedAt,
+		ResolvedBy:  r.ResolvedBy,
+	}
+}
+
+// Implements advisory.OperatorQueue by persisting the advisory.
+// The operator console then fetches the pending advisories for processing.
+func (s *Store) Enqueue(a advisory.Advisory) error {
+	ctx := context.Background()
+
+	rawJSON, err := json.Marshal(a.Raw)
+	if err != nil {
+		return fmt.Errorf("Operator Queue: error while encoding raw payload: %w", err)
+	}
+
+	var actuatorID string
+	var targetState string
+	var ruleID string
+
+	if m, ok := a.Raw["_intended_action"].(map[string]any); ok {
+		actuatorID, _ = m["actuator_id"].(string)
+		targetState, _ = m["target_state"].(string)
+		ruleID, _ = m["rule_id"].(string)
+	}
+
+	return s.queries.InsertPending(ctx, InsertPendingParams{
+		SourceID:    a.SourceID,
+		Kind:        a.Kind,
+		Severity:    int64(a.Severity),
+		Value:       a.Value,
+		Unit:        a.Unit,
+		ObservedAt:  a.ObservedAt.UTC().Format(time.RFC3339Nano),
+		ReceivedAt:  a.ReceivedAt.UTC().Format(time.RFC3339Nano),
+		Disposition: string(a.Disposition),
+		RawJson:     string(rawJSON),
+		ActuatorID:  actuatorID,
+		TargetState: targetState,
+		RuleID:      ruleID,
+	})
+
+}
+
+// Get all the pending advisories
+func (s *Store) GetPending(ctx context.Context, id int64) (PendingAdvisory, error) {
+	row, err := s.queries.GetPending(ctx, id)
+
+	if err != nil {
+		return PendingAdvisory{}, ErrorPendingNotFound
+	}
+
+	return pendingFromRow(row), nil
+}
+
+// List all the pending advisories waiting operator approval
+func (s *Store) ListPending(ctx context.Context) ([]PendingAdvisory, error) {
+	rows, err := s.queries.ListPending(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make([]PendingAdvisory, len(rows))
+	for i, r := range rows {
+		out[i] = pendingFromRow(r)
+	}
+
+	return out, nil
+}
+
+// Resolve a Pending item on the operator queue.
+func (s *Store) ResolvePending(
+	ctx context.Context,
+	id int64,
+	status, actor string,
+) (PendingAdvisory, error) {
+	if status != QueueItemApproved && status != QueueItemRejected {
+		return PendingAdvisory{}, fmt.Errorf(
+			"Operator Queue, invalid status, must be resolved or rejected got: %q", status)
+	}
+
+	existing, err := s.queries.GetPending(ctx, id)
+	if err != nil {
+		return PendingAdvisory{}, ErrorPendingNotFound
+	}
+	if existing.Status != QueueItemPending {
+		return PendingAdvisory{}, ErrorAlreadyResolved
+	}
+
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+
+	err = s.withAuditTx(ctx, actor, "operator_queue:"+status, fmt.Sprintf("%d", id), existing, func(qtx *Queries) error {
+		res, err := qtx.ResolvePending(ctx, ResolvePendingParams{
+			Status:     status,
+			ResolvedAt: now,
+			ResolvedBy: actor,
+			ID:         id,
+		})
+		if err != nil {
+			return err
+		}
+		n, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if n == 0 {
+			// Resolved by someone else between our check and the update
+			return ErrorAlreadyResolved
+		}
+		return nil
+	})
+	if err != nil {
+		return PendingAdvisory{}, err
+	}
+
+	existing.Status = status
+	existing.ResolvedAt = now
+	existing.ResolvedBy = actor
+	return pendingFromRow(existing), nil
+}

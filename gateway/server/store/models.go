@@ -48,6 +48,25 @@ type ExternalSource struct {
 	FieldMap    string
 }
 
+type OperatorQueue struct {
+	ID          int64
+	SourceID    string
+	Kind        string
+	Severity    int64
+	Value       float64
+	Unit        string
+	ObservedAt  string
+	ReceivedAt  string
+	Disposition string
+	RawJson     string
+	ActuatorID  string
+	TargetState string
+	RuleID      string
+	Status      string
+	ResolvedAt  string
+	ResolvedBy  string
+}
+
 type PolicyRule struct {
 	ID              string
 	Name            string

@@ -68,3 +68,19 @@ FROM audit_log ORDER BY id DESC LIMIT ?;
 -- name: InsertAuditLog :exec
 INSERT INTO audit_log (at, actor, action, entity, detail)
 VALUES (?, ?, ?, ?, ?);
+
+-- name: InsertPending :exec
+INSERT INTO operator_queue (source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: ListPending :many
+SELECT id, source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id, status, resolved_at, resolved_by
+FROM operator_queue WHERE status = 'pending' ORDER BY id;
+
+-- name: GetPending :one
+SELECT id, source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id, status, resolved_at, resolved_by
+FROM operator_queue WHERE id = ?;
+
+-- name: ResolvePending :execresult
+UPDATE operator_queue SET status = ?, resolved_at = ?, resolved_by = ?
+WHERE id = ? AND status = 'pending';

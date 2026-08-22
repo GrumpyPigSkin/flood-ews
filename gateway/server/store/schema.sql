@@ -62,3 +62,23 @@ CREATE TABLE IF NOT EXISTS egress_target (
   auth_token    TEXT NOT NULL DEFAULT '',
   min_severity  INTEGER NOT NULL DEFAULT 0
 );
+
+-- The captured external advisory that requires operator approval
+CREATE TABLE IF NOT EXISTS operator_queue (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  source_id     TEXT NOT NULL,
+  kind          TEXT NOT NULL,
+  severity      INTEGER NOT NULL,
+  value         REAL NOT NULL DEFAULT 0,
+  unit          TEXT NOT NULL DEFAULT '',
+  observed_at   TEXT NOT NULL,
+  received_at   TEXT NOT NULL,
+  disposition   TEXT NOT NULL,
+  raw_json      TEXT NOT NULL DEFAULT '{}',
+  actuator_id   TEXT NOT NULL DEFAULT '',
+  target_state  TEXT NOT NULL DEFAULT '',
+  rule_id       TEXT NOT NULL DEFAULT '',
+  status        TEXT NOT NULL DEFAULT 'pending',
+  resolved_at   TEXT NOT NULL DEFAULT '',
+  resolved_by   TEXT NOT NULL DEFAULT ''
+);

@@ -10,12 +10,15 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"server/actuator"
 	"server/policy"
 	"server/poller"
 	"server/store"
+	"strconv"
 	"sync"
 	"time"
 
@@ -140,6 +143,12 @@ func (s *Server) Routes() http.Handler {
 
 		ctl := http.NewServeMux()
 		ctl.Handle("POST /v1/control/actuate", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleActuate)))))
+
+		// Operator queue
+		ctl.Handle("GET /v1/control/pending", jwtAuth(jwtRequired(http.HandlerFunc(s.handleListPending))))
+		ctl.Handle("POST /v1/control/pending/{id}/approve", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleApprovePending)))))
+		ctl.Handle("POST /v1/control/pending/{id}/reject", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleRejectPending)))))
+
 		mux.Handle("/v1/control/", ctl)
 	}
 
@@ -524,4 +533,101 @@ func (l *LiveStore) snapshot() []map[string]any {
 		out = append(out, cloned)
 	}
 	return out
+}
+
+// Get the pending queued items from the store.
+func (s *Server) handleListPending(w http.ResponseWriter, r *http.Request) {
+	items, err := s.store.ListPending(r.Context())
+	if err != nil {
+		s.writeErr(w, http.StatusInternalServerError, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, items)
+}
+
+func (s *Server) writePendingErr(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, store.ErrorPendingNotFound):
+		s.writeErr(w, http.StatusNotFound, err)
+	case errors.Is(err, store.ErrorAlreadyResolved):
+		s.writeErr(w, http.StatusConflict, err)
+	default:
+		s.writeErr(w, http.StatusInternalServerError, err)
+	}
+}
+
+// Handle approving a pending operator queue action.
+func (s *Server) handleApprovePending(w http.ResponseWriter, r *http.Request) {
+
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		s.writeErr(w, http.StatusBadRequest, err)
+		return
+	}
+
+	actor := s.actorFrom(r)
+
+	// Peek at the item without resolving it yet, ensure it has an action and then
+	// execute the action first. If we can't execute the action leave it pending.
+	item, err := s.store.GetPending(r.Context(), id)
+	if err != nil {
+		s.writePendingErr(w, err)
+		return
+	}
+
+	if item.Status != store.QueueItemPending {
+		s.writePendingErr(w, store.ErrorAlreadyResolved)
+		return
+	}
+
+	if item.ActuatorID == "" {
+		// There is no action attached to the queued item so we just clear the item.
+		if _, err := s.store.ResolvePending(r.Context(), id, store.QueueItemApproved, actor); err != nil {
+			s.writePendingErr(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"status": store.QueueItemApproved, "id": id})
+		return
+	}
+
+	// The item has an action so approve it.
+	res, err := s.engine.ApprovePending(r.Context(), item.ActuatorID, item.TargetState,
+		"operator_approved:"+actor, fmt.Sprintf("pending@%d", id))
+	if err != nil {
+		s.writeErr(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// Resolve the action.
+	if _, err := s.store.ResolvePending(r.Context(), id, store.QueueItemApproved, actor); err != nil {
+		s.log.Warn("approve pending: resolve after actuation", "id", id, "err", err)
+	}
+
+	// Record in the audit log.
+	_ = s.store.RecordControlAction(r.Context(), actor, item.ActuatorID, item.TargetState,
+		fmt.Sprintf("approved pending #%d", id))
+
+	// Reply
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status": "approved", "id": id,
+		"actuator": res.ActuatorID, "from": res.PriorState, "to": res.NewState, "applied": res.Applied,
+	})
+}
+
+// Handle rejecting a operator queue action.
+func (s *Server) handleRejectPending(w http.ResponseWriter, r *http.Request) {
+
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		s.writeErr(w, http.StatusBadRequest, err)
+		return
+	}
+
+	actor := s.actorFrom(r)
+	if _, err := s.store.ResolvePending(r.Context(), id, store.QueueItemRejected, actor); err != nil {
+		s.writePendingErr(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"status": store.QueueItemRejected, "id": id})
 }

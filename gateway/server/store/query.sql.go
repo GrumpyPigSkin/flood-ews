@@ -7,6 +7,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 )
 
 const deleteActuator = `-- name: DeleteActuator :exec
@@ -45,6 +46,35 @@ func (q *Queries) DeleteTarget(ctx context.Context, id string) error {
 	return err
 }
 
+const getPending = `-- name: GetPending :one
+SELECT id, source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id, status, resolved_at, resolved_by
+FROM operator_queue WHERE id = ?
+`
+
+func (q *Queries) GetPending(ctx context.Context, id int64) (OperatorQueue, error) {
+	row := q.db.QueryRowContext(ctx, getPending, id)
+	var i OperatorQueue
+	err := row.Scan(
+		&i.ID,
+		&i.SourceID,
+		&i.Kind,
+		&i.Severity,
+		&i.Value,
+		&i.Unit,
+		&i.ObservedAt,
+		&i.ReceivedAt,
+		&i.Disposition,
+		&i.RawJson,
+		&i.ActuatorID,
+		&i.TargetState,
+		&i.RuleID,
+		&i.Status,
+		&i.ResolvedAt,
+		&i.ResolvedBy,
+	)
+	return i, err
+}
+
 const insertAuditLog = `-- name: InsertAuditLog :exec
 INSERT INTO audit_log (at, actor, action, entity, detail)
 VALUES (?, ?, ?, ?, ?)
@@ -65,6 +95,44 @@ func (q *Queries) InsertAuditLog(ctx context.Context, arg InsertAuditLogParams) 
 		arg.Action,
 		arg.Entity,
 		arg.Detail,
+	)
+	return err
+}
+
+const insertPending = `-- name: InsertPending :exec
+INSERT INTO operator_queue (source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type InsertPendingParams struct {
+	SourceID    string
+	Kind        string
+	Severity    int64
+	Value       float64
+	Unit        string
+	ObservedAt  string
+	ReceivedAt  string
+	Disposition string
+	RawJson     string
+	ActuatorID  string
+	TargetState string
+	RuleID      string
+}
+
+func (q *Queries) InsertPending(ctx context.Context, arg InsertPendingParams) error {
+	_, err := q.db.ExecContext(ctx, insertPending,
+		arg.SourceID,
+		arg.Kind,
+		arg.Severity,
+		arg.Value,
+		arg.Unit,
+		arg.ObservedAt,
+		arg.ReceivedAt,
+		arg.Disposition,
+		arg.RawJson,
+		arg.ActuatorID,
+		arg.TargetState,
+		arg.RuleID,
 	)
 	return err
 }
@@ -124,6 +192,51 @@ func (q *Queries) ListAudit(ctx context.Context, limit int64) ([]AuditLog, error
 			&i.Action,
 			&i.Entity,
 			&i.Detail,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPending = `-- name: ListPending :many
+SELECT id, source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id, status, resolved_at, resolved_by
+FROM operator_queue WHERE status = 'pending' ORDER BY id
+`
+
+func (q *Queries) ListPending(ctx context.Context) ([]OperatorQueue, error) {
+	rows, err := q.db.QueryContext(ctx, listPending)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OperatorQueue
+	for rows.Next() {
+		var i OperatorQueue
+		if err := rows.Scan(
+			&i.ID,
+			&i.SourceID,
+			&i.Kind,
+			&i.Severity,
+			&i.Value,
+			&i.Unit,
+			&i.ObservedAt,
+			&i.ReceivedAt,
+			&i.Disposition,
+			&i.RawJson,
+			&i.ActuatorID,
+			&i.TargetState,
+			&i.RuleID,
+			&i.Status,
+			&i.ResolvedAt,
+			&i.ResolvedBy,
 		); err != nil {
 			return nil, err
 		}
@@ -255,6 +368,27 @@ func (q *Queries) ListTargets(ctx context.Context) ([]EgressTarget, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const resolvePending = `-- name: ResolvePending :execresult
+UPDATE operator_queue SET status = ?, resolved_at = ?, resolved_by = ?
+WHERE id = ? AND status = 'pending'
+`
+
+type ResolvePendingParams struct {
+	Status     string
+	ResolvedAt string
+	ResolvedBy string
+	ID         int64
+}
+
+func (q *Queries) ResolvePending(ctx context.Context, arg ResolvePendingParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, resolvePending,
+		arg.Status,
+		arg.ResolvedAt,
+		arg.ResolvedBy,
+		arg.ID,
+	)
 }
 
 const upsertActuator = `-- name: UpsertActuator :exec

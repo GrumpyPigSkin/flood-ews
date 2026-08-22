@@ -26,7 +26,6 @@ import (
 	"github.com/joho/godotenv"
 
 	"server/actuator"
-	"server/advisory"
 	"server/api"
 	"server/egress"
 	"server/policy"
@@ -73,7 +72,7 @@ func main() {
 			_ = st.RecordControlAction(context.Background(), "policy", r.ActuatorID, r.NewState, r.Reason)
 		}
 	})
-	opQueue := &stubOperatorQueue{log: logger}
+	opQueue := st
 	engine := policy.NewEngine(daemon, opQueue, logger)
 
 	// Load stored data and setup policy engine.
@@ -213,12 +212,4 @@ func runHeartbeat(ctx context.Context, d *actuator.Daemon, interval time.Duratio
 			d.Heartbeat()
 		}
 	}
-}
-
-// TODO: Replace this stub with the proper operator queue, need to add to API.!!!
-type stubOperatorQueue struct{ log *slog.Logger }
-
-func (s *stubOperatorQueue) Enqueue(a advisory.Advisory) error {
-	s.log.Info("OPERATOR-QUEUE <- advisory (stub)", "source", a.SourceID, "kind", a.Kind)
-	return nil
 }
