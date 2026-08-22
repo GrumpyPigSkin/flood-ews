@@ -2,6 +2,7 @@
 // manual overriding of actuators. Must be logged in to use this screen.
 
 import 'package:dashboard/widgets/error_banner.dart';
+import 'package:dashboard/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -35,31 +36,6 @@ class _ActuatorsScreenState extends State<ActuatorsScreen> {
   void dispose() {
     _controller?.dispose();
     super.dispose();
-  }
-
-  /// Toast on an actuator manual state change.
-  void _toast(String message, {bool error = false}) {
-    if (!mounted) return;
-    final theme = Theme.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.clearSnackBars();
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
-            fontSize: 13,
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        backgroundColor: error
-            ? theme.colorScheme.error
-            : theme.colorScheme.surfaceContainerHigh,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   @override
@@ -107,7 +83,7 @@ class _ActuatorsScreenState extends State<ActuatorsScreen> {
                         icon: Icons.settings_input_component_outlined,
                         text: 'No actuators configured',
                       )
-                    : _ActuatorGrid(controller: c, toast: _toast),
+                    : _ActuatorGrid(controller: c),
               ),
             ],
           );
@@ -120,9 +96,8 @@ class _ActuatorsScreenState extends State<ActuatorsScreen> {
 /// Display the actuators that were retrieved.
 class _ActuatorGrid extends StatelessWidget {
   final ActuatorController controller;
-  final void Function(String, {bool error}) toast;
 
-  const _ActuatorGrid({required this.controller, required this.toast});
+  const _ActuatorGrid({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -146,22 +121,26 @@ class _ActuatorGrid extends StatelessWidget {
           onActuate: (target) async {
             try {
               final applied = await controller.actuate(v.spec.id, target);
-              toast(
+              Toast.show(
+                context,
                 applied
                     ? '${v.spec.name} → $target'
                     : '${v.spec.name} already $target',
               );
             } on GatewayApiException catch (e) {
-              toast(e.message, error: true);
+              Toast.show(context, e.message, error: true);
             }
           },
           // Handle enabling the actuator, toast on enable.
           onSetEnabled: (enabled) async {
             try {
               await controller.setEnable(v.spec, enabled);
-              toast('${v.spec.name} ${enabled ? "enabled" : "disabled"}');
+              Toast.show(
+                context,
+                '${v.spec.name} ${enabled ? "enabled" : "disabled"}',
+              );
             } on GatewayApiException catch (e) {
-              toast(e.message, error: true);
+              Toast.show(context, e.message, error: true);
             }
           },
         );

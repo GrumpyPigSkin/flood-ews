@@ -4,6 +4,7 @@
 import 'package:dashboard/services/base_entity_card.dart';
 import 'package:dashboard/widgets/confirmation_dialogue.dart';
 import 'package:dashboard/widgets/error_banner.dart';
+import 'package:dashboard/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -39,31 +40,6 @@ class _PolicyScreenState extends State<PolicyScreen> {
     super.dispose();
   }
 
-  /// Wrapper around snackbar.
-  void _toast(String message, {bool error = false}) {
-    if (!mounted) return;
-    final theme = Theme.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.clearSnackBars();
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
-            fontSize: 13,
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        backgroundColor: error
-            ? theme.colorScheme.error
-            : theme.colorScheme.surfaceContainerHigh,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   /// Open the RuleEditorDialogue for the selected rule.
   Future<void> _openEditor(
     PolicyRuleController c, {
@@ -77,9 +53,12 @@ class _PolicyScreenState extends State<PolicyScreen> {
     if (result == null) return;
     try {
       await c.save(result);
-      _toast(existing == null ? 'Added ${result.id}' : 'Saved ${result.id}');
+      Toast.show(
+        context,
+        existing == null ? 'Added ${result.id}' : 'Saved ${result.id}',
+      );
     } on GatewayApiException catch (e) {
-      _toast(e.message, error: true);
+      Toast.show(context, e.message, error: true);
     }
   }
 
@@ -97,9 +76,9 @@ class _PolicyScreenState extends State<PolicyScreen> {
     if (ok != true) return;
     try {
       await c.delete(r.id);
-      _toast('Deleted ${r.id}');
+      Toast.show(context, 'Deleted ${r.id}');
     } on GatewayApiException catch (e) {
-      _toast(e.message, error: true);
+      Toast.show(context, e.message, error: true);
     }
   }
 

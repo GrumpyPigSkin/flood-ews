@@ -4,6 +4,7 @@
 import 'package:dashboard/services/base_entity_card.dart';
 import 'package:dashboard/widgets/confirmation_dialogue.dart';
 import 'package:dashboard/widgets/error_banner.dart';
+import 'package:dashboard/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -42,31 +43,6 @@ class _ExternalApiScreenState extends State<ExternalApiScreen> {
     super.dispose();
   }
 
-  /// Wrapper around snackbar.
-  void _toast(String message, {bool error = false}) {
-    if (!mounted) return;
-    final theme = Theme.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.clearSnackBars();
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
-            fontSize: 13,
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        backgroundColor: error
-            ? theme.colorScheme.error
-            : theme.colorScheme.surfaceContainerHigh,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   /// Open the SourceEditorDialogue for the selected source.
   Future<void> _openEditor(
     ExternalSourceController c, {
@@ -79,9 +55,12 @@ class _ExternalApiScreenState extends State<ExternalApiScreen> {
     if (result == null) return;
     try {
       await c.save(result);
-      _toast(existing == null ? 'Added ${result.id}' : 'Saved ${result.id}');
+      Toast.show(
+        context,
+        existing == null ? 'Added ${result.id}' : 'Saved ${result.id}',
+      );
     } on GatewayApiException catch (e) {
-      _toast(e.message, error: true);
+      Toast.show(context, e.message, error: true);
     }
   }
 
@@ -101,9 +80,9 @@ class _ExternalApiScreenState extends State<ExternalApiScreen> {
     if (ok != true) return;
     try {
       await c.delete(s.id);
-      _toast('Deleted ${s.id}');
+      Toast.show(context, 'Deleted ${s.id}');
     } on GatewayApiException catch (e) {
-      _toast(e.message, error: true);
+      Toast.show(context, e.message, error: true);
     }
   }
 

@@ -10,6 +10,7 @@ import 'package:dashboard/services/gateway_api.dart';
 import 'package:dashboard/widgets/egress_editor_dialogue.dart';
 import 'package:dashboard/widgets/error_banner.dart';
 import 'package:dashboard/widgets/screen_kit.dart';
+import 'package:dashboard/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dashboard/theme.dart';
@@ -38,21 +39,6 @@ class _EgressScreenState extends State<EgressScreen> {
     super.dispose();
   }
 
-  /// Toast helper to display snackbar.
-  void _toast(String message, {bool error = false}) {
-    if (!mounted) return;
-    final theme = Theme.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: error
-            ? theme.colorScheme.error
-            : theme.colorScheme.surfaceContainerHigh,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   /// Open the dialogue to edit or create a new Egress target.
   Future<void> _openEditor(
     EgressTargetController c, {
@@ -65,13 +51,14 @@ class _EgressScreenState extends State<EgressScreen> {
     if (result == null) return;
     try {
       await c.save(result.target, dsn: result.dsn, authToken: result.authToken);
-      _toast(
+      Toast.show(
+        context,
         existing == null
             ? 'Added ${result.target.id}'
             : 'Saved ${result.target.id}',
       );
     } on GatewayApiException catch (e) {
-      _toast(e.message, error: true);
+      Toast.show(context, e.message, error: true);
     }
   }
 
@@ -114,9 +101,9 @@ class _EgressScreenState extends State<EgressScreen> {
     if (ok != true) return;
     try {
       await c.delete(t.id);
-      _toast('Deleted ${t.id}');
+      Toast.show(context, 'Deleted ${t.id}');
     } on GatewayApiException catch (e) {
-      _toast(e.message, error: true);
+      Toast.show(context, e.message, error: true);
     }
   }
 
