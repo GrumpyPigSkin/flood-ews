@@ -92,6 +92,21 @@ class GatewayApi {
     return jsonDecode(resp.body) as Map<String, dynamic>;
   }
 
+  /// List advisories currently awaiting operator approval.
+  Future<List<dynamic>> listPending() => _getList('/v1/control/pending');
+
+  /// Approve a pending advisory.
+  Future<Map<String, dynamic>> approvePending(int id) async {
+    final resp = await _send('POST', '/v1/control/pending/$id/approve');
+    return jsonDecode(resp.body) as Map<String, dynamic>;
+  }
+
+  /// Reject a pending advisory.
+  Future<Map<String, dynamic>> rejectPending(int id) async {
+    final resp = await _send('POST', '/v1/control/pending/$id/reject');
+    return jsonDecode(resp.body) as Map<String, dynamic>;
+  }
+
   /// Unauthenticated readings.
   Future<List<dynamic>> readings() => _getList('/v1/dashboard/readings');
 
