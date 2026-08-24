@@ -8,11 +8,8 @@
 namespace fog::security {
 
 /**
- * @brief Sliding window replay protection. Check that a sensor reading isn't a
- * duplicate. This works as a sliding window as the sensors do not store their
- * sequence state, there for if one genuinely reboots it needs to be able to
- * rejoin at some point. If a reading hasn't been seen in longer than 20 minutes
- * it can rejoin.
+ * @brief Replay protection ensures that the received message's sequence number
+ * is higher than the previous. The sender must persist this sequence number.
  */
 class SensorReplayDetection {
 public:
@@ -22,7 +19,6 @@ public:
   /** @brief Helper struct for table. */
   struct SensorReplayEntry {
     std::uint64_t m_eui;
-    std::uint64_t m_last_seen;
     std::uint32_t m_last_sequence;
     bool m_is_active;
   };
@@ -47,24 +43,12 @@ public:
       // First time the sensor has been seen.
       entry->m_is_active = true;
       entry->m_last_sequence = reading.m_seq;
-      entry->m_last_seen = reading.m_timestamp;
       return true;
     }
 
     // If this sequence is newer than the stored one, that is a win.
     if (entry->m_last_sequence < reading.m_seq) {
       entry->m_last_sequence = reading.m_seq;
-      entry->m_last_seen = reading.m_timestamp;
-      return true;
-    }
-
-    auto elapsed = static_cast<std::int64_t>(reading.m_timestamp) -
-                   static_cast<std::int64_t>(entry->m_last_seen);
-
-    if (elapsed > TIMEOUT_US) {
-      // Likely a reboot rather than a replay attack.
-      entry->m_last_sequence = reading.m_seq;
-      entry->m_last_seen = reading.m_timestamp;
       return true;
     }
 

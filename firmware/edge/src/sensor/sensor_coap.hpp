@@ -6,6 +6,7 @@
 #include "common/ot_utils.hpp"
 #include "common/security/trusted_device_store.hpp"
 #include "common/sensor_reading.hpp"
+#include "fs/sequence_persist.hpp"
 #include <cstdint>
 #include <mutex>
 
@@ -19,6 +20,17 @@ namespace edge::sensor {
  * @brief Service to send the sensor data over CoAP to the fog layer.
  */
 class CoapService {
+
+  /**
+   * @brief To save flash read/write cycles while maintaining persistent flash
+   * indexes we jump by 1000. So for example first ever time we start at 0, so
+   * we store 1000 to flash, then when we get to 1000 we store 2000. This way if
+   * we reboot we guarantee we jump into the future, while reducing flash/read
+   * write cycles. At the expense of possible missing a large group of sequence
+   * values on reboot.
+   */
+  static constexpr std::uint32_t SEQ_STEP = 1000;
+
 public:
   /**
    * @brief Construct a new Coap Service object
@@ -41,6 +53,10 @@ public:
     if (pub_key.has_value()) {
       logging::inf(".eui={:#x}, .pub_key={::#x}", m_eui, pub_key.value());
     }
+
+    m_persisted_sequence.init();
+    m_seq_id = m_persisted_sequence.load().m_seq;
+    m_persisted_sequence.save(fs::PersistedSequence{m_seq_id + SEQ_STEP});
   }
 
   /**
@@ -95,8 +111,12 @@ public:
 #endif
             sig.value()};
 
-    // Increment the sequence id.
+    // Increment and persist sequence id if required.
     m_seq_id++;
+
+    if ((m_seq_id % SEQ_STEP) == 0) {
+      m_persisted_sequence.save(fs::PersistedSequence{m_seq_id});
+    }
 
     coap_addr_t addr;
     addr.u.str = m_address;
@@ -113,13 +133,16 @@ private:
   std::uint64_t m_eui{};
 
   /** @brief The sequence for this message. */
-  std::uint32_t m_seq_id{1};
+  std::uint32_t m_seq_id{};
 
   /** @brief The address to send to. */
   const char *m_address{nullptr};
 
   /** @brief The uri to send to. */
   const char *m_uri_path{nullptr};
+
+  /** @brief Sequence persist. */
+  fs::SequencePersist m_persisted_sequence;
 
 #ifdef CONFIG_ENABLE_FAULT_INJECTION
   fault::FaultInjection m_fault_injection;
