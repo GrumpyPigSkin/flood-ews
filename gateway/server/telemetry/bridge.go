@@ -79,6 +79,11 @@ func (b *Bridge) HandleUplink(payload []byte) {
 	}
 	u := cs.toUplink(time.Now().UTC())
 
+	// Check for a duplicate entry.
+	if !b.hub.IsUnique(u) {
+		return
+	}
+
 	// Broadcast to WS clients.
 	b.hub.Record(u)
 

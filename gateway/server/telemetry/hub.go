@@ -39,6 +39,31 @@ func NewHub(cfg Config, log *slog.Logger) *Hub {
 	}
 }
 
+// Check if this is the first time we have seen this uplink.
+func (h *Hub) IsUnique(u Uplink) bool {
+
+	seq, ok := getSeq(u)
+
+	if !ok {
+		return true
+	}
+
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	for i := range h.history {
+		if h.history[i].Object == nil {
+			continue
+		}
+
+		if prevSeq, ok := getSeq(h.history[i]); ok && prevSeq == seq {
+			return false
+		}
+	}
+
+	return true
+}
+
 // Record buffers an uplink and broadcasts it to every connected client. Slow
 // clients that can't keep up have the message dropped rather than blocking the
 // broadcast.
@@ -145,4 +170,14 @@ func (h *Hub) ServeWS(conn *websocket.Conn) {
 			return
 		}
 	}
+}
+
+// Extract the sequence number from the uplink.
+func getSeq(u Uplink) (int64, bool) {
+	if u.Object == nil {
+		return 0, false
+	}
+
+	v := u.Object["seq"].(int64)
+	return v, true
 }
