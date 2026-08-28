@@ -1,9 +1,9 @@
 #pragma once
 
+#include "common/inplace_function.hpp"
 #include "common/mutex.hpp"
 #include "egress_tracker.hpp"
 #include <cstring>
-#include <functional>
 #include <mutex>
 
 namespace fog::egress {
@@ -15,19 +15,19 @@ namespace fog::egress {
 template <typename EntryT, typename BatchT> struct Hooks {
 
   /** @brief Is this node the leader right now. */
-  std::function<bool()> m_is_leader;
+  stdext::inplace_function<bool()> m_is_leader;
 
   /**
    * @brief Commit an EGRESS record to the Raft log. Return true if accepted.
    */
-  std::function<bool(const EgressRecord &rec)> m_submit_egress;
+  stdext::inplace_function<bool(const EgressRecord &rec)> m_submit_egress;
 
   /** @brief Read the SensorBatch back out of the replicated log by index. */
-  std::function<EntryT const *(std::uint64_t index)> m_read_entry;
+  stdext::inplace_function<EntryT const *(std::uint64_t index)> m_read_entry;
 
   /** @brief Hand the encoded bytes to the E5 module. */
-  std::function<void(const BatchT &batch, std::uint64_t term,
-                     std::uint64_t index, std::uint32_t seq)>
+  stdext::inplace_function<void(const BatchT &batch, std::uint64_t term,
+                                std::uint64_t index, std::uint32_t seq)>
       m_lorawan_send;
 
   /** @brief Check all hooks are present. */

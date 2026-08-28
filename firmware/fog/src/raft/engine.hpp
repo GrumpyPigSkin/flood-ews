@@ -33,9 +33,9 @@ class Engine {
   static constexpr std::size_t QUEUE_DEPTH = 8;
 
 public:
-  using OnApplyCallbackT = std::function<void(const Entry<> &)>;
-  using OnStateChangeCallbackT =
-      std::function<void(const State old_state, const State new_state)>;
+  using OnApplyCallbackT = stdext::inplace_function<void(const Entry<> &)>;
+  using OnStateChangeCallbackT = stdext::inplace_function<void(
+      const State old_state, const State new_state)>;
 
   /**
    * @brief Constructor

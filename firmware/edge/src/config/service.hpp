@@ -1,13 +1,13 @@
 #pragma once
 
 #include "common/coap_utils.h"
+#include "common/inplace_function.hpp"
 #include "common/mutex.hpp"
 #include "common/work_task.hpp"
 #include "config/store.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <functional>
 #include <mutex>
 #include <openthread/coap.h>
 #include <openthread/instance.h>
@@ -36,7 +36,7 @@ public:
    * needs rescheduling.
    * @param [in] uri_path The path over coap to listen for the config.
    */
-  explicit ConfigService(std::function<void()> on_reschedule,
+  explicit ConfigService(stdext::inplace_function<void()> on_reschedule,
                          const char *uri_path)
       : m_reschedule{std::move(on_reschedule)}, m_save_settings([this] {
           std::scoped_lock guard(m_lock);
@@ -353,7 +353,7 @@ private:
   mutable common::openthread_mutex m_ot_lock;
 
   /** @brief On reschedule callback. */
-  std::function<void()> m_reschedule;
+  stdext::inplace_function<void()> m_reschedule;
 
   /** @brief CoAP resource. */
   otCoapResource m_resource{};

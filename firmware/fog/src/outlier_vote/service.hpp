@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/inplace_function.hpp"
 #include "common/logging.hpp"
 #include "common/mutex.hpp"
 #include "common/periodic_task.hpp"
@@ -7,7 +8,6 @@
 #include "outlier_vote/engine.hpp"
 #include "outlier_vote/sensor_batch.hpp"
 #include <cstdint>
-#include <functional>
 #include <mutex>
 
 namespace fog::vote {
@@ -21,8 +21,8 @@ public:
   using Engine = VoteEngine;
   using Batch = batch::SensorBatch;
   using Entry = common::SensorReadingWire;
-  using SubmitFn = std::function<void(const Batch &)>;
-  using NowMsFn = std::function<std::optional<std::uint64_t>()>;
+  using SubmitFn = stdext::inplace_function<void(const Batch &)>;
+  using NowMsFn = stdext::inplace_function<std::optional<std::uint64_t>()>;
 
   /**
    * @brief Constructor

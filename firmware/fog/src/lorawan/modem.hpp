@@ -1,10 +1,10 @@
 #pragma once
 
+#include "common/inplace_function.hpp"
 #include "common/logging.hpp"
 #include "fmt/core.h"
 #include "lorawan/protocol.hpp"
 #include <cstdint>
-#include <functional>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -18,10 +18,11 @@ namespace fog::lora {
  */
 struct UartPort {
   /** @brief Write over UART. */
-  std::function<void(std::string_view)> m_write;
+  stdext::inplace_function<void(std::string_view)> m_write;
 
   /** @brief Read a line from UART. */
-  std::function<std::optional<std::string_view>(std::uint32_t timeout_ms)>
+  stdext::inplace_function<std::optional<std::string_view>(
+      std::uint32_t timeout_ms)>
       m_read_line;
 };
 

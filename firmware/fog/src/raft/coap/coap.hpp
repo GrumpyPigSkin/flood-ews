@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/coap_utils.h"
+#include "common/inplace_function.hpp"
 #include "common/logging.hpp"
 #include "common/ot_utils.hpp"
 #include "common/security/trusted_device_store.hpp"
@@ -9,13 +10,12 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <openthread/coap.h>
 
 namespace fog::raft {
 
 class CoapServer {
-  using InboundFunc = std::function<bool(const Message<> &)>;
+  using InboundFunc = stdext::inplace_function<bool(const Message<> &)>;
   static constexpr std::size_t NUM_COAP_ENDPOINTS = 6;
 
 public:

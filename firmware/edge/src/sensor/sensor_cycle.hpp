@@ -1,12 +1,12 @@
 #pragma once
 
+#include "common/inplace_function.hpp"
 #include "common/periodic_task.hpp"
 #include "common/work_task.hpp"
 #include "jsn/driver.hpp"
 #include "jsn/jsn_logic.hpp"
 #include <algorithm>
 #include <cstdint>
-#include <functional>
 #include <zephyr/kernel.h>
 
 namespace edge::sensor {
@@ -16,22 +16,24 @@ namespace edge::sensor {
  */
 struct SensorCycleParams {
   /** @brief Timings in ms from a config source. */
-  std::function<std::uint32_t()> sleep_interval_ms;
-  std::function<std::uint32_t()> warmup_ms;
-  std::function<std::uint32_t()> timeout_ms;
-  std::function<std::uint32_t()> ground_distance_mm;
+  stdext::inplace_function<std::uint32_t()> sleep_interval_ms;
+  stdext::inplace_function<std::uint32_t()> warmup_ms;
+  stdext::inplace_function<std::uint32_t()> timeout_ms;
+  stdext::inplace_function<std::uint32_t()> ground_distance_mm;
 
   /**
    * @brief Callback fired when a new reading is produced.
    */
-  std::function<void(bool is_ready, std::uint32_t raw_mm,
-                     std::uint32_t ground_mm)>
+  stdext::inplace_function<void(bool is_ready, std::uint32_t raw_mm,
+                                std::uint32_t ground_mm)>
       emit_reading;
 
   /**
    * @brief Time function defaulted to kernal uptime.
    */
-  std::function<std::int64_t()> now_ms = [] { return k_uptime_get(); };
+  stdext::inplace_function<std::int64_t()> now_ms = [] {
+    return k_uptime_get();
+  };
 };
 
 /**

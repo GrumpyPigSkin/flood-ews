@@ -1,10 +1,10 @@
 #pragma once
 
+#include "common/inplace_function.hpp"
 #include "common/logging.hpp"
 #include "jsn/jsn_logic.hpp"
 #include <atomic>
 #include <cstdint>
-#include <functional>
 #include <utility>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/kernel.h>
@@ -33,7 +33,7 @@ public:
    * @brief Runs once per measurement, either on a reading or on timeout.
    * Called within ISR context.
    */
-  using DoneFn = std::function<void(ReadingState)>;
+  using DoneFn = stdext::inplace_function<void(ReadingState)>;
 
   /**
    * @brief Constructor

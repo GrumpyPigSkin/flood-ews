@@ -26,7 +26,7 @@ struct Platform {
   UartPort uart{};
   std::array<std::uint8_t, common::EUI64_LEN> eui{};
   std::string_view app_key;
-  std::function<void(std::uint32_t seq, std::uint64_t batch_index)>
+  stdext::inplace_function<void(std::uint32_t seq, std::uint64_t batch_index)>
       m_on_complete;
 };
 
@@ -284,7 +284,7 @@ private:
   struct k_thread m_thread_data;
 
   /** @brief Callback for when a message has been successfully sent. */
-  std::function<void(std::uint32_t seq, std::uint64_t batch_index)>
+  stdext::inplace_function<void(std::uint32_t seq, std::uint64_t batch_index)>
       m_on_complete;
 
 #ifdef CONFIG_ENABLE_FAULT_INJECTION

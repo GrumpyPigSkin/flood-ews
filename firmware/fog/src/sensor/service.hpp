@@ -1,11 +1,11 @@
 #pragma once
 
 #include "common/coap_utils.h"
+#include "common/inplace_function.hpp"
 #include "common/logging.hpp"
 #include "common/security/trusted_device_store.hpp"
 #include "common/sensor_reading.hpp"
 #include "security/sensor_replay_detection.hpp"
-#include <functional>
 #include <openthread/coap.h>
 #include <openthread/network_time.h>
 
@@ -22,7 +22,7 @@ public:
   /**
    * @brief Callback when we get a reading.
    */
-  using OnReadingT = std::function<void(const SensorReadingWire &)>;
+  using OnReadingT = stdext::inplace_function<void(const SensorReadingWire &)>;
 
   /**
    * @brief Constructor
