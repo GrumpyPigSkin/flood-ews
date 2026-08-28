@@ -3,9 +3,9 @@ CompileFlags:
 
   Add:
     - -isystem
-    - C:/ncs/toolchains/936afb6332/opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/include/c++/12.2.0
+    - C:/ncs/toolchains/dcbdc366a1/opt/zephyr-sdk/gnu/arm-zephyr-eabi/arm-zephyr-eabi/include/c++/14.3.0
     - -isystem
-    - C:/ncs/toolchains/936afb6332/opt/zephyr-sdk/arm-zephyr-eabi/arm-zephyr-eabi/include/c++/12.2.0/arm-zephyr-eabi/thumb/v8-m.main+fp/hard
+    - C:/ncs/toolchains/dcbdc366a1/opt/zephyr-sdk/gnu/arm-zephyr-eabi/arm-zephyr-eabi/include/c++/14.3.0/arm-zephyr-eabi/thumb/v8-m.main+fp/hard
 
   Remove: [
     "-fno-printf-return-value",
