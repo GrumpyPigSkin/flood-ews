@@ -14,7 +14,6 @@
 #include <openthread/thread.h>
 #include <optional>
 
-
 namespace fog::raft {
 
 inline void NetworkService::init() {
@@ -137,7 +136,7 @@ NetworkService::find_or_create_peer(const std::uint64_t eui) {
   }
 
   // Could not create.
-  logging::wrn("Peer: %016llx, could not be added", eui);
+  logging::wrn("Peer: {}, could not be added", eui);
   return nullptr;
 }
 
