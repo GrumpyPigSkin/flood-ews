@@ -5,9 +5,6 @@
  * three threads. These can then be manipulated and the state of the cluster
  * monitored for it's behaviour.
  */
-
-#include "../../fog/src/raft/raft_types.hpp"
-#include "../../fog/src/raft/server/server.hpp"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -29,6 +26,15 @@
 #include <thread>
 #include <utility>
 #include <vector>
+
+// Override the inplace function size for the test.
+#define INPLACE_FUNCTION_INLINE_SIZE 1
+namespace stdext::inplace_function_detail {
+static constexpr size_t InplaceFunctionDefaultCapacity = 64;
+}
+
+#include "../../fog/src/raft/raft_types.hpp"
+#include "../../fog/src/raft/server/server.hpp"
 
 namespace fog::raft::test {
 

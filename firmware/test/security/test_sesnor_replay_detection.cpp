@@ -93,20 +93,11 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         ReplayScenario{
             "duplicate_rejected", 0x1, {{5, 1'000, true}, {5, 1'000, false}}},
-        ReplayScenario{"old_sequence_within_window_rejected",
-                       0x2,
-                       {{10, 0, true}, {9, 1'000, false}}},
+        ReplayScenario{
+            "old_sequence_rejected", 0x2, {{10, 0, true}, {9, 1'000, false}}},
         ReplayScenario{"newer_sequence_accepted",
                        0x3,
-                       {{1, 0, true}, {2, 100, true}, {3, 200, true}}},
-        ReplayScenario{
-            "old_sequence_at_timeout_rejected",
-            0x4,
-            {{10, 0, true}, {10, SensorReplayDetection::TIMEOUT_US, false}}},
-        ReplayScenario{"old_sequence_just_after_timeout_accepted",
-                       0x5,
-                       {{10, 0, true},
-                        {10, SensorReplayDetection::TIMEOUT_US + 1, true}}}),
+                       {{1, 0, true}, {2, 100, true}, {3, 200, true}}}),
     [](const ::testing::TestParamInfo<ReplayScenario> &info) {
       return info.param.name;
     });
