@@ -1,8 +1,8 @@
 """Integration Test.
 
-Test that a reading with a bash hash gets dropped when received by the
-Fog layer.
-    1. Tell the sensor to omit the hash.
+Test that a reading with a valid signature that no longer matches the payload is
+rejected at the fog layer.
+    1. Tell the sensor to change the payload after signing.
     2. Check the fog layer rejects the reading.
 """
 
@@ -20,17 +20,17 @@ TIMEOUT = 120.0
 logger = logging.getLogger(__name__)
 
 @pytest.mark.asyncio
-async def test_bad_hash_is_rejected(
+async def test_bad_payload_is_rejected(
     chirpstack,
     otctl,
     fog_cluster,
     coap_context) -> None:
     """Integration Test.
 
-    Test that a reading with a bash hash gets dropped when received by the
-    Fog layer.
+    Test that a reading with a valid signature that no longer matches the payload is
+    rejected at the fog layer.
 
-        1. Tell the sensor to omit the hash.
+        1. Tell the sensor to change the payload after signing.
 
         2. Check the fog layer rejects the reading.
     """
