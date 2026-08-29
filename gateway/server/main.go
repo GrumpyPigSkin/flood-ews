@@ -101,7 +101,7 @@ func main() {
 	}
 	defer p.StopAll()
 
-	// Egress targets TODO: Finish supabase storage.
+	// Egress targets.
 	targets, err := st.ListTargets(ctx)
 	if err != nil {
 		logger.Error("list targets", "err", err)
