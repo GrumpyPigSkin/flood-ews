@@ -98,7 +98,9 @@ namespace stdext {
 
 namespace inplace_function_detail {
 
+#ifndef INPLACE_FUNCTION_INLINE_SIZE
 static constexpr size_t InplaceFunctionDefaultCapacity = 32;
+#endif
 
 #ifndef SG14_USE_STD_ALIGNED_STORAGE
 // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61458
