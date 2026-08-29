@@ -100,16 +100,15 @@ public:
 
     logging::inf("Signed reading: {}", sig.value());
 
-    const common::SensorReadingSigned signed_reading{
-        .m_reading = to_wire,
-        .m_signature =
 #ifdef CONFIG_ENABLE_FAULT_INJECTION
-            // Conditionally ruin the hash.
-        (fault_message.m_active && fault_message.m_ruin_hash)
-            ? std::array<std::uint8_t, 64>{}
-            :
+    // Flip the payload value so the signature and payload no longer match.
+    if (fault_message.m_active && fault_message.m_ruin_hash) {
+      to_wire.m_water_level_mm = ~to_wire.m_water_level_mm;
+    }
 #endif
-            sig.value()};
+
+    const common::SensorReadingSigned signed_reading{
+        .m_reading = to_wire, .m_signature = sig.value()};
 
     // Increment and persist sequence id if required.
     m_seq_id++;
