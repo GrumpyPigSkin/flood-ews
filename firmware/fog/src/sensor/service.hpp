@@ -72,7 +72,7 @@ public:
       logging::inf("Bad sensor payload from .eui={}, .error={}", reading.m_eui,
                    res);
 #ifdef CONFIG_ENABLE_FAULT_INJECTION
-      logging::inf("ERROR: SIGNATURE FAILED");
+      logging::inf("ERROR:SIGNATURE_FAILED");
 #endif
       return;
     }
@@ -86,7 +86,7 @@ public:
     // Check this isn't a duplicate.
     if (!m_replay_detect.is_fresh(reading)) {
 #ifdef CONFIG_ENABLE_FAULT_INJECTION
-      logging::inf("ERROR: REPLAY PROTECTION");
+      logging::inf("ERROR:REPLAY_PROTECTION");
 #endif
       return;
     }
