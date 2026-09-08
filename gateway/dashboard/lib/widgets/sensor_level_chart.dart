@@ -7,7 +7,6 @@
 
 import 'package:dashboard/model/telemetry.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:dashboard/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -23,24 +22,29 @@ class SensorLevelChart extends StatelessWidget {
   const SensorLevelChart({super.key, required this.history, this.thresholdMm});
 
   /// Convert the validity into a colour.
-  static Color _validityColor(String v) => switch (v) {
-    'GOOD' => Palette.ok,
-    'QUESTIONABLE' => Palette.watch,
-    'INVALID' => Palette.alarm,
-    _ => Palette.textDim,
+  static Color _validityColor(ThemeData theme, String v) => switch (v) {
+    'GOOD' => theme.colorScheme.secondary,
+    'QUESTIONABLE' => theme.colorScheme.tertiary,
+    'INVALID' => theme.colorScheme.error,
+    _ => theme.colorScheme.onSurfaceVariant,
   };
 
   /// Build the UI.
   @override
   Widget build(BuildContext context) {
     // Don't bother showing anything if we don't have enough readings.
+    final theme = Theme.of(context);
+
     if (history.length < 2) {
-      return const SizedBox(
+      return SizedBox(
         height: 160,
         child: Center(
           child: Text(
             'Collecting readings...',
-            style: TextStyle(color: Palette.textDim, fontSize: 12),
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
           ),
         ),
       );
@@ -70,8 +74,10 @@ class SensorLevelChart extends StatelessWidget {
             show: true,
             drawVerticalLine: false,
             horizontalInterval: ((maxY - minY) / 4).clamp(1, double.infinity),
-            getDrawingHorizontalLine: (_) =>
-                const FlLine(color: Palette.hairline, strokeWidth: 0.5),
+            getDrawingHorizontalLine: (_) => FlLine(
+              color: theme.colorScheme.outlineVariant,
+              strokeWidth: 0.5,
+            ),
           ),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
@@ -87,7 +93,10 @@ class SensorLevelChart extends StatelessWidget {
                 reservedSize: 44,
                 getTitlesWidget: (value, meta) => Text(
                   '${value.toInt()}',
-                  style: const TextStyle(color: Palette.textDim, fontSize: 10),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
                 ),
               ),
             ),
@@ -102,8 +111,8 @@ class SensorLevelChart extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
                       DateFormat('HH:mm').format(t.toLocal()),
-                      style: const TextStyle(
-                        color: Palette.textDim,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 10,
                       ),
                     ),
@@ -118,14 +127,14 @@ class SensorLevelChart extends StatelessWidget {
                   horizontalLines: [
                     HorizontalLine(
                       y: thresholdMm!.toDouble(),
-                      color: Palette.alarm.withValues(alpha: 0.6),
+                      color: theme.colorScheme.error.withValues(alpha: 0.6),
                       strokeWidth: 1,
                       dashArray: [6, 4],
                       label: HorizontalLineLabel(
                         show: true,
                         alignment: Alignment.topRight,
-                        style: const TextStyle(
-                          color: Palette.alarm,
+                        style: TextStyle(
+                          color: theme.colorScheme.error,
                           fontSize: 9,
                         ),
                         labelResolver: (_) => 'threshold',
@@ -138,7 +147,7 @@ class SensorLevelChart extends StatelessWidget {
             LineChartBarData(
               spots: spots,
               isCurved: false,
-              color: Palette.accent,
+              color: theme.colorScheme.primary,
               barWidth: 1.6,
               dotData: FlDotData(
                 show: true,
@@ -148,27 +157,27 @@ class SensorLevelChart extends StatelessWidget {
                   final outlier = p.entry.outlier;
                   return FlDotCirclePainter(
                     radius: outlier ? 3.5 : 2.5,
-                    color: _validityColor(v),
+                    color: _validityColor(theme, v),
                     strokeWidth: outlier ? 1.5 : 0,
-                    strokeColor: Palette.alarm,
+                    strokeColor: theme.colorScheme.error,
                   );
                 },
               ),
               belowBarData: BarAreaData(
                 show: true,
-                color: Palette.accent.withValues(alpha: 0.08),
+                color: theme.colorScheme.primary.withValues(alpha: 0.08),
               ),
             ),
           ],
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (_) => Palette.surfaceAlt,
+              getTooltipColor: (_) => theme.colorScheme.surfaceContainerHigh,
               getTooltipItems: (spots) => spots.map((s) {
                 final p = history[s.spotIndex];
                 return LineTooltipItem(
                   '${p.waterLevelMm} mm\n${p.entry.validity}',
                   TextStyle(
-                    color: _validityColor(p.entry.validity),
+                    color: _validityColor(theme, p.entry.validity),
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
