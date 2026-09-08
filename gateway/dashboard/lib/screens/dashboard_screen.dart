@@ -91,10 +91,20 @@ class _ConnDot extends StatelessWidget {
       LinkState.connecting => theme.colorScheme.tertiary,
       LinkState.disconnected => theme.colorScheme.error,
     };
-    return Container(
-      width: 9,
-      height: 9,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+
+    final label = switch (connection) {
+      LinkState.connected => 'System connected',
+      LinkState.connecting => 'System connecting',
+      LinkState.disconnected => 'System disconnected',
+    };
+
+    return Semantics(
+      label: label,
+      child: Container(
+        width: 9,
+        height: 9,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
     );
   }
 }
@@ -130,18 +140,25 @@ class _Headline extends StatelessWidget {
     final accent = alert
         ? theme.colorScheme.error
         : theme.colorScheme.secondary;
+
+    final cardBg = alert
+        ? theme.colorScheme.errorContainer
+        : theme.colorScheme.surface;
+
+    final borderColor = alert
+        ? theme.colorScheme.error
+        : theme.colorScheme.outlineVariant;
+
     final meanRounded = agg.meanMm.round();
+
+    final stationPlural = agg.reporting == 1 ? "station" : "stations";
+    final alertStatusText = alert ? 'FLOOD ALERT' : 'Levels normal';
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: alert
-              ? theme.colorScheme.error.withValues(alpha: 0.5)
-              : theme.colorScheme.outlineVariant,
-          width: alert ? 2 : 1,
-        ),
+        border: Border.all(color: borderColor, width: alert ? 2 : 1),
       ),
       padding: const EdgeInsets.all(36),
       child: Column(
@@ -150,7 +167,7 @@ class _Headline extends StatelessWidget {
         children: [
           Text(
             // Show alert text.
-            alert ? 'FLOOD ALERT' : 'Levels normal',
+            alertStatusText,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -160,33 +177,38 @@ class _Headline extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           // Headline value, mean across stations.
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                '$meanRounded',
-                style: TextStyle(
-                  fontFamily: monoFamily,
-                  fontSize: 96,
-                  fontWeight: FontWeight.w800,
-                  height: 1.0,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: Text(
-                  'mm',
+          Semantics(
+            container: true,
+            label:
+                'Average water level: $meanRounded millimeters, calculated across ${agg.reporting} $stationPlural',
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  '$meanRounded',
                   style: TextStyle(
-                    fontSize: 28,
-                    color: theme.colorScheme.onSurfaceVariant,
+                    fontFamily: monoFamily,
+                    fontSize: 96,
+                    fontWeight: FontWeight.w800,
+                    height: 1.0,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Text(
+                    'mm',
+                    style: TextStyle(
+                      fontSize: 28,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 6),
           // Show the user how many sensors contributed to the mean.
@@ -236,60 +258,67 @@ class _PeakStat extends StatelessWidget {
         : theme.colorScheme.onSurfaceVariant;
 
     // Sub container for the peak value.
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: peakColor.withValues(alpha: 0.4)),
-      ),
+    return Semantics(
+      container: true,
+      label:
+          'Peak water level: ${agg.peakMm} millimeters, recorded at station ${peak.euiHex}',
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: peakColor.withValues(alpha: 0.4)),
+          ),
 
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'PEAK',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.5,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 14),
-          // The peak value.
-          Text(
-            '${agg.peakMm}',
-            style: TextStyle(
-              fontFamily: monoFamily,
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: peakColor,
-              height: 1.0,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: Text(
-              'mm',
-              style: TextStyle(
-                fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'PEAK',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
+              const SizedBox(width: 14),
+              // The peak value.
+              Text(
+                '${agg.peakMm}',
+                style: TextStyle(
+                  fontFamily: monoFamily,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: peakColor,
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Text(
+                  'mm',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              // The node that reported the peak value.
+              Text(
+                peak.euiHex,
+                style: TextStyle(
+                  fontFamily: monoFamily,
+                  fontSize: 13,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 14),
-          // The node that reported the peak value.
-          Text(
-            peak.euiHex,
-            style: TextStyle(
-              fontFamily: monoFamily,
-              fontSize: 13,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -318,22 +347,26 @@ class _DegradedBanner extends StatelessWidget {
 
     // If we don't have any degraded sensors or outliers report all is good.
     if (degraded == 0 && outliers == 0) {
-      return Row(
-        children: [
-          Icon(
-            Icons.check_circle_outline,
-            size: 18,
-            color: theme.colorScheme.secondary,
-          ),
-          SizedBox(width: 8),
-          Text(
-            'All stations reporting normally',
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 14,
+      return Semantics(
+        container: true,
+        label: 'System status: All stations reporting normally',
+        child: Row(
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              size: 18,
+              color: theme.colorScheme.secondary,
             ),
-          ),
-        ],
+            SizedBox(width: 8),
+            Text(
+              'All stations reporting normally',
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
       );
     }
 
@@ -344,11 +377,17 @@ class _DegradedBanner extends StatelessWidget {
       if (outliers > 0) '$outliers flagged',
     ];
 
+    final statusMessage = 'Degraded performance: ${parts.join(" · ")}';
+
     // Display the issues found.
-    return ErrorBanner(
-      icon: Icons.warning_amber_rounded,
-      message: 'Degraded performance: ${parts.join(" · ")}',
-      color: theme.colorScheme.tertiary,
+    return Semantics(
+      container: true,
+      label: 'System status alert: $statusMessage',
+      child: ErrorBanner(
+        icon: Icons.warning_amber_rounded,
+        message: 'Degraded performance: ${parts.join(" · ")}',
+        color: theme.colorScheme.tertiary,
+      ),
     );
   }
 }
