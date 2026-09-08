@@ -62,9 +62,9 @@ FOG_NODES = [
 
 # MAC addresses for the sensors in case there are extra nodes on the network.
 KNOWN_SENSOR_MACS = {
-    "ea88114cfd5b3f89",  # Sensor 1
-    "8664571121fbf910",  # Sensor 2
-    "6aa56bfcd0edaa23",  # Sensor 3
+    "fadcc893c36d285a",  # Sensor 1
+    "ee26904b34042d16",  # Sensor 2
+    "e6b94268b7b61f91",  # Sensor 3
 }
 
 # ChirpStack MQTT

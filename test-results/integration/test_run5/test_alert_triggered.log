@@ -1,0 +1,75 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.1.1, pluggy-1.6.0 -- /home/oliver/projects/tests/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/oliver/projects/tests
+configfile: pytest.ini
+plugins: timeout-2.4.0, anyio-4.14.2, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+test_alert_triggered.py::test_alert_triggered 2026-09-05 13:37:12 [INFO] test_helpers: Waiting up to 150.0s for a clean baseline...
+2026-09-05 13:37:20 [INFO] test_helpers: Baseline confirmed clean.
+2026-09-05 13:37:55 [INFO] coap: Retransmission, Message ID: 63309.
+2026-09-05 13:38:00 [INFO] coap: Retransmission, Message ID: 63309.
+2026-09-05 13:38:00 [INFO] sensor_fault_injector: Fault PUT acknowledged: 2.04 Changed
+2026-09-05 13:38:00 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:38:00 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe33, ACK, MID 0xf74d> could not be matched to any request
+2026-09-05 13:38:00 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:38:00 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:38:00 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe33, ACK, MID 0xf74d> could not be matched to any request
+2026-09-05 13:38:01 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:38:03 [INFO] coap: Retransmission, Message ID: 63310.
+2026-09-05 13:38:04 [INFO] sensor_fault_injector: Fault PUT acknowledged: 2.04 Changed
+2026-09-05 13:38:04 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec02] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:38:04 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec02] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe34, ACK, MID 0xf74e> could not be matched to any request
+2026-09-05 13:38:04 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:38:06 [INFO] coap: Retransmission, Message ID: 63311.
+2026-09-05 13:38:12 [INFO] coap: Retransmission, Message ID: 63311.
+2026-09-05 13:38:18 [INFO] sensor_fault_injector: Fault PUT acknowledged: 2.04 Changed
+2026-09-05 13:38:18 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec03] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:38:18 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec03] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe35, ACK, MID 0xf74f> could not be matched to any request
+2026-09-05 13:38:18 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:38:18 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec03] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:38:18 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec03] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe35, ACK, MID 0xf74f> could not be matched to any request
+2026-09-05 13:38:18 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:39:50 [INFO] tests.test_alert_triggered: Alert received: Uplink(ts=6293.750027877, dev_eui='f4ce360a4eac3643', f_port=8, f_cnt=111, payload=b'C6\xacN\n6\xce\xf4\x03\x00\x00\x00M\x01\x00\x00n\x00\x00\x00\x01\x03\xf1i\x8b\xe9S6\xce\xf4@\x06\x00\x00Hy\x95t\xce\x95\x04\xc316\xce\xf4@\x06\x00\x00\x85b"v\xad\xe1\xc0OO6\xce\xf4@\x06\x00\x00\xd7\x19\x8et', decoded={'raft_term': 3.0, 'raft_log_index': 333.0, 'alert': True, 'node_id': '17640096208354293315', 'count': 3.0, 'seq': 110.0, 'entries': [{'validity': 'GOOD', 'outlier': False, 'device_eui': '17640096524485224945', 'detail': 0.0, 'validity_code': 0.0, 'timestamp': 1955952968.0, 'water_level_mm': 1600.0}, {'timestamp': 1981964933.0, 'water_level_mm': 1600.0, 'validity': 'GOOD', 'outlier': False, 'detail': 0.0, 'device_eui': '17640096377809966542', 'validity_code': 0.0}, {'outlier': False, 'detail': 0.0, 'timestamp': 1955469783.0, 'validity': 'GOOD', 'water_level_mm': 1600.0, 'validity_code': 0.0, 'device_eui': '17640096504725168557'}]})
+2026-09-05 13:39:53 [INFO] coap: Retransmission, Message ID: 63312.
+2026-09-05 13:39:56 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec03] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:39:56 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec03] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe36, ACK, MID 0xf750> could not be matched to any request
+2026-09-05 13:39:56 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:39:58 [INFO] coap: Retransmission, Message ID: 63313.
+2026-09-05 13:39:59 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec02] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:39:59 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec02] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe37, ACK, MID 0xf751> could not be matched to any request
+2026-09-05 13:39:59 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:40:01 [INFO] coap: Retransmission, Message ID: 63314.
+2026-09-05 13:40:05 [INFO] coap: Retransmission, Message ID: 63314.
+2026-09-05 13:40:14 [INFO] coap: Retransmission, Message ID: 63314.
+2026-09-05 13:40:15 [INFO] test_helpers: Waiting up to 660.0s for a clean baseline...
+2026-09-05 13:40:15 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:40:15 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe38, ACK, MID 0xf752> could not be matched to any request
+2026-09-05 13:40:15 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:40:15 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:40:15 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe38, ACK, MID 0xf752> could not be matched to any request
+2026-09-05 13:40:15 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:40:15 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 13:40:15 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec01] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token fe38, ACK, MID 0xf752> could not be matched to any request
+2026-09-05 13:40:15 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 13:40:50 [INFO] test_helpers: Baseline confirmed clean.
+PASSED
+
+=============================== warnings summary ===============================
+test_alert_triggered.py::test_alert_triggered
+  /home/oliver/projects/tests/chirpstack_handler.py:39: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
+    self._client = mqtt.Client()
+
+test_alert_triggered.py::test_alert_triggered
+test_alert_triggered.py::test_alert_triggered
+test_alert_triggered.py::test_alert_triggered
+test_alert_triggered.py::test_alert_triggered
+test_alert_triggered.py::test_alert_triggered
+test_alert_triggered.py::test_alert_triggered
+  /home/oliver/projects/tests/sensor_fault_injector.py:54: DeprecationWarning: Initializing messages with an mtype is deprecated. Instead, set transport_tuning=aiocoap.Reliable or aiocoap.Unreliable.
+    msg = Message(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 1 passed, 7 warnings in 218.60s (0:03:38) ===================

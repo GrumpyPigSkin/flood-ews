@@ -1,0 +1,36 @@
+[8563.984] WRN: cmd: got line: +MSGHEX: Done
+[8563.984] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=527
+[8563.984] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=517
+[8563.984] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[8572.442] INF: on_window_close: Sensor window closed.
+[8572.442] INF: on_window_close: Batch submitted to raft.
+[8573.309] WRN: cmd: got line: +MSGHEX: Start
+[8576.153] WRN: cmd: got line: +MSGHEX: Done
+[8576.301] I: FAULT:PAUSED_IN_WINDOW
+[8585.148] I: nRF5 802154 radio initialized
+[8585.148] I: 8 Sectors of 4096 bytes
+[8585.148] I: alloc wra: 0, ea8
+[8585.148] I: data wra: 0, 43c
+[8585.148] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[8585.148] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[8585.148] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[8585.148] WRN: Device detached from thread network.
+[8585.148] WRN: Device attached started raft.
+[8585.148] INF: .eui=0xf4ce360a4eac3643, .pub_key=[0x4, 0x72, 0xff, 0xc3, 0xf2, 0x28, 0x0, 0x45, 0x65, 0xdd, 0xd1, 0xa8, 0xfc, 0xce, 0x6f, 0x72, 0x3b, 0x50, 0xc3, 0x24, 0x43, 0xd8, 0xc7, 0x33, 0x7a, 0xaa, 0x3b, 0xd1, 0x22, 0x94, 0x42, 0x92, 0x1e, 0xe2, 0xad, 0x8b, 0xc2, 0x3a, 0x81, 0x3, 0xdc, 0x6c, 0xd3, 0x45, 0x67, 0x11, 0x48, 0x43, 0x68, 0xe5, 0x69, 0x28, 0xc9, 0x8d, 0xe8, 0x1b, 0x9c, 0x5a, 0xe1, 0x96, 0xef, 0xb4, 0x8, 0x7a, 0x7d]
+[8585.148] I: 4 Sectors of 4096 bytes
+[8585.148] I: alloc wra: 0, e78
+[8585.148] I: data wra: 0, 4f8
+[8585.148] INF: Service register: OK
+[8585.148] INF: get_time_us: Time not synced
+[8585.148] INF: load loaded state: .m_term=0, .m_voted_for=0 
+[8585.148] INF: LoraWanService: Thread started.
+[8585.148] INF: LoraWanService: Attempting to join network.
+[8592.233] WRN: cmd: got lWRN: cmd: got line: +JOIN: Network joined
+[8592.603] WRN: cmd: got line: +MSGHEX: Start
+[8593.600] WRN: cmd: got line: +MSGHEX: FPENDING
+[8593.642] WRN: cmd: got line: +MSGHEX: RXWIN1, RSSI -2, SNR 9.0
+[8593.652] WRN: cmd: got line: +MSGHEX: Done
+[8593.800] INF: LoraWanService: Joined LoRaWAN network.
+[8610.220] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[8610.655] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=501
+[8613.250] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533

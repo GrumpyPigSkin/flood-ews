@@ -1,0 +1,19 @@
+[9032.136] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[9032.136] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
+[9033.192] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[9040.425] E: Cannot send frame
+[9050.018] E: Cannot send frame
+[9050.104] E: Cannot send frame
+[9050.906] E: Cannot send frame
+[9052.461] INF: on_window_close: Sensor window closed.
+[9052.461] INF: on_window_close: Batch submitted to raft.
+[9060.114] INF: Persistence saved: .current_term=12, .voted_for=18446744073709551615
+[9060.114] INF: Persistence saved: .current_term=12, .voted_for=17640096808941659601
+[9060.588] E: Cannot send frame
+[9060.685] INF: RAFT:BECAME_FOLLOWER
+[9071.078] E: Cannot send frame
+[9090.149] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[9090.594] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=406
+[9093.182] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[9112.416] INF: on_window_close: Sensor window closed.
+[9112.416] INF: on_window_close: Batch submitted to raft.

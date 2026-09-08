@@ -1,0 +1,185 @@
+?       server  [no test files]
+=== RUN   TestSetSpecs
+--- PASS: TestSetSpecs (0.00s)
+=== RUN   TestExecute
+=== RUN   TestExecute/Successful_State_Transition
+=== RUN   TestExecute/Idempotent_Call_(No-Op)
+=== RUN   TestExecute/Unknown_Actuator_ID
+=== RUN   TestExecute/Invalid_State_Choice
+=== RUN   TestExecute/Backend_Hardware_Error
+--- PASS: TestExecute (0.00s)
+    --- PASS: TestExecute/Successful_State_Transition (0.00s)
+    --- PASS: TestExecute/Idempotent_Call_(No-Op) (0.00s)
+    --- PASS: TestExecute/Unknown_Actuator_ID (0.00s)
+    --- PASS: TestExecute/Invalid_State_Choice (0.00s)
+    --- PASS: TestExecute/Backend_Hardware_Error (0.00s)
+=== RUN   TestOnResult
+--- PASS: TestOnResult (0.00s)
+=== RUN   TestWatchdog_Trips
+--- PASS: TestWatchdog_Trips (0.08s)
+PASS
+ok      server/actuator 0.495s
+=== RUN   TestDisposition_Valid
+=== RUN   TestDisposition_Valid/Valid_Advisory
+=== RUN   TestDisposition_Valid/Valid_Operator_Approved
+=== RUN   TestDisposition_Valid/Empty_string
+=== RUN   TestDisposition_Valid/Invalid_arbitrary_string
+--- PASS: TestDisposition_Valid (0.00s)
+    --- PASS: TestDisposition_Valid/Valid_Advisory (0.00s)
+    --- PASS: TestDisposition_Valid/Valid_Operator_Approved (0.00s)
+    --- PASS: TestDisposition_Valid/Empty_string (0.00s)
+    --- PASS: TestDisposition_Valid/Invalid_arbitrary_string (0.00s)
+=== RUN   TestAdvisory_Stale
+=== RUN   TestAdvisory_Stale/Zero_time_timestamp_(fail)
+=== RUN   TestAdvisory_Stale/Fresh_observation_(exactly_now)
+=== RUN   TestAdvisory_Stale/Fresh_observation_(under_max_age_limit)
+=== RUN   TestAdvisory_Stale/Exact_boundary_limit_(shouldn't_be_stale_yet)
+=== RUN   TestAdvisory_Stale/Stale_observation_(just_over_the_limit)
+=== RUN   TestAdvisory_Stale/Very_old_observation
+=== RUN   TestAdvisory_Stale/Just_a_bit_in_the_future
+--- PASS: TestAdvisory_Stale (0.00s)
+    --- PASS: TestAdvisory_Stale/Zero_time_timestamp_(fail) (0.00s)
+    --- PASS: TestAdvisory_Stale/Fresh_observation_(exactly_now) (0.00s)
+    --- PASS: TestAdvisory_Stale/Fresh_observation_(under_max_age_limit) (0.00s)
+    --- PASS: TestAdvisory_Stale/Exact_boundary_limit_(shouldn't_be_stale_yet) (0.00s)
+    --- PASS: TestAdvisory_Stale/Stale_observation_(just_over_the_limit) (0.00s)
+    --- PASS: TestAdvisory_Stale/Very_old_observation (0.00s)
+    --- PASS: TestAdvisory_Stale/Just_a_bit_in_the_future (0.00s)
+PASS
+ok      server/advisory 0.382s
+=== RUN   TestLiveStore_UpdateAndSnapshot
+--- PASS: TestLiveStore_UpdateAndSnapshot (0.00s)
+=== RUN   TestRoute_Healthz
+--- PASS: TestRoute_Healthz (0.00s)
+=== RUN   TestRoute_DashboardReadings
+--- PASS: TestRoute_DashboardReadings (0.00s)
+=== RUN   TestLocalRoutesIsolation
+--- PASS: TestLocalRoutesIsolation (0.00s)
+=== RUN   TestLocalLogin_And_JWT_Authorization
+--- PASS: TestLocalLogin_And_JWT_Authorization (0.34s)
+=== RUN   TestActorFrom_HeaderFallback
+--- PASS: TestActorFrom_HeaderFallback (0.00s)
+=== RUN   TestWriteErr
+--- PASS: TestWriteErr (0.00s)
+PASS
+ok      server/api      1.646s
+?       server/egress   [no test files]
+=== RUN   TestEngine_SetRules
+--- PASS: TestEngine_SetRules (0.00s)
+=== RUN   TestEngine_SubmitAdvisory
+=== RUN   TestEngine_SubmitAdvisory/Autonomous_trigger
+=== RUN   TestEngine_SubmitAdvisory/Disabled_rule_ignored
+=== RUN   TestEngine_SubmitAdvisory/Severity_below_threshold
+=== RUN   TestEngine_SubmitAdvisory/Higher_priority_overrides_lower_priority
+=== RUN   TestEngine_SubmitAdvisory/Multiple_distinct_actuators_both_trigger
+=== RUN   TestEngine_SubmitAdvisory/Dangerous_actions_require_operator_approval
+=== RUN   TestEngine_SubmitAdvisory/Operator_approved_disposition_forces_queueing
+--- PASS: TestEngine_SubmitAdvisory (0.00s)
+    --- PASS: TestEngine_SubmitAdvisory/Autonomous_trigger (0.00s)
+    --- PASS: TestEngine_SubmitAdvisory/Disabled_rule_ignored (0.00s)
+    --- PASS: TestEngine_SubmitAdvisory/Severity_below_threshold (0.00s)
+    --- PASS: TestEngine_SubmitAdvisory/Higher_priority_overrides_lower_priority (0.00s)
+    --- PASS: TestEngine_SubmitAdvisory/Multiple_distinct_actuators_both_trigger (0.00s)
+    --- PASS: TestEngine_SubmitAdvisory/Dangerous_actions_require_operator_approval (0.00s)
+    --- PASS: TestEngine_SubmitAdvisory/Operator_approved_disposition_forces_queueing (0.00s)
+=== RUN   TestEngine_ApprovePending
+--- PASS: TestEngine_ApprovePending (0.00s)
+PASS
+ok      server/policy   0.423s
+=== RUN   TestExternalSource_DrivesActuatorViaPolicy
+--- PASS: TestExternalSource_DrivesActuatorViaPolicy (0.00s)
+=== RUN   TestPoller_PollOnce_SuccessAndRouting
+--- PASS: TestPoller_PollOnce_SuccessAndRouting (0.00s)
+=== RUN   TestPoller_PollOnce_BoundsChecking
+--- PASS: TestPoller_PollOnce_BoundsChecking (0.00s)
+=== RUN   TestPoller_Sync
+--- PASS: TestPoller_Sync (0.00s)
+=== RUN   TestGenericValidator
+=== RUN   TestGenericValidator/Success:_Basic_mapping_with_threshold_severity
+=== RUN   TestGenericValidator/Success:_Severity_mapped_directly_from_path_with_mapping
+=== RUN   TestGenericValidator/Success:_Fallback_to_source_kind_and_default_values
+=== RUN   TestGenericValidator/Success:_Parse_ObservedAt_timestamp_successfully
+=== RUN   TestGenericValidator/Error:_Invalid_JSON_body
+=== RUN   TestGenericValidator/Error:_Bad_FieldMap_JSON
+=== RUN   TestGenericValidator/Error:_Missing_value_path_in_payload
+--- PASS: TestGenericValidator (0.00s)
+    --- PASS: TestGenericValidator/Success:_Basic_mapping_with_threshold_severity (0.00s)
+    --- PASS: TestGenericValidator/Success:_Severity_mapped_directly_from_path_with_mapping (0.00s)
+    --- PASS: TestGenericValidator/Success:_Fallback_to_source_kind_and_default_values (0.00s)
+    --- PASS: TestGenericValidator/Success:_Parse_ObservedAt_timestamp_successfully (0.00s)
+    --- PASS: TestGenericValidator/Error:_Invalid_JSON_body (0.00s)
+    --- PASS: TestGenericValidator/Error:_Bad_FieldMap_JSON (0.00s)
+    --- PASS: TestGenericValidator/Error:_Missing_value_path_in_payload (0.00s)
+=== RUN   TestGetStringWithFallback
+=== RUN   TestGetStringWithFallback/Path_empty
+=== RUN   TestGetStringWithFallback/Path_missing
+=== RUN   TestGetStringWithFallback/Value_empty_string
+=== RUN   TestGetStringWithFallback/Value_exists
+--- PASS: TestGetStringWithFallback (0.00s)
+    --- PASS: TestGetStringWithFallback/Path_empty (0.00s)
+    --- PASS: TestGetStringWithFallback/Path_missing (0.00s)
+    --- PASS: TestGetStringWithFallback/Value_empty_string (0.00s)
+    --- PASS: TestGetStringWithFallback/Value_exists (0.00s)
+=== RUN   TestSeverityFromThresholds
+=== RUN   TestSeverityFromThresholds/Below_all
+=== RUN   TestSeverityFromThresholds/Exactly_lowest
+=== RUN   TestSeverityFromThresholds/Between_info_and_watch
+=== RUN   TestSeverityFromThresholds/Exactly_watch
+=== RUN   TestSeverityFromThresholds/Between_watch_and_warning
+=== RUN   TestSeverityFromThresholds/Exactly_warning
+=== RUN   TestSeverityFromThresholds/Well_above_warning
+--- PASS: TestSeverityFromThresholds (0.00s)
+    --- PASS: TestSeverityFromThresholds/Below_all (0.00s)
+    --- PASS: TestSeverityFromThresholds/Exactly_lowest (0.00s)
+    --- PASS: TestSeverityFromThresholds/Between_info_and_watch (0.00s)
+    --- PASS: TestSeverityFromThresholds/Exactly_watch (0.00s)
+    --- PASS: TestSeverityFromThresholds/Between_watch_and_warning (0.00s)
+    --- PASS: TestSeverityFromThresholds/Exactly_warning (0.00s)
+    --- PASS: TestSeverityFromThresholds/Well_above_warning (0.00s)
+=== RUN   TestSeverityFromMapped
+=== RUN   TestSeverityFromMapped/Mapped_critical
+=== RUN   TestSeverityFromMapped/Mapped_warning
+=== RUN   TestSeverityFromMapped/Mapped_unknown_string_value
+=== RUN   TestSeverityFromMapped/Unmapped_fallback_to_standard_severity_string
+=== RUN   TestSeverityFromMapped/Unmapped_completely_invalid
+--- PASS: TestSeverityFromMapped (0.00s)
+    --- PASS: TestSeverityFromMapped/Mapped_critical (0.00s)
+    --- PASS: TestSeverityFromMapped/Mapped_warning (0.00s)
+    --- PASS: TestSeverityFromMapped/Mapped_unknown_string_value (0.00s)
+    --- PASS: TestSeverityFromMapped/Unmapped_fallback_to_standard_severity_string (0.00s)
+    --- PASS: TestSeverityFromMapped/Unmapped_completely_invalid (0.00s)
+=== RUN   TestSeverityFromStr
+=== RUN   TestSeverityFromStr/info
+=== RUN   TestSeverityFromStr/watch
+=== RUN   TestSeverityFromStr/warning
+=== RUN   TestSeverityFromStr/critical
+=== RUN   TestSeverityFromStr/unknown
+=== RUN   TestSeverityFromStr/#00
+--- PASS: TestSeverityFromStr (0.00s)
+    --- PASS: TestSeverityFromStr/info (0.00s)
+    --- PASS: TestSeverityFromStr/watch (0.00s)
+    --- PASS: TestSeverityFromStr/warning (0.00s)
+    --- PASS: TestSeverityFromStr/critical (0.00s)
+    --- PASS: TestSeverityFromStr/unknown (0.00s)
+    --- PASS: TestSeverityFromStr/#00 (0.00s)
+PASS
+ok      server/poller   1.298s
+=== RUN   TestEnqueueWithIntendedAction
+--- PASS: TestEnqueueWithIntendedAction (0.00s)
+=== RUN   TestEnqueueWithoutIntendedAction
+--- PASS: TestEnqueueWithoutIntendedAction (0.00s)
+=== RUN   TestResolvePendingApproved
+--- PASS: TestResolvePendingApproved (0.00s)
+=== RUN   TestResolvePendingNotFound
+--- PASS: TestResolvePendingNotFound (0.00s)
+=== RUN   TestResolvePendingReject
+--- PASS: TestResolvePendingReject (0.00s)
+=== RUN   TestUpsertAndListSources
+--- PASS: TestUpsertAndListSources (0.00s)
+=== RUN   TestUpsertSourceValidationError
+--- PASS: TestUpsertSourceValidationError (0.00s)
+=== RUN   TestDeleteSourceAndAuditChain
+--- PASS: TestDeleteSourceAndAuditChain (0.00s)
+PASS
+ok      server/store    0.736s
+?       server/telemetry        [no test files]

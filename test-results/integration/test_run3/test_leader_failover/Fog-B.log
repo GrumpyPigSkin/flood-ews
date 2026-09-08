@@ -1,0 +1,42 @@
+[13836.418] WRN: cmd: got line: +MSGHEX: Done
+[13836.418] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[13836.418] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
+[13836.418] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[13836.418] INF: on_window_close: Sensor window closed.
+[13836.418] INF: on_window_close: Batch submitted to raft.
+[13836.418] WRN: cmd: got line: +MSGHEX: Start
+[13836.418] WRN: cmd: got line: +MSGHEX: Done
+[13836.418] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[13836.418] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
+[13836.418] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[13836.418] INF: on_window_close: Sensor window closed.
+[13836.418] INF: on_window_close: Batch submitted to raft.
+[13836.418] WRN: cmd: got line: +MSGHEX: Start
+[13836.418] WRN: cmd: got line: +MSGHEX: Done
+[13836.418] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=527
+[13836.418] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
+[13836.418] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[13861.353] INFINF: on_window_close: Sensor window closed.
+[13861.353] INF: on_window_close: Batch submitted to raft.
+[13861.881] WRN: cmd: got line: +MSGHEX: Start
+[13871.164] I: nRF5 802154 radio initialized
+[13871.164] I: 8 Sectors of 4096 bytes
+[13871.164] I: alloc wra: 0, d98
+[13871.164] I: data wra: 0, 6a4
+[13871.164] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[13871.164] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[13871.164] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[13871.164] WRN: Device detached from thread network.
+[13871.164] WRN: Device attached started raft.
+[13871.164] INF: .eui=0xf4ce363a5c916092, .pub_key=[0x4, 0xbe, 0xde, 0xac, 0x71, 0xb7, 0x47, 0x42, 0xaf, 0x3, 0xf3, 0xd3, 0xf4, 0x4a, 0x99, 0x62, 0xba, 0x87, 0xe7, 0xe7, 0xb2, 0xc2, 0xfd, 0x29, 0x9f, 0xab, 0x16, 0x45, 0x7c, 0xcb, 0x92, 0x75, 0x1d, 0x29, 0x8f, 0x3a, 0xab, 0x28, 0x3, 0x48, 0x30, 0xe3, 0xe5, 0x1b, 0x19, 0x2, 0xde, 0x24, 0x1b, 0xc, 0x13, 0x7d, 0x1c, 0x9e, 0x11, 0x5f, 0x4b, 0xd0, 0xfc, 0x48, 0xf6, 0x45, 0xb, 0xde, 0x20]
+[13871.164] I: 4 Sectors of 4096 bytes
+[13871.164] I: alloc wra: 0, d68
+[13871.164] I: data wra: 0, 760
+[13871.164] INF: Service register: OK
+[13871.164] INF: load loaded state: .m_term=29, .m_voted_for=17640096414745845906 
+[13871.164] INF: LoraWanService: Thread started.
+[13871.164] INF: LoraWanService: Attempting to join network.
+[13871.164] WRN: cmd: got line: +AT: OK
+[13872.425] WRNINF: Persistence saved: .current_term=31, .voted_for=18446744073709551615
+[13872.425] INF: Persistence saved: .current_term=31, .voted_for=17640096808941659601
+[13872.987] INF: RAFT:BECAME_FOLLOWER

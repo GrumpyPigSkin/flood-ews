@@ -1,0 +1,37 @@
+[12802.552] E: Cannot send frame
+[12802.552] E: Cannot send frame
+[12802.552] E: Cannot send frame
+[12802.552] E: Cannot send frame
+[12802.552] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[12802.552] E: Cannot send frame
+[12802.552] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
+[12802.552] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[12802.552] INF: on_window_close: Sensor window closed.
+[12802.552] INF: on_window_close: Batch submitted to raft.
+[12802.552] E: Cannot send frame
+[12802.552] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[12802.552] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=396
+[12802.552] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[12802.552] E: Cannot send frame
+[12802.552] INF: on_window_close: Sensor window closed.
+[12802.552] INF: on_window_close: Batch submitted to raft.
+[12802.552] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[12802.552] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=1000
+[12802.552] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[12803.803] INF: on_window_close: SensoE: Cannot send frame
+[12810.207] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[12810.567] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=401
+[12813.112] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[12824.854] E: Cannot send frame
+[12832.364] INF: on_window_close: Sensor window closed.
+[12832.364] INF: on_window_close: Batch submitted to raft.
+[12837.223] INF: Persistence saved: .current_term=15, .voted_for=18446744073709551615
+[12837.223] INF: Persistence saved: .current_term=15, .voted_for=17640096808941659601
+[12837.741] INF: RAFT:BECAME_FOLLOWER
+[12843.581] INF: RAFT:BECAME_CANDIDATE
+[12843.581] INF: State changed from: FOLLOWER to: CANDIDATE
+[12843.581] INF: Persistence saved: .current_term=16, .voted_for=17640096414745845906
+[12843.867] INF: RAFT:BECAME_LEADER
+[12843.867] INF: State changed from: CANDIDATE to: LEADER
+[12843.867] INF: RAFT:BECAME_LEADER
+[12844.068] WRN: cmd: got line: +MSGHEX: Start

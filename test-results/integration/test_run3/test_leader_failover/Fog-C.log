@@ -1,0 +1,29 @@
+[13838.212] E: Cannot send frame
+[13838.212] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[13838.212] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
+[13838.212] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[13838.212] INF: on_window_close: Sensor window closed.
+[13838.212] INF: on_window_close: Batch submitted to raft.
+[13838.212] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[13838.212] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
+[13838.212] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[13838.212] E: Cannot send frame
+[13838.212] INF: on_window_close: Sensor window closed.
+[13838.212] INF: on_window_close: Batch submitted to raft.
+[13838.212] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=527
+[13838.212] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
+[13838.212] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[13838.212] INF: on_window_close: Sensor window closed.
+[13838.212] INF: on_window_close: Batch submitted to raft.
+[13861.351] INF: on_reading: got new reading: .eui=176INF: on_window_close: Sensor window closed.
+[13861.351] INF: on_window_close: Batch submitted to raft.
+[13865.692] INF: Persistence saved: .current_term=30, .voted_for=18446744073709551615
+[13865.692] INF: Persistence saved: .current_term=30, .voted_for=17640096208354293315
+[13866.222] INF: RAFT:BECAME_FOLLOWER
+[13866.940] E: Cannot send frame
+[13872.290] INF: RAFT:BECAME_CANDIDATE
+[13872.290] INF: State changed from: FOLLOWER to: CANDIDATE
+[13872.290] INF: Persistence saved: .current_term=31, .voted_for=17640096808941659601
+[13872.566] INF: RAFT:BECAME_LEADER
+[13872.566] INF: State changed from: CANDIDATE to: LEADER
+[13872.566] INF: RAFT:BECAME_LEADER

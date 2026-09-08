@@ -1,0 +1,70 @@
+[12884.158] WRN: cmd: got line: +MSGHEX: Done
+[12884.158] INF: RAFT:BECAME_FOLLOWER
+[12884.158] INF: State changed from: LEADER to: FOLLOWER
+[12884.158] INF: RAFT:BECAME_FOLLOWER
+[12884.158] INF: Persistence saved: .current_term=17, .voted_for=18446744073709551615
+[12884.158] INF: RAFT:BECAME_FOLLOWER
+[12884.158] INF: RAFT:BECAME_CANDIDATE
+[12884.158] INF: State changed from: FOLLOWER to: CANDIDATE
+[12884.158] INF: Persistence saved: .current_term=18, .voted_for=17640096414745845906
+[12884.158] INF: RAFT:BECAME_LEADER
+[12884.158] INF: State changed from: CANDIDATE to: LEADER
+[12884.158] INF: RAFT:BECAME_LEADER
+[12884.158] WRN: cmd: got line: +MSGHEX: Start
+[12884.158] WRN: cmd: got line: +MSGHEX: Done
+[12884.158] INF: RAFT:BECAME_FOLLOWER
+[12884.158] INF: State changed from: LEADER to: FOLLOWER
+[12884.158] INF: RAFT:BECAME_FOLLOWER
+[12884.158] INF: Persistence saved: .current_term=19, .voted_for=18446744073709551615
+[12884.158] INF: RAFT:BECAME_CANDIDATE
+[12884.158] INF: State changed from: FOLLOWER to: CANDIDATE
+[12884.158] INF: Persistence saved: .current_term=20, .voted_for=17640096414745845906
+[12884.158] INF: RAFT:BECAME_LEADER
+[12884.158] INF: State changed from: CANDIDATE to: LEADER
+[12884.158] INF: RAFT:BECAME_LEADER
+[12884.158] WRN: cmd: got line: +MSGHEX: Start
+[12888.163] WRN: cmd: got line: +MSGHEX: DoINF: RAFT:BECAME_CANDIDATE
+[12888.163] INF: State changed from: FOLLOWER to: CANDIDATE
+[12888.163] INF: Persistence saved: .current_term=24, .voted_for=17640096414745845906
+[12888.382] INF: RAFT:BECAME_LEADER
+[12888.382] INF: State changed from: CANDIDATE to: LEADER
+[12888.382] INF: RAFT:BECAME_LEADER
+[12888.583] WRN: cmd: got line: +MSGHEX: Start
+[12897.868] I: nRF5 802154 radio initialized
+[12897.868] I: 8 Sectors of 4096 bytes
+[12897.868] I: alloc wra: 0, e18
+[12897.868] I: data wra: 0, 4ec
+[12897.868] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[12897.868] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[12897.868] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[12897.868] WRN: Device detached from thread network.
+[12897.868] WRN: Device attached started raft.
+[12897.868] INF: .eui=0xf4ce363a5c916092, .pub_key=[0x4, 0xbe, 0xde, 0xac, 0x71, 0xb7, 0x47, 0x42, 0xaf, 0x3, 0xf3, 0xd3, 0xf4, 0x4a, 0x99, 0x62, 0xba, 0x87, 0xe7, 0xe7, 0xb2, 0xc2, 0xfd, 0x29, 0x9f, 0xab, 0x16, 0x45, 0x7c, 0xcb, 0x92, 0x75, 0x1d, 0x29, 0x8f, 0x3a, 0xab, 0x28, 0x3, 0x48, 0x30, 0xe3, 0xe5, 0x1b, 0x19, 0x2, 0xde, 0x24, 0x1b, 0xc, 0x13, 0x7d, 0x1c, 0x9e, 0x11, 0x5f, 0x4b, 0xd0, 0xfc, 0x48, 0xf6, 0x45, 0xb, 0xde, 0x20]
+[12897.868] I: 4 Sectors of 4096 bytes
+[12897.868] I: alloc wra: 0, de8
+[12897.868] I: data wra: 0, 5a8
+[12897.868] INF: Service register: OK
+[12897.868] INF: load loaded state: .m_term=24, .m_voted_for=17640096414745845906 
+[12897.868] INF: LoraWanService: Thread started.
+[12897.868] INF: LoraWanService: Attempting to join network.
+[12897.868] WRN: cmd: got line: +AT: OK
+[12897.942] WRNINF: RAFT:BECAME_FOLLOWER
+[12897.991] WRN: cmd: got line: +DR: EU868
+[12898.167] WRN: cmd: got line: +ADR: OFF
+[12898.334] WRN: cmd: got line: +DR: DR5
+[12898.557] WRN: cmd: got line: +LW: DC, OFF, 0
+[12898.737] WRN: cmd: got line: +LW: JDC, OFF
+[12898.971] WRN: cmd: got line: +JOIN: Start
+[12898.983] WRN: cmd: got line: +JOIN: NORMAL
+[12900.785] INF: RAFT:BECAME_CANDIDATE
+[12900.785] INF: State changed from: FOLLOWER to: CANDIDATE
+[12900.785] INF: Persistence saved: .current_term=27, .voted_for=17640096414745845906
+[12901.073] INF: RAFT:BECAME_LEADER
+[12901.073] INF: State changed from: CANDIDATE to: LEADER
+[12901.073] INF: RAFT:BECAME_LEADER
+[12906.978] WRN: cmd: got line: +JOIN: Join failed
+[12906.989] WRN: cmd: got line: +JOIN: Done
+[12937.081] WRN: cmd: got line: +JOIN: Start
+[12937.092] WRN: cmd: got line: +JOIN: FORCE
+[12945.086] WRN: cmd: got line: +JOIN: Join failed
+[12945.107] WRN: cmd: got line: +JOIN: Done

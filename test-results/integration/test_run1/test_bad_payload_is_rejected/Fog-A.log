@@ -1,0 +1,40 @@
+[6437.660] INF: on_window_close: Sensor window closed.
+[6437.660] INF: on_window_close: Batch submitted to raft.
+[6437.660] WRN: cmd: got line: +MSGHEX: Start
+[6437.660] WRN: cmd: got line: +MSGHEX: Done
+[6437.660] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
+[6437.660] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[6437.660] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=527
+[6437.660] INF: on_window_close: Sensor window closed.
+[6437.660] INF: on_window_close: Batch submitted to raft.
+[6437.660] WRN: cmd: got line: +MSGHEX: Start
+[6437.660] WRN: cmd: got line: +MSGHEX: Done
+[6437.660] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=406
+[6437.660] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[6437.660] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[6437.660] INF: on_window_close: Sensor window closed.
+[6437.660] INF: on_window_close: Batch submitted to raft.
+[6437.660] WRN: cmd: got line: +MSGHEX: Start
+[6437.660] WRN: cmd: got line: +MSGHEX: Done
+[6437.660] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
+[6450.291] INF: on_reading: got new INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[6450.683] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=406
+[6453.284] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[6472.450] INF: on_window_close: Sensor window closed.
+[6472.450] INF: on_window_close: Batch submitted to raft.
+[6473.211] WRN: cmd: got line: +MSGHEX: Start
+[6476.230] WRN: cmd: got line: +MSGHEX: Done
+[6510.337] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=527
+[6510.685] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=401
+[6513.316] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[6532.459] INF: on_window_close: Sensor window closed.
+[6532.459] INF: on_window_close: Batch submitted to raft.
+[6533.252] WRN: cmd: got line: +MSGHEX: Start
+[6536.200] WRN: cmd: got line: +MSGHEX: Done
+[6570.291] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=527
+[6570.735] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
+[6573.323] INF: Bad sensor payload from .eui=17640096377809966542, .error=-149
+[6573.323] INF: ERROR:SIGNATURE_FAILED
+[6592.449] INF: on_window_close: Sensor window closed.
+[6592.449] INF: on_window_close: Batch submitted to raft.
+[6593.093] WRN: cmd: got line: +MSGHEX: Start

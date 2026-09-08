@@ -1,0 +1,35 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.1.1, pluggy-1.6.0 -- /home/oliver/projects/tests/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/oliver/projects/tests
+configfile: pytest.ini
+plugins: timeout-2.4.0, anyio-4.14.2, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier 2026-09-05 15:16:02 [INFO] test_helpers: Waiting up to 150.0s for a clean baseline...
+2026-09-05 15:16:50 [INFO] test_helpers: Baseline confirmed clean.
+2026-09-05 15:17:22 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Selected target fdde:ad00:beef:0:0:ff:fe00:ec02
+2026-09-05 15:17:25 [INFO] coap: Retransmission, Message ID: 46560.
+2026-09-05 15:17:26 [INFO] sensor_fault_injector: Fault PUT acknowledged: 2.04 Changed
+2026-09-05 15:17:26 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec02] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, but could not match it to a running exchange.
+2026-09-05 15:17:26 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:ec02] (locally fdde:ad00:beef::ff:fe00:ec06%wpan0)>, token 63cb, ACK, MID 0xb5e0> could not be matched to any request
+2026-09-05 15:17:26 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-05 15:17:50 [INFO] tests.test_faulted_sensor_flagged_as_outlier: outlier confirmed: {'validity': 'QUESTIONABLE', 'outlier': True, 'detail': 16.0, 'timestamp': 3570841796.0, 'water_level_mm': 1000.0, 'validity_code': 2.0, 'device_eui': '17640096377809966542'}
+2026-09-05 15:17:50 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Waiting up to 330.0 s for validity to become INVALID...
+2026-09-05 15:21:50 [INFO] tests.test_faulted_sensor_flagged_as_outlier: INVALID confirmed: {'device_eui': '17640096377809966542', 'water_level_mm': 1000.0, 'validity_code': 1.0, 'validity': 'INVALID', 'detail': 16.0, 'outlier': True, 'timestamp': 3810843482.0}
+2026-09-05 15:27:50 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Reading for 17640096377809966542 recovered to GOOD.
+PASSED
+
+=============================== warnings summary ===============================
+test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier
+  /home/oliver/projects/tests/chirpstack_handler.py:39: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
+    self._client = mqtt.Client()
+
+test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier
+test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier
+  /home/oliver/projects/tests/sensor_fault_injector.py:54: DeprecationWarning: Initializing messages with an mtype is deprecated. Instead, set transport_tuning=aiocoap.Reliable or aiocoap.Unreliable.
+    msg = Message(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 1 passed, 3 warnings in 708.56s (0:11:48) ===================

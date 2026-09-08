@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio
-async def test_leader_killed_while_paused_in_egress_window(
+async def test_egress_resumed_by_next_leader(
     chirpstack,
     otctl,
     fog_cluster,

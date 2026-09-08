@@ -1,0 +1,43 @@
+[12800.697] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[12800.697] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
+[12800.697] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[12800.697] INF: on_window_close: Sensor window closed.
+[12800.697] INF: on_window_close: Batch submitted to raft.
+[12800.697] WRN: cmd: got line: +MSGHEX: Start
+[12800.697] WRN: cmd: got line: +MSGHEX: Done
+[12800.697] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[12800.697] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=396
+[12800.697] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[12800.697] INF: on_window_close: Sensor window closed.
+[12800.697] INF: on_window_close: Batch submitted to raft.
+[12800.697] WRN: cmd: got line: +MSGHEX: Start
+[12800.697] WRN: cmd: got line: +MSGHEX: Done
+[12800.697] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[12800.697] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=1000
+[12800.697] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[12810.275] INF: on_window_close: Sensor window INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[12810.785] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=401
+[12813.240] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[12832.359] INF: on_window_close: Sensor window closed.
+[12832.359] INF: on_window_close: Batch submitted to raft.
+[12832.899] WRN: cmd: got line: +MSGHEX: Start
+[12842.178] I: nRF5 802154 radio initialized
+[12842.178] I: 8 Sectors of 4096 bytes
+[12842.178] I: alloc wra: 0, de0
+[12842.178] I: data wra: 0, 684
+[12842.178] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[12842.178] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[12842.178] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[12842.178] WRN: Device detached from thread network.
+[12842.178] WRN: Device attached started raft.
+[12842.178] INF: .eui=0xf4ce360a4eac3643, .pub_key=[0x4, 0x72, 0xff, 0xc3, 0xf2, 0x28, 0x0, 0x45, 0x65, 0xdd, 0xd1, 0xa8, 0xfc, 0xce, 0x6f, 0x72, 0x3b, 0x50, 0xc3, 0x24, 0x43, 0xd8, 0xc7, 0x33, 0x7a, 0xaa, 0x3b, 0xd1, 0x22, 0x94, 0x42, 0x92, 0x1e, 0xe2, 0xad, 0x8b, 0xc2, 0x3a, 0x81, 0x3, 0xdc, 0x6c, 0xd3, 0x45, 0x67, 0x11, 0x48, 0x43, 0x68, 0xe5, 0x69, 0x28, 0xc9, 0x8d, 0xe8, 0x1b, 0x9c, 0x5a, 0xe1, 0x96, 0xef, 0xb4, 0x8, 0x7a, 0x7d]
+[12842.178] I: 4 Sectors of 4096 bytes
+[12842.178] I: alloc wra: 0, db0
+[12842.178] I: data wra: 0, 740
+[12842.178] INF: Service register: OK
+[12842.178] INF: get_time_us: Time not synced
+[12842.178] INF: load loaded state: .m_term=11, .m_voted_for=17640096208354293315 
+[12842.178] INF: LoraWanService: Thread started.
+[12843.777] INF: LoraWanService: Attempting to join netwINF: Persistence saved: .current_term=16, .voted_for=18446744073709551615
+[12843.777] INF: Persistence saved: .current_term=16, .voted_for=17640096414745845906
+[12844.169] INF: RAFT:BECAME_FOLLOWER
