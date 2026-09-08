@@ -12,6 +12,7 @@ class ScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -20,7 +21,10 @@ class ScreenBody extends StatelessWidget {
           if (intro != null) ...[
             Text(
               intro!,
-              style: const TextStyle(color: Palette.textDim, fontSize: 14),
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontSize: 14,
+              ),
             ),
             const SizedBox(height: 16),
           ],
@@ -46,12 +50,13 @@ class Panel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Palette.surface,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Palette.hairline),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,10 +67,10 @@ class Panel extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Palette.text,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const Spacer(),
@@ -73,7 +78,7 @@ class Panel extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, color: Palette.hairline),
+          Divider(height: 1, color: theme.colorScheme.outlineVariant),
           Padding(padding: const EdgeInsets.all(16), child: child),
         ],
       ),
@@ -128,8 +133,15 @@ class StatusChip extends StatelessWidget {
   /// Colour of the chip.
   final Color color;
 
+  final Color? backgroundColor;
+
   /// Constructor.
-  const StatusChip({super.key, required this.label, required this.color});
+  const StatusChip({
+    super.key,
+    required this.label,
+    required this.color,
+    this.backgroundColor,
+  });
 
   /// Build the chip UI.
   @override
@@ -137,7 +149,7 @@ class StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
+        color: backgroundColor ?? color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
