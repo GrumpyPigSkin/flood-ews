@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 /// Login screen preview
 @Preview(name: 'Login Screen', size: Size(800, 520))
-Widget previewSensorScreen() {
+Widget previewLoginScreen() {
   final stubApi = AuthService(baseUrl: '');
 
   return MaterialApp(
