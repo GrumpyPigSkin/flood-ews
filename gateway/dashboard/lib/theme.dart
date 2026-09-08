@@ -1,23 +1,36 @@
-// Theme for EWS dashboard. The theme is all dark mode with colours to highlight
-// specific important data to the user. The aim is to keep the noise low in the
-// screens for a easier diagnosis if issues. And give more important data it's
-// visual affordance.
+// High contrast theme for EWS dashboard. The idea is make the whole application
+// default high contrast for greater readability and WCAG 1.4.6 Contrast
 
 import 'package:flutter/material.dart';
 
-// Colours used throughout the app.
 class Palette {
-  static const ground = Color(0xFF0F172A);
-  static const surface = Color(0xFF1E293B);
-  static const surfaceAlt = Color(0xFF273449);
-  static const hairline = Color(0xFF334155);
-  static const text = Color(0xFFE2E8F0);
-  static const textDim = Color(0xFF94A3B8);
+  // Background colours, dark for high contrast text.
+  static const ground = Color(0xFF000000);
+  static const surface = Color(0xFF121212);
+  static const surfaceAlt = Color(0xFF1E1E1E);
 
-  static const ok = Color(0xFF34D399);
-  static const watch = Color(0xFFFBBF24);
-  static const alarm = Color(0xFFF87171);
-  static const accent = Color(0xFF38BDF8);
+  // Outline colours
+  static const hairline = Color(0xFF444444);
+  static const borderActive = Color(0xFFFFFFFF);
+
+  // Bright text for high contrast
+  static const text = Color(0xFFFFFFFF);
+  static const textDim = Color(0xFFB0B0B0);
+
+  // OK colour for outline and container.
+  static const ok = Color(0xFF00FF66);
+  static const okContainer = Color(0xFF003311);
+
+  // Warning colour for outline and container.
+  static const watch = Color(0xFFFFCC00);
+  static const watchContainer = Color(0xFF332600);
+
+  // Alarm colour for outline and container.
+  static const alarm = Color(0xFFFF3333);
+  static const alarmContainer = Color(0xFF330000);
+
+  // Primary colour for none status stuff
+  static const systemPrimary = Color(0xFF00E5FF);
 }
 
 /// Build the main theme for the app.
@@ -28,10 +41,14 @@ ThemeData buildTheme() {
     colorScheme: base.colorScheme.copyWith(
       surface: Palette.surface,
       surfaceContainerHigh: Palette.surfaceAlt,
-      primary: Palette.accent,
+      primary: Palette.systemPrimary,
       error: Palette.alarm,
+      errorContainer: Palette.alarmContainer,
       tertiary: Palette.watch,
+      tertiaryContainer: Palette.watchContainer,
       secondary: Palette.ok,
+      secondaryContainer: Palette.okContainer,
+      outline: Palette.borderActive,
       outlineVariant: Palette.hairline,
       onSurface: Palette.text,
       onSurfaceVariant: Palette.textDim,
