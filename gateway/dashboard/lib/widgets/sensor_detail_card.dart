@@ -39,6 +39,15 @@ class SensorDetailCard extends StatelessWidget {
     };
   }
 
+  Color _validityBgColor(ThemeData theme, String v) {
+    return switch (v) {
+      'GOOD' => theme.colorScheme.secondaryContainer,
+      'QUESTIONABLE' => theme.colorScheme.tertiaryContainer,
+      'INVALID' => theme.colorScheme.errorContainer,
+      _ => theme.colorScheme.surfaceContainerHigh,
+    };
+  }
+
   /// Build the UI.
   @override
   Widget build(BuildContext context) {
@@ -47,6 +56,7 @@ class SensorDetailCard extends StatelessWidget {
     final freshness = station.freshnessAt(now);
     final e = station.latest;
     final vColor = _validityColor(context, e.validity);
+    final vBgColor = _validityBgColor(theme, e.validity);
 
     // Is the sensor is a bad state.
     final critical =
@@ -55,15 +65,21 @@ class SensorDetailCard extends StatelessWidget {
         station.alert ||
         freshness == Freshness.offline;
 
+    final cardBg = critical
+        ? theme.colorScheme.errorContainer
+        : theme.colorScheme.surface;
+
+    final cardBorder = critical
+        ? theme.colorScheme.error
+        : theme.colorScheme.outline;
+
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           // If the sensor is in a critical state, outline the sensor in read.
-          color: critical
-              ? theme.colorScheme.error.withValues(alpha: 0.5)
-              : theme.colorScheme.outlineVariant,
+          color: cardBorder,
           width: critical ? 2 : 1,
         ),
       ),
@@ -73,7 +89,7 @@ class SensorDetailCard extends StatelessWidget {
         children: [
           _header(context, freshness, now),
           const SizedBox(height: 14),
-          _readout(context, vColor),
+          _readout(context, vColor, vBgColor),
           const SizedBox(height: 16),
           SensorLevelChart(history: history, thresholdMm: thresholdMm),
           const SizedBox(height: 16),
@@ -131,7 +147,7 @@ class SensorDetailCard extends StatelessWidget {
   }
 
   /// Display the latest reading and its validity.
-  Widget _readout(BuildContext context, Color vColor) {
+  Widget _readout(BuildContext context, Color vColor, Color vBgColor) {
     final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -161,7 +177,11 @@ class SensorDetailCard extends StatelessWidget {
         Transform.scale(
           scale: 1.5,
           alignment: Alignment.centerRight,
-          child: StatusChip(label: station.validity, color: vColor),
+          child: StatusChip(
+            label: station.validity,
+            color: vColor,
+            backgroundColor: vBgColor,
+          ),
         ),
       ],
     );

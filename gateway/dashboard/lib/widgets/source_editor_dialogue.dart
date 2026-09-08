@@ -331,7 +331,9 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
       const SizedBox(height: 10),
       Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHigh,
+          color: _fieldMapOk
+              ? theme.colorScheme.surfaceContainerHigh
+              : theme.colorScheme.errorContainer,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: _fieldMapOk
@@ -365,7 +367,7 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
         icon: const Icon(Icons.auto_fix_high, size: 15),
         label: const Text('Insert template'),
         style: TextButton.styleFrom(
-          foregroundColor: theme.colorScheme.onSurfaceVariant,
+          foregroundColor: theme.colorScheme.primary,
           padding: EdgeInsets.zero,
           alignment: Alignment.centerLeft,
         ),
@@ -379,8 +381,7 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
   Widget _dispositionPicker(ThemeData theme) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      for (int i = 0; i < Disposition.values.length; i++) ...[
-        if (i > 0) const SizedBox(height: 8),
+      for (final disp in Disposition.values) ...[
         RadioGroup<Disposition>(
           groupValue: _disposition,
           onChanged: (Disposition? v) {
@@ -389,23 +390,28 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
             }
           },
           child: RadioListTile<Disposition>(
-            value: Disposition.values[i],
+            value: disp,
             dense: true,
-            activeColor: theme.colorScheme.primary,
+            activeColor: theme.colorScheme.secondary,
             tileColor: theme.colorScheme.surfaceContainerHigh,
             selectedTileColor: theme.colorScheme.surfaceContainerHigh,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
+              side: BorderSide(
+                color: _disposition == disp
+                    ? theme.colorScheme.secondary
+                    : Colors.transparent,
+              ),
             ),
             title: Text(
-              Disposition.values[i].label,
+              disp.label,
               style: TextStyle(
                 fontSize: 13,
                 color: theme.colorScheme.onSurface,
               ),
             ),
             subtitle: Text(
-              Disposition.values[i].help,
+              disp.help,
               style: TextStyle(
                 fontSize: 11,
                 color: theme.colorScheme.onSurfaceVariant,
