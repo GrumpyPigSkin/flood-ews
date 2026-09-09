@@ -178,6 +178,11 @@ func getSeq(u Uplink) (int64, bool) {
 		return 0, false
 	}
 
-	v := u.Object["seq"].(int64)
-	return v, true
+	val, ok := u.Object["seq"].(float64)
+	if !ok {
+		return 0, false
+	}
+
+	// Convert float64 to int64
+	return int64(val), true
 }
