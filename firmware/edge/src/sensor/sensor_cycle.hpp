@@ -3,6 +3,7 @@
 #include "common/inplace_function.hpp"
 #include "common/periodic_task.hpp"
 #include "common/work_task.hpp"
+#include "config/config.hpp"
 #include "jsn/driver.hpp"
 #include "jsn/jsn_logic.hpp"
 #include <algorithm>
@@ -17,9 +18,6 @@ namespace edge::sensor {
 struct SensorCycleParams {
   /** @brief Timings in ms from a config source. */
   stdext::inplace_function<std::uint32_t()> sleep_interval_ms;
-  stdext::inplace_function<std::uint32_t()> warmup_ms;
-  stdext::inplace_function<std::uint32_t()> timeout_ms;
-  stdext::inplace_function<std::uint32_t()> ground_distance_mm;
 
   /**
    * @brief Callback fired when a new reading is produced.
@@ -105,7 +103,7 @@ private:
   void on_sleep_elapsed() {
     m_cycle_start_ms = m_deps.now_ms();
     m_jsn.power_on();
-    m_warmup.one_shot(common::ms_to_k_timeout(m_deps.warmup_ms()));
+    m_warmup.one_shot(common::ms_to_k_timeout(config::SENSOR_WARMUP_MS));
   }
 
   /**
@@ -114,7 +112,7 @@ private:
    */
   void on_warmup_elapsed() {
     m_jsn.trigger();
-    m_timeout.one_shot(common::ms_to_k_timeout(m_deps.timeout_ms()));
+    m_timeout.one_shot(common::ms_to_k_timeout(config::SENSOR_TIMEOUT_MS));
   }
 
   /**
@@ -132,7 +130,7 @@ private:
     const auto [state, dist] = m_jsn.snapshot();
     const bool is_ready = (state == jsn::ReadingState::VALID);
     if (m_deps.emit_reading) {
-      m_deps.emit_reading(is_ready, dist, m_deps.ground_distance_mm());
+      m_deps.emit_reading(is_ready, dist, config::GROUND_DIST_MM);
     }
     m_jsn.reset();
     schedule_sleep_from(m_cycle_start_ms);

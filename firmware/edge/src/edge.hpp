@@ -36,7 +36,6 @@ public:
    * @brief Initialise the application.
    */
   void init() {
-    m_config_service.init();
     m_sensor_coap.init();
     m_alert_handler.init();
     if (!m_jsn_driver.init()) {
@@ -61,29 +60,24 @@ public:
   }
 
 private:
-  /** @brief Configuration service for handling config updates. */
-  config::ConfigService m_config_service{
-      [this] { m_sensor_cycle.reschedule(); }, common::SENSOR_CONFIG_URI};
-
   /** @brief JSN-SR04T driver for communicating with sensor hardware. */
   jsn::Driver m_jsn_driver{PWR_PIN, TRIG_PIN, ECHO_PIN};
 
   /** @brief The main sensor task, loops every sleep_interval_s. Initialise
    * callbacks inline. */
   sensor::SensorCycle m_sensor_cycle{
-      m_jsn_driver,
-      sensor::SensorCycleParams{
-          .sleep_interval_ms =
-              [this] { return m_config_service.sleep_interval_s() * S_TO_MS; },
-          .warmup_ms = [this] { return m_config_service.sensor_warmup_ms(); },
-          .timeout_ms = [this] { return m_config_service.sensor_timeout_ms(); },
-          .ground_distance_mm =
-              [this] { return m_config_service.ground_distance_mm(); },
-          .emit_reading =
-              [this](const bool valid, const std::uint16_t raw_mm,
-                     const std::uint16_t ground_dist) {
-                send_sensor_reading(valid, raw_mm, ground_dist);
-              }}};
+      m_jsn_driver, sensor::SensorCycleParams{
+                        .sleep_interval_ms =
+                            [this] {
+                              return m_alert.m_alert_active
+                                         ? m_alert.m_alert_interval_ms
+                                         : config::SLEEP_MS;
+                            },
+                        .emit_reading =
+                            [this](const bool valid, const std::uint16_t raw_mm,
+                                   const std::uint16_t ground_dist) {
+                              send_sensor_reading(valid, raw_mm, ground_dist);
+                            }}};
 
   /** @brief CoAP service for sending sensor data back to the fog node. */
   sensor::CoapService m_sensor_coap{common::MESH_LOCAL_MULTICAST_ADDR,
