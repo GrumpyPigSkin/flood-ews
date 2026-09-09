@@ -145,8 +145,8 @@ func TestPoller_Sync(t *testing.T) {
 	p.Sync(ctx, sources)
 
 	p.mu.Lock()
-	_, runningA := p.cancels["src-a"]
-	_, runningB := p.cancels["src-b"]
+	_, runningA := p.running["src-a"]
+	_, runningB := p.running["src-b"]
 	p.mu.Unlock()
 
 	if !runningA {
@@ -161,7 +161,7 @@ func TestPoller_Sync(t *testing.T) {
 	p.Sync(ctx, []store.ExternalSource{})
 
 	p.mu.Lock()
-	_, runningAAfter := p.cancels["src-a"]
+	_, runningAAfter := p.running["src-a"]
 	p.mu.Unlock()
 
 	if runningAAfter {

@@ -16,6 +16,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"reflect"
 	"server/advisory"
 	"server/store"
 	"sync"
@@ -26,6 +27,11 @@ import (
 // source Kind can have its own; the registry picks one by Kind.
 type Validator func(src store.ExternalSource, body []byte, now time.Time) (advisory.Advisory, error)
 
+type runningSource struct {
+	cancel context.CancelFunc
+	src    store.ExternalSource
+}
+
 type Poller struct {
 	client     *http.Client
 	sink       advisory.Sink
@@ -33,20 +39,20 @@ type Poller struct {
 	log        *slog.Logger
 	validators map[string]Validator
 	mu         sync.Mutex
-	cancels    map[string]context.CancelFunc
+	running    map[string]runningSource
 }
 
 // Factory function for Poller.
 func New(sink advisory.Sink, opQueue advisory.OperatorQueue, log *slog.Logger) *Poller {
 	return &Poller{
 		client: &http.Client{
-			Timeout: 10 * time.Second, // bound every outbound call
+			Timeout: 30 * time.Second, // Slow government APIs
 		},
 		sink:       sink,
 		opQueue:    opQueue,
 		log:        log,
 		validators: map[string]Validator{"generic": genericValidator},
-		cancels:    map[string]context.CancelFunc{},
+		running:    map[string]runningSource{},
 	}
 }
 
@@ -68,22 +74,23 @@ func (p *Poller) Sync(ctx context.Context, sources []store.ExternalSource) {
 		}
 	}
 
-	// Stop goroutines no longer desired (removed or disabled).
-	for id, cancel := range p.cancels {
-		if _, ok := desired[id]; !ok {
-			cancel()
-			delete(p.cancels, id)
+	// Stop goroutines no longer desired or that have changed.
+	for id, r := range p.running {
+		s, ok := desired[id]
+		if !ok || !sameConfig(s, r.src) {
+			r.cancel()
+			delete(p.running, id)
 			p.log.Info("poller: stopped source", "id", id)
 		}
 	}
 
 	// Start goroutines for newly-desired sources.
 	for id, src := range desired {
-		if _, running := p.cancels[id]; running {
+		if _, running := p.running[id]; running {
 			continue
 		}
 		cctx, cancel := context.WithCancel(ctx)
-		p.cancels[id] = cancel
+		p.running[id] = runningSource{cancel: cancel, src: src}
 		go p.run(cctx, src)
 		p.log.Info("poller: started source", "id", id, "interval", src.PollMs)
 	}
@@ -114,9 +121,9 @@ func (p *Poller) run(ctx context.Context, src store.ExternalSource) {
 func (p *Poller) StopAll() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	for id, cancel := range p.cancels {
-		cancel()
-		delete(p.cancels, id)
+	for id, r := range p.running {
+		r.cancel()
+		delete(p.running, id)
 	}
 }
 
@@ -203,4 +210,9 @@ func (p *Poller) dispatch(adv advisory.Advisory) {
 		}
 		p.log.Info("poller: advisory submitted to consensus", "id", adv.SourceID, "kind", adv.Kind, "sev", adv.Severity)
 	}
+}
+
+// Compare two external sources are exactly the same.
+func sameConfig(a, b store.ExternalSource) bool {
+	return reflect.DeepEqual(a, b)
 }
