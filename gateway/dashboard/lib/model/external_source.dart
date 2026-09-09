@@ -1,36 +1,23 @@
 // External source model.
+//
+// CREATE TABLE IF NOT EXISTS external_source (
+//   id            TEXT PRIMARY KEY,
+//   name          TEXT NOT NULL,
+//   enabled       INTEGER NOT NULL DEFAULT 1,
+//   url           TEXT NOT NULL,
+//   auth_header   TEXT NOT NULL DEFAULT '',
+//   auth_token    TEXT NOT NULL DEFAULT '',
+//   poll_ms       INTEGER NOT NULL,
+//   kind          TEXT NOT NULL DEFAULT '',
+//   max_age_ms    INTEGER NOT NULL DEFAULT 0,
+//   min_value     REAL NOT NULL DEFAULT 0,
+//   max_value     REAL NOT NULL DEFAULT 0,
+//   field_map     TEXT NOT NULL DEFAULT '{}'
+// );
 
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-
-/// Per-source policy for how a validated advisory may affect the system.
-enum Disposition {
-  /// An advisory acts antonymously.
-  advisory('advisory', 'Advisory', 'Policy may act autonomously'),
-
-  /// Must go to the operator for approval.
-  operatorApproved(
-    'operator_approved',
-    'Operator approved',
-    'Always needs human approval',
-  );
-
-  /// Constructor
-  const Disposition(this.wire, this.label, this.help);
-
-  final String wire;
-  final String label;
-  final String help;
-
-  /// Looks up the enum by its wire string. Defaults to `advisory` if not found.
-  static Disposition fromWire(String? s) {
-    return Disposition.values.firstWhere(
-      (element) => element.wire == s,
-      orElse: () => Disposition.advisory,
-    );
-  }
-}
 
 /// An external source maps to an external source is server Go code.
 @immutable
@@ -46,7 +33,6 @@ class ExternalSource {
   final int maxAgeMs;
   final double minValue;
   final double maxValue;
-  final Disposition disposition;
 
   /// The FieldMapping JSON, stored opaquely server-side. This is what tells
   /// the generic validator how to map this source's response onto an
@@ -65,7 +51,6 @@ class ExternalSource {
     required this.maxAgeMs,
     required this.minValue,
     required this.maxValue,
-    required this.disposition,
     required this.fieldMap,
   });
 
@@ -80,7 +65,6 @@ class ExternalSource {
     maxAgeMs: 900000,
     minValue: 0,
     maxValue: 0,
-    disposition: Disposition.advisory,
     fieldMap: '',
   );
 
@@ -98,7 +82,6 @@ class ExternalSource {
     maxAgeMs: (j['MaxAgeMs'] as num?)?.toInt() ?? 0,
     minValue: (j['MinValue'] as num?)?.toDouble() ?? 0,
     maxValue: (j['MaxValue'] as num?)?.toDouble() ?? 0,
-    disposition: Disposition.fromWire(j['Disposition']?.toString()),
     fieldMap: (j['FieldMap'] ?? '').toString(),
   );
 
@@ -115,7 +98,6 @@ class ExternalSource {
     'MaxAgeMs': maxAgeMs,
     'MinValue': minValue,
     'MaxValue': maxValue,
-    'Disposition': disposition.wire,
     'FieldMap': fieldMap,
   };
 
@@ -132,7 +114,6 @@ class ExternalSource {
     int? maxAgeMs,
     double? minValue,
     double? maxValue,
-    Disposition? disposition,
     String? fieldMap,
   }) => ExternalSource(
     id: id ?? this.id,
@@ -146,7 +127,6 @@ class ExternalSource {
     maxAgeMs: maxAgeMs ?? this.maxAgeMs,
     minValue: minValue ?? this.minValue,
     maxValue: maxValue ?? this.maxValue,
-    disposition: disposition ?? this.disposition,
     fieldMap: fieldMap ?? this.fieldMap,
   );
 

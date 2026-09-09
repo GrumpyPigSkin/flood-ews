@@ -46,7 +46,7 @@ class _PolicyEditorDialogueState extends State<PolicyEditorDialogue> {
   late Severity _matchMinSeverity;
   String? _actuatorId;
   String? _targetState;
-  late bool _requireOperator;
+  late Disposition _disposition;
   late bool _enabled;
 
   bool get _isNew => widget.existing == null;
@@ -66,7 +66,7 @@ class _PolicyEditorDialogueState extends State<PolicyEditorDialogue> {
     _matchSourceId = TextEditingController(text: r.matchSourceId);
     _priority = TextEditingController(text: r.priority.toString());
     _matchMinSeverity = r.matchMinSeverity;
-    _requireOperator = r.requireOperator;
+    _disposition = r.disposition;
     _enabled = r.enabled;
 
     // Only preselect an actuator/state if it's still one we know about.
@@ -117,7 +117,7 @@ class _PolicyEditorDialogueState extends State<PolicyEditorDialogue> {
       matchSourceId: _matchSourceId.text.trim(),
       actuatorId: _actuatorId!,
       targetState: _targetState!,
-      requireOperator: _requireOperator,
+      disposition: _disposition,
       priority: int.tryParse(_priority.text) ?? 0,
     );
     Navigator.pop(context, rule);
@@ -194,7 +194,8 @@ class _PolicyEditorDialogueState extends State<PolicyEditorDialogue> {
                     const SizedBox(height: 12),
                     _statePicker(theme),
                     const SizedBox(height: 12),
-                    _requireOperatorToggle(theme),
+                    DialogueSectionLabel('Disposition'),
+                    _dispositionPicker(theme),
                   ],
                 ),
               ),
@@ -300,32 +301,48 @@ class _PolicyEditorDialogueState extends State<PolicyEditorDialogue> {
   }
 
   /// Toggle whether a match acts autonomously or is queued for an operator.
-  Widget _requireOperatorToggle(ThemeData theme) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-    decoration: BoxDecoration(
-      color: theme.colorScheme.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: theme.colorScheme.outlineVariant),
-    ),
-    child: SwitchListTile(
-      dense: true,
-      contentPadding: EdgeInsets.zero,
-      value: _requireOperator,
-      onChanged: (v) => setState(() => _requireOperator = v),
-      activeThumbColor: theme.colorScheme.tertiary,
-      inactiveThumbColor: theme.colorScheme.onSurfaceVariant,
-      inactiveTrackColor: theme.colorScheme.surface,
-      title: Text(
-        'Require operator approval',
-        style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
-      ),
-      subtitle: Text(
-        'A match is queued on the console instead of acting immediately',
-        style: TextStyle(
-          fontSize: 11,
-          color: theme.colorScheme.onSurfaceVariant,
+  Widget _dispositionPicker(ThemeData theme) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      for (final disp in Disposition.values) ...[
+        RadioGroup<Disposition>(
+          groupValue: _disposition,
+          onChanged: (Disposition? v) {
+            if (v != null) {
+              setState(() => _disposition = v);
+            }
+          },
+          child: RadioListTile<Disposition>(
+            value: disp,
+            dense: true,
+            activeColor: theme.colorScheme.secondary,
+            tileColor: theme.colorScheme.surfaceContainerHigh,
+            selectedTileColor: theme.colorScheme.surfaceContainerHigh,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(
+                color: _disposition == disp
+                    ? theme.colorScheme.secondary
+                    : Colors.transparent,
+              ),
+            ),
+            title: Text(
+              disp.label,
+              style: TextStyle(
+                fontSize: 13,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            subtitle: Text(
+              disp.help,
+              style: TextStyle(
+                fontSize: 11,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
         ),
-      ),
-    ),
+      ],
+    ],
   );
 }

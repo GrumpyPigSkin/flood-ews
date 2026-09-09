@@ -40,7 +40,6 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
   late TextEditingController _fieldMap;
 
   // Disposition of the source.
-  late Disposition _disposition;
   late bool _enabled;
 
   // Any issues with fields in the source.
@@ -68,7 +67,6 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
           ? FieldMapValidator.template
           : s.fieldMap,
     );
-    _disposition = s.disposition;
     _enabled = s.enabled;
 
     _id.addListener(_updateFormState);
@@ -146,7 +144,6 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
       maxAgeMs: (int.tryParse(_maxAgeSecs.text) ?? 900) * 1000,
       minValue: double.tryParse(_minValue.text) ?? 0,
       maxValue: double.tryParse(_maxValue.text) ?? 0,
-      disposition: _disposition,
       fieldMap: _fieldMap.text.trim(),
     );
     Navigator.pop(context, source);
@@ -309,9 +306,6 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
           ),
         ],
       ),
-      const SizedBox(height: 16),
-      DialogueSectionLabel('Disposition'),
-      _dispositionPicker(theme),
     ],
   );
 
@@ -374,52 +368,6 @@ class _SourceEditorDialogueState extends State<SourceEditorDialogue> {
       ),
       const SizedBox(height: 8),
       StatusIssueList(issues: _issues, validMessage: "Mapping is valid."),
-    ],
-  );
-
-  /// Pick the disposition.
-  Widget _dispositionPicker(ThemeData theme) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      for (final disp in Disposition.values) ...[
-        RadioGroup<Disposition>(
-          groupValue: _disposition,
-          onChanged: (Disposition? v) {
-            if (v != null) {
-              setState(() => _disposition = v);
-            }
-          },
-          child: RadioListTile<Disposition>(
-            value: disp,
-            dense: true,
-            activeColor: theme.colorScheme.secondary,
-            tileColor: theme.colorScheme.surfaceContainerHigh,
-            selectedTileColor: theme.colorScheme.surfaceContainerHigh,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(
-                color: _disposition == disp
-                    ? theme.colorScheme.secondary
-                    : Colors.transparent,
-              ),
-            ),
-            title: Text(
-              disp.label,
-              style: TextStyle(
-                fontSize: 13,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            subtitle: Text(
-              disp.help,
-              style: TextStyle(
-                fontSize: 11,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ),
-      ],
     ],
   );
 }

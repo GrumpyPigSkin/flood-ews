@@ -249,7 +249,7 @@ class _RuleCard extends StatelessWidget {
           ],
         ),
       ),
-      if (rule.requireOperator) ...[
+      if (rule.disposition == Disposition.operatorApproved) ...[
         StatusChip(label: 'Needs approval', color: theme.colorScheme.tertiary),
         const SizedBox(width: 6),
       ],
@@ -287,12 +287,7 @@ class _RuleCard extends StatelessWidget {
     children: [
       EntityDetailRow(label: 'Actuator ID', value: rule.actuatorId),
       EntityDetailRow(label: 'Target state', value: rule.targetState),
-      EntityDetailRow(
-        label: 'On match',
-        value: rule.requireOperator
-            ? 'Queue for operator approval'
-            : 'Act autonomously',
-      ),
+      EntityDetailRow(label: 'On match', value: rule.disposition.help),
     ],
   );
 }

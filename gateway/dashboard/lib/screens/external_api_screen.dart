@@ -244,12 +244,12 @@ class _SourceCard extends StatelessWidget {
           ],
         ),
       ),
-      StatusChip(
-        label: source.disposition.label,
-        color: source.disposition == Disposition.operatorApproved
-            ? theme.colorScheme.tertiary
-            : theme.colorScheme.primary,
-      ),
+      // StatusChip(
+      //   label: source.disposition.label,
+      //   color: source.disposition == Disposition.operatorApproved
+      //       ? theme.colorScheme.tertiary
+      //       : theme.colorScheme.primary,
+      // ),
       const SizedBox(width: 6),
       Icon(
         selected ? Icons.expand_less : Icons.expand_more,

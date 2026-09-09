@@ -9,12 +9,40 @@
 //   match_source_id   TEXT NOT NULL DEFAULT '',
 //   actuator_id       TEXT NOT NULL,
 //   target_state      TEXT NOT NULL,
-//   require_operator  INTEGER NOT NULL DEFAULT 0,
+//   disposition       TEXT NOT NULL,
 //   priority          INTEGER NOT NULL DEFAULT 0
 // );
 
 import 'package:dashboard/model/severity.dart';
 import 'package:flutter/foundation.dart';
+
+/// Per-source policy for how a validated advisory may affect the system.
+enum Disposition {
+  /// An advisory acts antonymously.
+  advisory('advisory', 'Advisory', 'Policy may act autonomously'),
+
+  /// Must go to the operator for approval.
+  operatorApproved(
+    'operator_approved',
+    'Operator approved',
+    'Always needs operator approval',
+  );
+
+  /// Constructor
+  const Disposition(this.wire, this.label, this.help);
+
+  final String wire;
+  final String label;
+  final String help;
+
+  /// Looks up the enum by its wire string. Defaults to `advisory` if not found.
+  static Disposition fromWire(String? s) {
+    return Disposition.values.firstWhere(
+      (element) => element.wire == s,
+      orElse: () => Disposition.advisory,
+    );
+  }
+}
 
 /// A rule maps a matched advisory onto an actuator command, or queues it for
 /// operator approval. Evaluated in priority order (highest first) by the
@@ -37,7 +65,7 @@ class PolicyRule {
 
   /// If true, a match is queued for operator approval instead of acting
   /// autonomously.
-  final bool requireOperator;
+  final Disposition disposition;
 
   /// Higher wins when multiple rules target the same actuator in one
   /// evaluation.
@@ -53,7 +81,7 @@ class PolicyRule {
     required this.matchSourceId,
     required this.actuatorId,
     required this.targetState,
-    required this.requireOperator,
+    required this.disposition,
     required this.priority,
   });
 
@@ -67,7 +95,7 @@ class PolicyRule {
     matchSourceId: '',
     actuatorId: '',
     targetState: '',
-    requireOperator: false,
+    disposition: Disposition.advisory,
     priority: 0,
   );
 
@@ -84,7 +112,7 @@ class PolicyRule {
     matchSourceId: (j['match_source_id'] ?? '').toString(),
     actuatorId: (j['actuator_id'] ?? '').toString(),
     targetState: (j['target_state'] ?? '').toString(),
-    requireOperator: (j['require_operator'] as bool?) ?? false,
+    disposition: Disposition.fromWire(j['Disposition']?.toString()),
     priority: (j['priority'] as num?)?.toInt() ?? 0,
   );
 
@@ -98,7 +126,7 @@ class PolicyRule {
     'match_source_id': matchSourceId,
     'actuator_id': actuatorId,
     'target_state': targetState,
-    'require_operator': requireOperator,
+    'require_operator': disposition.wire,
     'priority': priority,
   };
 }
