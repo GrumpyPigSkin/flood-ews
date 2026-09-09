@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS actuator (
   failsafe_state TEXT NOT NULL
 );
 
+INSERT INTO actuator (id, name, enabled, states, failsafe_state) VALUES
+  ('flood-gate', 'Main flood gate', 1, '["closed", "open"]', 'closed')
+ON CONFLICT (id) DO NOTHING;
+
 -- Rule for the policy engine.
 CREATE TABLE IF NOT EXISTS policy_rule (
   id                TEXT PRIMARY KEY,

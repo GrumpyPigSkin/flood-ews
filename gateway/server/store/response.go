@@ -81,6 +81,7 @@ func (s *Store) UpsertSource(ctx context.Context, e ExternalSource, actor string
 			MinValue:    e.MinValue,
 			MaxValue:    e.MaxValue,
 			Disposition: string(e.Disposition),
+			FieldMap:    e.FieldMap,
 		})
 	})
 }

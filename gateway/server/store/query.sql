@@ -3,14 +3,14 @@ SELECT id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_m
 FROM external_source ORDER BY id;
 
 -- name: UpsertSource :exec
-INSERT INTO external_source (id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, disposition)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO external_source (id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, disposition, field_map)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO UPDATE SET
   name=excluded.name, enabled=excluded.enabled, url=excluded.url,
   auth_header=excluded.auth_header, auth_token=excluded.auth_token,
   poll_ms=excluded.poll_ms, kind=excluded.kind, max_age_ms=excluded.max_age_ms,
   min_value=excluded.min_value, max_value=excluded.max_value,
-  disposition=excluded.disposition;
+  disposition=excluded.disposition, field_map=excluded.field_map;
 
 -- name: DeleteSource :exec
 DELETE FROM external_source WHERE id = ?;
