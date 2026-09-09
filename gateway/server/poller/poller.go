@@ -92,8 +92,10 @@ func (p *Poller) Sync(ctx context.Context, sources []store.ExternalSource) {
 
 // Start polling the external sources.
 func (p *Poller) run(ctx context.Context, src store.ExternalSource) {
-	// Jittered first tick avoids all sources firing simultaneously.
-	ticker := time.NewTicker(time.Duration(src.PollMs))
+
+	// Start the new timer for the source
+	interval := time.Duration(src.PollMs) * time.Millisecond
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	// Poll once immediately so we don't wait a full interval for first data.
