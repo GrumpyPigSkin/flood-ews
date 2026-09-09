@@ -42,7 +42,6 @@ public:
     }
     ring_buf_init(&m_rx_ring, m_rx_storage.size(), m_rx_storage.data());
     k_sem_init(&m_rx_sem, 0, 1);
-    s_self = this;
     uart_irq_callback_user_data_set(m_uart, &E5Uart::isr, this);
     uart_irq_rx_enable(m_uart);
     return true;
@@ -89,7 +88,7 @@ private:
       if (ring_buf_get(&m_rx_ring, &byte, 1) == 0) {
         const std::int64_t remaining = deadline - k_uptime_get();
         const k_timeout_t wait =
-            common::ms_to_k_timeout(std::max(remaining, std::int64_t{50}));
+            common::ms_to_k_timeout(std::min(remaining, std::int64_t{50}));
         k_sem_take(&m_rx_sem, wait);
         continue;
       }
@@ -181,9 +180,6 @@ private:
    * returned when RX is completed.
    */
   std::array<char, RX_BUF_SIZE> m_line{};
-
-  /** @brief Pointer to self. */
-  static inline E5Uart *s_self{nullptr};
 };
 
 } // namespace fog::lora
