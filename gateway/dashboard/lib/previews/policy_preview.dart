@@ -62,7 +62,7 @@ class _StubPolicyApi extends GatewayApi {
         "match_source_id": '',
         "actuator_id": 'pump-03',
         "target_state": 'ON',
-        "require_operator": false,
+        "disposition": false,
         "priority": 10,
       },
       {
@@ -74,7 +74,7 @@ class _StubPolicyApi extends GatewayApi {
         "match_source_id": '',
         "actuator_id": 'pump-03',
         "target_state": 'OFF',
-        "require_operator": false,
+        "disposition": false,
         "priority": 5,
       },
     ];

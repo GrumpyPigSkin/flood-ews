@@ -126,7 +126,7 @@ class PolicyRule {
     'match_source_id': matchSourceId,
     'actuator_id': actuatorId,
     'target_state': targetState,
-    'require_operator': disposition.wire,
+    'disposition': disposition.wire,
     'priority': priority,
   };
 }
