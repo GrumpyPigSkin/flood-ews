@@ -55,19 +55,17 @@ func TestPoller_PollOnce_SuccessAndRouting(t *testing.T) {
 
 	// Set up mocks and poller
 	sink := &MockSink{}
-	opQueue := &MockOperatorQueue{}
 	// Quiet logger for tests
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	p := New(sink, opQueue, logger)
+	p := New(sink, logger)
 
 	src := store.ExternalSource{
-		ID:          "source-1",
-		Enabled:     true,
-		Url:         server.URL,
-		Kind:        "generic",
-		PollMs:      1000,
-		Disposition: string(advisory.DispositionAdvisory),
+		ID:      "source-1",
+		Enabled: true,
+		Url:     server.URL,
+		Kind:    "generic",
+		PollMs:  1000,
 		// Configure the FieldMap so genericValidator knows how to map the JSON payload
 		FieldMap: `{
 			"value_path": "value",
@@ -87,21 +85,6 @@ func TestPoller_PollOnce_SuccessAndRouting(t *testing.T) {
 	if sink.Submitted[0].Value != 42.5 {
 		t.Errorf("expected value 42.5, got %f", sink.Submitted[0].Value)
 	}
-
-	// Test Operator Queue Route
-	src.Disposition = string(advisory.DispositionOperatorApproved)
-
-	// Reset the mock sink state so it doesn't leak into the next step
-	sink.Submitted = nil
-
-	p.pollOnce(context.Background(), src)
-
-	if len(opQueue.Enqueued) != 1 {
-		t.Fatalf("expected 1 enqueued advisory, got %d", len(opQueue.Enqueued))
-	}
-	if opQueue.Enqueued[0].Value != 42.5 {
-		t.Errorf("expected enqueued value 42.5, got %f", opQueue.Enqueued[0].Value)
-	}
 }
 
 func TestPoller_PollOnce_BoundsChecking(t *testing.T) {
@@ -112,7 +95,7 @@ func TestPoller_PollOnce_BoundsChecking(t *testing.T) {
 	defer server.Close()
 
 	sink := &MockSink{}
-	p := New(sink, &MockOperatorQueue{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	p := New(sink, slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	src := store.ExternalSource{
 		ID:       "source-bounds",
@@ -131,7 +114,7 @@ func TestPoller_PollOnce_BoundsChecking(t *testing.T) {
 
 func TestPoller_Sync(t *testing.T) {
 	sink := &MockSink{}
-	p := New(sink, &MockOperatorQueue{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	p := New(sink, slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	sources := []store.ExternalSource{
 		{ID: "src-a", Enabled: true, PollMs: 5000},

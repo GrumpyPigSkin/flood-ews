@@ -11,14 +11,13 @@ import (
 func makeAdv(sourceID string, disposition advisory.Disposition) advisory.Advisory {
 	now := time.Now().UTC()
 	return advisory.Advisory{
-		SourceID:    sourceID,
-		Kind:        "river_level",
-		Severity:    advisory.SeverityWarning,
-		Value:       4.2,
-		Unit:        "m",
-		ObservedAt:  now,
-		ReceivedAt:  now,
-		Disposition: disposition,
+		SourceID:   sourceID,
+		Kind:       "river_level",
+		Severity:   advisory.SeverityWarning,
+		Value:      4.2,
+		Unit:       "m",
+		ObservedAt: now,
+		ReceivedAt: now,
 	}
 }
 
@@ -31,13 +30,14 @@ func TestEnqueueWithIntendedAction(t *testing.T) {
 	ctx := context.Background()
 
 	a := makeAdv("ex1", advisory.DispositionAdvisory)
-	a.Raw = map[string]any{
-		"_intended_action": map[string]any{
-			"actuator_id":  "gate-1",
-			"target_state": "open",
-			"rule_id":      "rule-42",
-		},
+
+	action := advisory.IntendedAction{
+		ActuatorId:  "gate-1",
+		TargetState: "open",
+		RuleId:      "rule-42",
 	}
+
+	a.IntendedAction = &action
 
 	if err := s.Enqueue(a); err != nil {
 		t.Fatalf("Enqueue failed: %v", err)
@@ -144,12 +144,10 @@ func TestResolvePendingReject(t *testing.T) {
 	ctx := context.Background()
 
 	a := makeAdv("ex4", advisory.DispositionAdvisory)
-	a.Raw = map[string]any{
-		"_intended_action": map[string]any{
-			"actuator_id":  "gate-2",
-			"target_state": "closed",
-			"rule_id":      "rule-7",
-		},
+	a.IntendedAction = &advisory.IntendedAction{
+		ActuatorId:  "gate-2",
+		TargetState: "closed",
+		RuleId:      "rule-7",
 	}
 	if err := s.Enqueue(a); err != nil {
 		t.Fatalf("Enqueue failed: %v", err)

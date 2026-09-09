@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS external_source (
   max_age_ms    INTEGER NOT NULL DEFAULT 0,
   min_value     REAL NOT NULL DEFAULT 0,
   max_value     REAL NOT NULL DEFAULT 0,
-  disposition   TEXT NOT NULL DEFAULT 'advisory',
   field_map     TEXT NOT NULL DEFAULT '{}'
 );
 
@@ -41,7 +40,7 @@ CREATE TABLE IF NOT EXISTS policy_rule (
   match_source_id   TEXT NOT NULL DEFAULT '',
   actuator_id       TEXT NOT NULL,
   target_state      TEXT NOT NULL,
-  require_operator  INTEGER NOT NULL DEFAULT 0,
+  disposition       TEXT NOT NULL DEFAULT 'disposition',
   priority          INTEGER NOT NULL DEFAULT 0
 );
 
@@ -67,8 +66,8 @@ CREATE TABLE IF NOT EXISTS egress_target (
   min_severity  INTEGER NOT NULL DEFAULT 0
 );
 
--- The captured external advisory that requires operator approval
-CREATE TABLE IF NOT EXISTS operator_queue (
+-- The captured external disposition that requires operator approval
+CREATE TABLE IF NOT EXISTS queued_advisory (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   source_id     TEXT NOT NULL,
   kind          TEXT NOT NULL,

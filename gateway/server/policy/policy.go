@@ -33,7 +33,7 @@ type Rule struct {
 
 	// RequireOperator: if true, a match does NOT act autonomously. It is
 	// queued for a human to approve on the local dashboard.
-	RequireOperator bool `json:"require_operator"`
+	Disposition advisory.Disposition `json:"disposition"`
 
 	// Priority: higher wins when multiple rules target the same actuator in
 	// one evaluation.
@@ -121,21 +121,21 @@ func (e *Engine) evaluate(ctx context.Context, a advisory.Advisory) {
 
 		// Disposition from the source can force operator approval regardless
 		// of the rule.
-		requireOperator := r.RequireOperator ||
-			a.Disposition == advisory.DispositionOperatorApproved
+		requireOperator :=
+			r.Disposition == advisory.DispositionOperatorApproved
 
 		if requireOperator {
 			// Attach the intended action so the dashboard can show the required
 			// approval.
 			pending := a
-			if pending.Raw == nil {
-				pending.Raw = map[string]any{}
+
+			action := advisory.IntendedAction{
+				ActuatorId:  r.ActuatorID,
+				TargetState: r.TargetState,
+				RuleId:      r.ID,
 			}
-			pending.Raw["_intended_action"] = map[string]any{
-				"actuator_id":  r.ActuatorID,
-				"target_state": r.TargetState,
-				"rule_id":      r.ID,
-			}
+
+			pending.IntendedAction = &action
 
 			if err := e.opQueue.Enqueue(pending); err != nil {
 				e.log.Error("policy: operator enqueue failed", "rule", r.ID, "err", err)

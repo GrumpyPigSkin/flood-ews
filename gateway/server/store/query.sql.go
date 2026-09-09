@@ -48,12 +48,12 @@ func (q *Queries) DeleteTarget(ctx context.Context, id string) error {
 
 const getPending = `-- name: GetPending :one
 SELECT id, source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id, status, resolved_at, resolved_by
-FROM operator_queue WHERE id = ?
+FROM queued_advisory WHERE id = ?
 `
 
-func (q *Queries) GetPending(ctx context.Context, id int64) (OperatorQueue, error) {
+func (q *Queries) GetPending(ctx context.Context, id int64) (QueuedAdvisory, error) {
 	row := q.db.QueryRowContext(ctx, getPending, id)
-	var i OperatorQueue
+	var i QueuedAdvisory
 	err := row.Scan(
 		&i.ID,
 		&i.SourceID,
@@ -100,7 +100,7 @@ func (q *Queries) InsertAuditLog(ctx context.Context, arg InsertAuditLogParams) 
 }
 
 const insertPending = `-- name: InsertPending :exec
-INSERT INTO operator_queue (source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id)
+INSERT INTO queued_advisory (source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
@@ -208,18 +208,18 @@ func (q *Queries) ListAudit(ctx context.Context, limit int64) ([]AuditLog, error
 
 const listPending = `-- name: ListPending :many
 SELECT id, source_id, kind, severity, value, unit, observed_at, received_at, disposition, raw_json, actuator_id, target_state, rule_id, status, resolved_at, resolved_by
-FROM operator_queue WHERE status = 'pending' ORDER BY id
+FROM queued_advisory WHERE status = 'pending' ORDER BY id
 `
 
-func (q *Queries) ListPending(ctx context.Context) ([]OperatorQueue, error) {
+func (q *Queries) ListPending(ctx context.Context) ([]QueuedAdvisory, error) {
 	rows, err := q.db.QueryContext(ctx, listPending)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []OperatorQueue
+	var items []QueuedAdvisory
 	for rows.Next() {
-		var i OperatorQueue
+		var i QueuedAdvisory
 		if err := rows.Scan(
 			&i.ID,
 			&i.SourceID,
@@ -253,7 +253,7 @@ func (q *Queries) ListPending(ctx context.Context) ([]OperatorQueue, error) {
 
 const listRules = `-- name: ListRules :many
 SELECT id, name, enabled, match_kind, match_min_sev, match_source_id,
-       actuator_id, target_state, require_operator, priority
+       actuator_id, target_state, disposition, priority
 FROM policy_rule ORDER BY priority DESC, id
 `
 
@@ -275,7 +275,7 @@ func (q *Queries) ListRules(ctx context.Context) ([]PolicyRule, error) {
 			&i.MatchSourceID,
 			&i.ActuatorID,
 			&i.TargetState,
-			&i.RequireOperator,
+			&i.Disposition,
 			&i.Priority,
 		); err != nil {
 			return nil, err
@@ -292,7 +292,7 @@ func (q *Queries) ListRules(ctx context.Context) ([]PolicyRule, error) {
 }
 
 const listSources = `-- name: ListSources :many
-SELECT id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, disposition, field_map
+SELECT id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, field_map
 FROM external_source ORDER BY id
 `
 
@@ -317,7 +317,6 @@ func (q *Queries) ListSources(ctx context.Context) ([]ExternalSource, error) {
 			&i.MaxAgeMs,
 			&i.MinValue,
 			&i.MaxValue,
-			&i.Disposition,
 			&i.FieldMap,
 		); err != nil {
 			return nil, err
@@ -371,7 +370,7 @@ func (q *Queries) ListTargets(ctx context.Context) ([]EgressTarget, error) {
 }
 
 const resolvePending = `-- name: ResolvePending :execresult
-UPDATE operator_queue SET status = ?, resolved_at = ?, resolved_by = ?
+UPDATE queued_advisory SET status = ?, resolved_at = ?, resolved_by = ?
 WHERE id = ? AND status = 'pending'
 `
 
@@ -419,26 +418,26 @@ func (q *Queries) UpsertActuator(ctx context.Context, arg UpsertActuatorParams) 
 }
 
 const upsertRule = `-- name: UpsertRule :exec
-INSERT INTO policy_rule (id, name, enabled, match_kind, match_min_sev, match_source_id, actuator_id, target_state, require_operator, priority)
+INSERT INTO policy_rule (id, name, enabled, match_kind, match_min_sev, match_source_id, actuator_id, target_state, disposition, priority)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO UPDATE SET
   name=excluded.name, enabled=excluded.enabled, match_kind=excluded.match_kind,
   match_min_sev=excluded.match_min_sev, match_source_id=excluded.match_source_id,
   actuator_id=excluded.actuator_id, target_state=excluded.target_state,
-  require_operator=excluded.require_operator, priority=excluded.priority
+  disposition=excluded.disposition, priority=excluded.priority
 `
 
 type UpsertRuleParams struct {
-	ID              string
-	Name            string
-	Enabled         bool
-	MatchKind       string
-	MatchMinSev     int64
-	MatchSourceID   string
-	ActuatorID      string
-	TargetState     string
-	RequireOperator bool
-	Priority        int64
+	ID            string
+	Name          string
+	Enabled       bool
+	MatchKind     string
+	MatchMinSev   int64
+	MatchSourceID string
+	ActuatorID    string
+	TargetState   string
+	Disposition   string
+	Priority      int64
 }
 
 func (q *Queries) UpsertRule(ctx context.Context, arg UpsertRuleParams) error {
@@ -451,37 +450,35 @@ func (q *Queries) UpsertRule(ctx context.Context, arg UpsertRuleParams) error {
 		arg.MatchSourceID,
 		arg.ActuatorID,
 		arg.TargetState,
-		arg.RequireOperator,
+		arg.Disposition,
 		arg.Priority,
 	)
 	return err
 }
 
 const upsertSource = `-- name: UpsertSource :exec
-INSERT INTO external_source (id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, disposition, field_map)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO external_source (id, name, enabled, url, auth_header, auth_token, poll_ms, kind, max_age_ms, min_value, max_value, field_map)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO UPDATE SET
   name=excluded.name, enabled=excluded.enabled, url=excluded.url,
   auth_header=excluded.auth_header, auth_token=excluded.auth_token,
   poll_ms=excluded.poll_ms, kind=excluded.kind, max_age_ms=excluded.max_age_ms,
-  min_value=excluded.min_value, max_value=excluded.max_value,
-  disposition=excluded.disposition, field_map=excluded.field_map
+  min_value=excluded.min_value, max_value=excluded.max_value, field_map=excluded.field_map
 `
 
 type UpsertSourceParams struct {
-	ID          string
-	Name        string
-	Enabled     bool
-	Url         string
-	AuthHeader  string
-	AuthToken   string
-	PollMs      int64
-	Kind        string
-	MaxAgeMs    int64
-	MinValue    float64
-	MaxValue    float64
-	Disposition string
-	FieldMap    string
+	ID         string
+	Name       string
+	Enabled    bool
+	Url        string
+	AuthHeader string
+	AuthToken  string
+	PollMs     int64
+	Kind       string
+	MaxAgeMs   int64
+	MinValue   float64
+	MaxValue   float64
+	FieldMap   string
 }
 
 func (q *Queries) UpsertSource(ctx context.Context, arg UpsertSourceParams) error {
@@ -497,7 +494,6 @@ func (q *Queries) UpsertSource(ctx context.Context, arg UpsertSourceParams) erro
 		arg.MaxAgeMs,
 		arg.MinValue,
 		arg.MaxValue,
-		arg.Disposition,
 		arg.FieldMap,
 	)
 	return err

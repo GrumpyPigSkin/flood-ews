@@ -33,22 +33,34 @@ type EgressTarget struct {
 }
 
 type ExternalSource struct {
-	ID          string
-	Name        string
-	Enabled     bool
-	Url         string
-	AuthHeader  string
-	AuthToken   string
-	PollMs      int64
-	Kind        string
-	MaxAgeMs    int64
-	MinValue    float64
-	MaxValue    float64
-	Disposition string
-	FieldMap    string
+	ID         string
+	Name       string
+	Enabled    bool
+	Url        string
+	AuthHeader string
+	AuthToken  string
+	PollMs     int64
+	Kind       string
+	MaxAgeMs   int64
+	MinValue   float64
+	MaxValue   float64
+	FieldMap   string
 }
 
-type OperatorQueue struct {
+type PolicyRule struct {
+	ID            string
+	Name          string
+	Enabled       bool
+	MatchKind     string
+	MatchMinSev   int64
+	MatchSourceID string
+	ActuatorID    string
+	TargetState   string
+	Disposition   string
+	Priority      int64
+}
+
+type QueuedAdvisory struct {
 	ID          int64
 	SourceID    string
 	Kind        string
@@ -65,17 +77,4 @@ type OperatorQueue struct {
 	Status      string
 	ResolvedAt  string
 	ResolvedBy  string
-}
-
-type PolicyRule struct {
-	ID              string
-	Name            string
-	Enabled         bool
-	MatchKind       string
-	MatchMinSev     int64
-	MatchSourceID   string
-	ActuatorID      string
-	TargetState     string
-	RequireOperator bool
-	Priority        int64
 }

@@ -8,7 +8,9 @@
 
 package advisory
 
-import "time"
+import (
+	"time"
+)
 
 // Disposition is the per-source policy for how a validated external alert is
 // allowed to affect the system.
@@ -44,6 +46,14 @@ const (
 	SeverityCritical
 )
 
+// Intended action contains the information to trigger an actuator response for
+// an advisory.
+type IntendedAction struct {
+	ActuatorId  string
+	TargetState string
+	RuleId      string
+}
+
 type Advisory struct {
 	// The external source this came from.
 	SourceID string
@@ -65,13 +75,8 @@ type Advisory struct {
 	// The time we pulled the advisory.
 	ReceivedAt time.Time
 
-	// Disposition is copied from the source config so the ingest path knows
-	// whether the policy engine may act autonomously or must queue for an
-	// operator.
-	Disposition Disposition
-
 	// Raw is the original decoded payload, retained for debugging.
-	Raw map[string]any
+	IntendedAction *IntendedAction
 }
 
 // Stale reports whether the observation is older than maxAge relative to

@@ -98,12 +98,11 @@ func validateSource(e ExternalSource) error {
 	if e.ID == "" || e.Url == "" {
 		return fmt.Errorf("source: id and url are required")
 	}
+
 	if e.PollMs < 1000 {
 		return fmt.Errorf("source %s: poll_interval too small (min 1s)", e.ID)
 	}
-	if !advisory.Disposition(e.Disposition).Valid() {
-		return fmt.Errorf("source %s: invalid disposition %q", e.ID, e.Disposition)
-	}
+
 	if e.MaxValue != 0 && e.MinValue > e.MaxValue {
 		return fmt.Errorf("source %s: min_value > max_value", e.ID)
 	}
@@ -114,6 +113,10 @@ func validateSource(e ExternalSource) error {
 func validateRule(r policy.Rule) error {
 	if r.ID == "" || r.ActuatorID == "" || r.TargetState == "" {
 		return fmt.Errorf("rule: id, actuator_id, target_state required")
+	}
+
+	if !advisory.Disposition(r.Disposition).Valid() {
+		return fmt.Errorf("source %s: invalid disposition %q", r.ID, r.Disposition)
 	}
 	return nil
 }

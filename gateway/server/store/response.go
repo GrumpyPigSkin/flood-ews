@@ -69,19 +69,18 @@ func (s *Store) UpsertSource(ctx context.Context, e ExternalSource, actor string
 	}
 	return s.withAuditTx(ctx, actor, "upsert_source", e.ID, e, func(qtx *Queries) error {
 		return qtx.UpsertSource(ctx, UpsertSourceParams{
-			ID:          e.ID,
-			Name:        e.Name,
-			Enabled:     e.Enabled,
-			Url:         e.Url,
-			AuthHeader:  e.AuthHeader,
-			AuthToken:   e.AuthToken,
-			PollMs:      e.PollMs,
-			Kind:        e.Kind,
-			MaxAgeMs:    e.MaxAgeMs,
-			MinValue:    e.MinValue,
-			MaxValue:    e.MaxValue,
-			Disposition: string(e.Disposition),
-			FieldMap:    e.FieldMap,
+			ID:         e.ID,
+			Name:       e.Name,
+			Enabled:    e.Enabled,
+			Url:        e.Url,
+			AuthHeader: e.AuthHeader,
+			AuthToken:  e.AuthToken,
+			PollMs:     e.PollMs,
+			Kind:       e.Kind,
+			MaxAgeMs:   e.MaxAgeMs,
+			MinValue:   e.MinValue,
+			MaxValue:   e.MaxValue,
+			FieldMap:   e.FieldMap,
 		})
 	})
 }
@@ -165,7 +164,7 @@ func (s *Store) ListRules(ctx context.Context) ([]policy.Rule, error) {
 			MatchSourceID:    r.MatchSourceID,
 			ActuatorID:       r.ActuatorID,
 			TargetState:      r.TargetState,
-			RequireOperator:  r.RequireOperator,
+			Disposition:      advisory.Disposition(r.Disposition),
 			Priority:         int(r.Priority),
 		}
 	}
@@ -179,16 +178,16 @@ func (s *Store) UpsertRule(ctx context.Context, r policy.Rule, actor string) err
 	}
 	return s.withAuditTx(ctx, actor, "upsert_rule", r.ID, r, func(qtx *Queries) error {
 		return qtx.UpsertRule(ctx, UpsertRuleParams{
-			ID:              r.ID,
-			Name:            r.Name,
-			Enabled:         r.Enabled,
-			MatchKind:       r.MatchKind,
-			MatchMinSev:     int64(r.MatchMinSeverity),
-			MatchSourceID:   r.MatchSourceID,
-			ActuatorID:      r.ActuatorID,
-			TargetState:     r.TargetState,
-			RequireOperator: r.RequireOperator,
-			Priority:        int64(r.Priority),
+			ID:            r.ID,
+			Name:          r.Name,
+			Enabled:       r.Enabled,
+			MatchKind:     r.MatchKind,
+			MatchMinSev:   int64(r.MatchMinSeverity),
+			MatchSourceID: r.MatchSourceID,
+			ActuatorID:    r.ActuatorID,
+			TargetState:   r.TargetState,
+			Disposition:   string(r.Disposition),
+			Priority:      int64(r.Priority),
 		})
 	})
 }
@@ -285,7 +284,7 @@ type PendingAdvisory struct {
 }
 
 // Convert a pending row to the usable type PendingAdvisory
-func pendingFromRow(r OperatorQueue) PendingAdvisory {
+func pendingFromRow(r QueuedAdvisory) PendingAdvisory {
 	observed, _ := time.Parse(time.RFC3339Nano, r.ObservedAt)
 	received, _ := time.Parse(time.RFC3339Nano, r.ReceivedAt)
 
@@ -324,19 +323,14 @@ func pendingFromRow(r OperatorQueue) PendingAdvisory {
 func (s *Store) Enqueue(a advisory.Advisory) error {
 	ctx := context.Background()
 
-	rawJSON, err := json.Marshal(a.Raw)
-	if err != nil {
-		return fmt.Errorf("Operator Queue: error while encoding raw payload: %w", err)
-	}
-
 	var actuatorID string
 	var targetState string
 	var ruleID string
 
-	if m, ok := a.Raw["_intended_action"].(map[string]any); ok {
-		actuatorID, _ = m["actuator_id"].(string)
-		targetState, _ = m["target_state"].(string)
-		ruleID, _ = m["rule_id"].(string)
+	if a.IntendedAction != nil {
+		actuatorID = a.IntendedAction.ActuatorId
+		targetState = a.IntendedAction.TargetState
+		ruleID = a.IntendedAction.RuleId
 	}
 
 	return s.queries.InsertPending(ctx, InsertPendingParams{
@@ -347,8 +341,6 @@ func (s *Store) Enqueue(a advisory.Advisory) error {
 		Unit:        a.Unit,
 		ObservedAt:  a.ObservedAt.UTC().Format(time.RFC3339Nano),
 		ReceivedAt:  a.ReceivedAt.UTC().Format(time.RFC3339Nano),
-		Disposition: string(a.Disposition),
-		RawJson:     string(rawJSON),
 		ActuatorID:  actuatorID,
 		TargetState: targetState,
 		RuleID:      ruleID,

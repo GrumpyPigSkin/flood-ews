@@ -79,6 +79,8 @@ func (b *Bridge) HandleUplink(payload []byte) {
 	}
 	u := cs.toUplink(time.Now().UTC())
 
+	b.log.Info("Got uplink: " + string(payload))
+
 	// Check for a duplicate entry.
 	if !b.hub.IsUnique(u) {
 		return

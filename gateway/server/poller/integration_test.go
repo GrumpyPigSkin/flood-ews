@@ -78,10 +78,9 @@ func TestExternalSource_DrivesActuatorViaPolicy(t *testing.T) {
 
 	// The mock external source should match the example JSON above.
 	src := store.ExternalSource{
-		ID:          "ea-gauge-1",
-		Enabled:     true,
-		Kind:        "river_level",
-		Disposition: string(advisory.DispositionAdvisory),
+		ID:      "ea-gauge-1",
+		Enabled: true,
+		Kind:    "river_level",
 		FieldMap: `{
 			"value_path": "items.0.value",
 			"observed_at_path": "items.0.dateTime",
@@ -94,7 +93,7 @@ func TestExternalSource_DrivesActuatorViaPolicy(t *testing.T) {
 		}`,
 	}
 
-	p := New(engine, &MockOperatorQueue{}, logger)
+	p := New(engine, logger)
 
 	if got := daemon.States()["barrier-1"]; got != "LOWERED" {
 		t.Fatalf("expected initial state 'LOWERED', got %q", got)

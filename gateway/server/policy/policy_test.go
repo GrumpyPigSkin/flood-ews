@@ -108,7 +108,7 @@ func TestEngine_SubmitAdvisory(t *testing.T) {
 		{
 			name: "Dangerous actions require operator approval",
 			rules: []Rule{
-				{ID: "r-siren", Enabled: true, RequireOperator: true, ActuatorID: "siren", TargetState: "ON"},
+				{ID: "r-siren", Enabled: true, Disposition: advisory.DispositionOperatorApproved, ActuatorID: "siren", TargetState: "ON"},
 			},
 			advisory:     advisory.Advisory{ReceivedAt: now},
 			expectQueued: []string{"r-siren"},
@@ -116,9 +116,9 @@ func TestEngine_SubmitAdvisory(t *testing.T) {
 		{
 			name: "Operator approved disposition forces queueing",
 			rules: []Rule{
-				{ID: "r-barrier", Enabled: true, RequireOperator: false, ActuatorID: "barrier", TargetState: "CLOSE"},
+				{ID: "r-barrier", Enabled: true, Disposition: advisory.DispositionOperatorApproved, ActuatorID: "barrier", TargetState: "CLOSE"},
 			},
-			advisory:     advisory.Advisory{Disposition: advisory.DispositionOperatorApproved, ReceivedAt: now},
+			advisory:     advisory.Advisory{ReceivedAt: now},
 			expectQueued: []string{"r-barrier"},
 		},
 	}
@@ -153,9 +153,9 @@ func TestEngine_SubmitAdvisory(t *testing.T) {
 			}
 			for i, ruleID := range tt.expectQueued {
 				if i < len(queue.enqueued) {
-					intended, ok := queue.enqueued[i].Raw["_intended_action"].(map[string]any)
-					if !ok || intended["rule_id"] != ruleID {
-						t.Errorf("expected queued action for rule %s, got %+v", ruleID, intended)
+					action := queue.enqueued[i].IntendedAction
+					if action == nil || action.RuleId != ruleID {
+						t.Errorf("expected queued action for rule %s, got %+v", ruleID, action)
 					}
 				}
 			}

@@ -4,9 +4,7 @@
 // make one outbound GET request, and turns the response into a validated
 // Advisory. Nothing external ever connects to us we start every call.
 //
-// The dispatch decision is per-source policy:
-//   Disposition == advisory           -> Sink   (actuates immediately)
-//   Disposition == operator_approved  -> OperatorQueue (human confirms)
+// Received external sources are the submitted to the advisory.Sink
 
 package poller
 
@@ -35,7 +33,6 @@ type runningSource struct {
 type Poller struct {
 	client     *http.Client
 	sink       advisory.Sink
-	opQueue    advisory.OperatorQueue
 	log        *slog.Logger
 	validators map[string]Validator
 	mu         sync.Mutex
@@ -43,13 +40,12 @@ type Poller struct {
 }
 
 // Factory function for Poller.
-func New(sink advisory.Sink, opQueue advisory.OperatorQueue, log *slog.Logger) *Poller {
+func New(sink advisory.Sink, log *slog.Logger) *Poller {
 	return &Poller{
 		client: &http.Client{
 			Timeout: 30 * time.Second, // Slow government APIs
 		},
 		sink:       sink,
-		opQueue:    opQueue,
 		log:        log,
 		validators: map[string]Validator{"generic": genericValidator},
 		running:    map[string]runningSource{},
@@ -161,8 +157,7 @@ func (p *Poller) pollOnce(ctx context.Context, src store.ExternalSource) {
 		return
 	}
 
-	adv.Disposition = advisory.Disposition(src.Disposition)
-	p.dispatch(adv)
+	p.sink.SubmitAdvisory(adv)
 }
 
 // Fetch the data using a GET request.
@@ -192,24 +187,6 @@ func (p *Poller) fetch(ctx context.Context, src store.ExternalSource) ([]byte, e
 	// Cap the body size to prevent any memory issues.
 	return io.ReadAll(io.LimitReader(resp.Body, 1<<20)) // 1 MiB
 
-}
-
-// Dispatch the advisory to either the queue or submit it.
-func (p *Poller) dispatch(adv advisory.Advisory) {
-	switch adv.Disposition {
-	case advisory.DispositionOperatorApproved:
-		if err := p.opQueue.Enqueue(adv); err != nil {
-			p.log.Error("poller: operator enqueue failed", "id", adv.SourceID, "err", err)
-			return
-		}
-		p.log.Info("poller: advisory queued for operator", "id", adv.SourceID, "kind", adv.Kind)
-	default: // DispositionAdvisory
-		if err := p.sink.SubmitAdvisory(adv); err != nil {
-			p.log.Error("poller: fog submit failed", "id", adv.SourceID, "err", err)
-			return
-		}
-		p.log.Info("poller: advisory submitted to consensus", "id", adv.SourceID, "kind", adv.Kind, "sev", adv.Severity)
-	}
 }
 
 // Compare two external sources are exactly the same.

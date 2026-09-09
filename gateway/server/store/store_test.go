@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"encoding/json"
-	"server/advisory"
 	"testing"
 )
 
@@ -26,18 +25,17 @@ func TestUpsertAndListSources(t *testing.T) {
 	actor := "test-operator-123"
 
 	src := ExternalSource{
-		ID:          "ex1",
-		Name:        "Ex1",
-		Enabled:     true,
-		Url:         "https://api.weather.gov/stations/RIV01",
-		AuthHeader:  "Auth",
-		AuthToken:   "secret-token-xyz",
-		PollMs:      5000,
-		Kind:        "river_level",
-		MaxAgeMs:    90000,
-		MinValue:    0.0,
-		MaxValue:    12.5,
-		Disposition: string(advisory.DispositionAdvisory),
+		ID:         "ex1",
+		Name:       "Ex1",
+		Enabled:    true,
+		Url:        "https://api.weather.gov/stations/RIV01",
+		AuthHeader: "Auth",
+		AuthToken:  "secret-token-xyz",
+		PollMs:     5000,
+		Kind:       "river_level",
+		MaxAgeMs:   90000,
+		MinValue:   0.0,
+		MaxValue:   12.5,
 	}
 
 	// Test successful Upsert
@@ -128,10 +126,9 @@ func TestDeleteSourceAndAuditChain(t *testing.T) {
 
 	// Add some data first
 	src := ExternalSource{
-		ID:          id,
-		Url:         "https://test.com",
-		PollMs:      10000,
-		Disposition: string(advisory.DispositionAdvisory),
+		ID:     id,
+		Url:    "https://test.com",
+		PollMs: 10000,
 	}
 	_ = s.UpsertSource(ctx, src, actor)
 

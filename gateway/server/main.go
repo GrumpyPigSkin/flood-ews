@@ -93,7 +93,7 @@ func main() {
 	go runHeartbeat(ctx, daemon, 5*time.Second)
 
 	// Start poller, pull external advisories into the policy engine.
-	p := poller.New(engine, opQueue, logger)
+	p := poller.New(engine, logger)
 	if sources, err := st.ListSources(ctx); err != nil {
 		logger.Error("list sources", "err", err)
 	} else {
