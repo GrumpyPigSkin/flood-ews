@@ -5,6 +5,7 @@
 #include "common/mutex.hpp"
 #include "common/periodic_task.hpp"
 #include "common/sensor_reading.hpp"
+#include "engine.hpp"
 #include "outlier_vote/engine.hpp"
 #include "outlier_vote/sensor_batch.hpp"
 #include <cstdint>
@@ -29,9 +30,9 @@ public:
    * @param [in] submit Called with each new sensor batch.
    * @param [in] cfg The configuration for the underlying engine.
    */
-  explicit VoteService(SubmitFn submit, NowMsFn now_ms, Config cfg = {})
-      : m_engine{cfg}, m_submit{std::move(submit)},
-        m_window([this] { on_window_close(); }), m_now_ms{std::move(now_ms)} {}
+  VoteService(SubmitFn submit, NowMsFn now_ms)
+      : m_submit{std::move(submit)}, m_window([this] { on_window_close(); }),
+        m_now_ms{std::move(now_ms)} {}
 
   /** @brief Deleted copy and move constructors. */
   VoteService(const VoteService &) = delete;
@@ -44,8 +45,8 @@ public:
    * @brief Arm the first collection window.
    */
   void start() {
-    const auto cfg = config();
-    m_window.one_shot(next_boundary_timeout(cfg.m_collection_window_ms));
+    m_window.one_shot(
+        next_boundary_timeout(OutlierVoteConfig::m_collection_window_ms));
   }
 
   /**
@@ -60,8 +61,7 @@ public:
   void resync() {
     const std::scoped_lock guard(m_lock);
     m_window.stop();
-    m_window.one_shot(
-        next_boundary_timeout(m_engine.config().m_collection_window_ms));
+    m_window.one_shot(next_boundary_timeout(m_engine.collection_window()));
   }
 
   /**
@@ -72,8 +72,7 @@ public:
   void window_start() {
     const std::scoped_lock guard(m_lock);
     m_engine.open_window();
-    m_window.one_shot(
-        next_boundary_timeout(m_engine.config().m_collection_window_ms));
+    m_window.one_shot(next_boundary_timeout(m_engine.collection_window()));
   }
 
   /**
@@ -84,24 +83,6 @@ public:
     if (!m_engine.accumulate(entry)) {
       logging::err("accumulate reading: .eui={:x}", entry.m_eui);
     }
-  }
-
-  /**
-   * @brief Set a new configuration.
-   * @param cfg
-   */
-  void set_config(const Config &cfg) {
-    const std::scoped_lock guard(m_lock);
-    m_engine.set_config(cfg);
-  }
-
-  /**
-   * @brief Get the current configuration.
-   * @return Config
-   */
-  [[nodiscard]] Config config() const {
-    const std::scoped_lock guard(m_lock);
-    return m_engine.config();
   }
 
   /**
@@ -146,7 +127,7 @@ private:
     {
       const std::scoped_lock guard(m_lock);
       batch = m_engine.close_window();
-      next_ms = m_engine.config().m_collection_window_ms;
+      next_ms = m_engine.collection_window();
     }
 
     if (batch.has_value() && m_submit) {

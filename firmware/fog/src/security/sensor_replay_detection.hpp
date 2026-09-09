@@ -14,7 +14,6 @@ namespace fog::security {
 class SensorReplayDetection {
 public:
   static constexpr std::size_t MAX_SENSORS = 8;
-  static constexpr std::int64_t TIMEOUT_US = 1200'000'000; // 20 mins
 
   /** @brief Helper struct for table. */
   struct SensorReplayEntry {

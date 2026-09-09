@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/global_config.h"
 #include "common/sensor_reading.hpp"
 #include "outlier_vote/sensor_batch.hpp"
 #include <algorithm>
@@ -16,22 +17,34 @@ using Eui = std::uint64_t;
 /**
  * @brief Configuration for the engine parameters.
  */
-struct Config {
-  std::uint16_t m_tolerance_mm = 200;        // |reading - median| outlier bound
-  std::uint16_t m_alert_threshold_mm = 1500; // good reading above this -> alert
-#ifdef CONFIG_ENABLE_FAULT_INJECTION
-  std::uint32_t m_collection_window_ms =
-      60000; // Time to wait before snapshotting samples and voting.
-#else
-  std::uint32_t m_collection_window_ms =
-      300000; // Time to wait before snapshotting samples and voting.
-#endif
-  std::uint8_t m_alert_clear_windows = 3; // clean windows needed to clear alert
-  std::uint8_t m_reputation_penalty = 20; // lost per outlier
-  std::uint8_t m_reputation_recovery = 5; // gained per clean reading
-  std::uint8_t m_reputation_min = 20;     // below -> excluded
-  std::uint8_t m_reputation_readmit = 40; // at/above -> readmitted
-  std::uint8_t m_reputation_initial = 100;
+struct OutlierVoteConfig {
+  /** @brief |reading - median| outlier bound. */
+  static constexpr std::uint16_t m_tolerance_mm = 200;
+
+  /** @brief Reading above this -> alert. */
+  static constexpr std::uint16_t m_alert_threshold_mm = 1500;
+
+  /** @brief Time to wait before snapshotting samples and voting. */
+  static constexpr std::uint32_t m_collection_window_ms =
+      common::DEFAULT_TIMEOUT_MS;
+
+  /** @brief Clean windows needed to clear alert. */
+  static constexpr std::uint8_t m_alert_clear_windows = 3;
+
+  /** @brief Lost per outlier. */
+  static constexpr std::uint8_t m_reputation_penalty = 20;
+
+  /** @brief Gained per clean reading. */
+  static constexpr std::uint8_t m_reputation_recovery = 5;
+
+  /** @brief below -> excluded. */
+  static constexpr std::uint8_t m_reputation_min = 20;
+
+  /** @brief at/above -> readmitted. */
+  static constexpr std::uint8_t m_reputation_readmit = 40;
+
+  /** @brief Initial reputation. */
+  static constexpr std::uint8_t m_reputation_initial = 100;
 };
 
 /**
@@ -62,30 +75,18 @@ public:
   static constexpr std::uint8_t MIN_REPUTATION = 10;
 
   /**
-   * @brief Construct a new Vote Engine object
-   * @param [in] cfg The configuration.
+   * @brief Set a new collection window for sampling.
+   * @param [in] collection_window
    */
-  explicit VoteEngine(Config cfg = {}) : m_cfg{cfg} {}
-
-  /**
-   * @brief Set a new config.
-   * @param cfg the new configuration.
-   */
-  void set_config(const Config &cfg) noexcept { m_cfg = cfg; }
+  void set_collection_window(const std::uint32_t collection_window) {
+    m_collection_window_ms = collection_window;
+  }
 
   /**
    * @brief Set a new collection window for sampling.
    * @param [in] collection_window
    */
-  void set_collection_window(const std::uint32_t collection_window) {
-    m_cfg.m_collection_window_ms = collection_window;
-  }
-
-  /**
-   * @brief Get the current configuration
-   * @return Config
-   */
-  [[nodiscard]] Config config() const noexcept { return m_cfg; }
+  std::uint32_t collection_window() const { return m_collection_window_ms; }
 
   /**
    * @brief Is an alert active.
@@ -175,7 +176,8 @@ public:
     bool trigger = false;
     for (std::uint8_t i = 0; i < batch.m_count; ++i) {
       if (batch.m_entries[i].m_validity == Validity::VALIDITY_GOOD &&
-          batch.m_entries[i].m_water_level_mm >= m_cfg.m_alert_threshold_mm) {
+          batch.m_entries[i].m_water_level_mm >=
+              OutlierVoteConfig::m_alert_threshold_mm) {
         trigger = true;
         break;
       }
@@ -184,7 +186,7 @@ public:
       m_clean_windows = 0;
       m_alert_active = true;
     } else if (m_alert_active) {
-      if (++m_clean_windows >= m_cfg.m_alert_clear_windows) {
+      if (++m_clean_windows >= OutlierVoteConfig::m_alert_clear_windows) {
         m_alert_active = false;
         m_clean_windows = 0;
       }
@@ -296,7 +298,8 @@ private:
 
     for (auto &reputation : m_reputation) {
       if (!reputation.m_known) {
-        reputation = Reputation{eui, m_cfg.m_reputation_initial, true, false};
+        reputation = Reputation{eui, OutlierVoteConfig::m_reputation_initial,
+                                true, false};
         return &reputation;
       }
     }
@@ -320,7 +323,7 @@ private:
 
     // Workout the deviation from the mean.
     const std::uint16_t dev = std::max(val, med) - std::min(val, med);
-    const bool is_outlier = dev > m_cfg.m_tolerance_mm;
+    const bool is_outlier = dev > OutlierVoteConfig::m_tolerance_mm;
 
     // Get the reputation for this eui.
     Reputation *rep = rep_for(eui);
@@ -330,19 +333,19 @@ private:
       // If this reading is an outlier, reduce the reputation and see if it has
       // reach the min reputation, if it has, exclude it.
       if (is_outlier) {
-        rep->m_reputation =
-            clamp_reputation(rep->m_reputation - m_cfg.m_reputation_penalty);
-        if (rep->m_reputation < m_cfg.m_reputation_min) {
+        rep->m_reputation = clamp_reputation(
+            rep->m_reputation - OutlierVoteConfig::m_reputation_penalty);
+        if (rep->m_reputation < OutlierVoteConfig::m_reputation_min) {
           rep->m_excluded = true;
         }
       } else {
 
         // Is not an outlier, add the recovery regardless and see if it can be
         // readmitted.
-        rep->m_reputation =
-            clamp_reputation(rep->m_reputation + m_cfg.m_reputation_recovery);
+        rep->m_reputation = clamp_reputation(
+            rep->m_reputation + OutlierVoteConfig::m_reputation_recovery);
         if (rep->m_excluded &&
-            rep->m_reputation >= m_cfg.m_reputation_readmit) {
+            rep->m_reputation >= OutlierVoteConfig::m_reputation_readmit) {
           rep->m_excluded = false;
         }
       }
@@ -368,7 +371,8 @@ private:
   }
 
   /** @brief The configuration. */
-  Config m_cfg{};
+  std::uint32_t m_collection_window_ms =
+      OutlierVoteConfig::m_collection_window_ms;
 
   /** @brief Accumulated EUIs. */
   std::array<Eui, MAX_SENSORS> m_euis{};

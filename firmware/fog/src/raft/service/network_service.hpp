@@ -2,11 +2,11 @@
 
 #include "common/mutex.hpp"
 #include <array>
+#include <cstdint>
 #include <openthread/ip6.h>
 #include <optional>
 #include <ranges>
 #include <stdint.h>
-
 namespace fog::raft {
 
 /**
