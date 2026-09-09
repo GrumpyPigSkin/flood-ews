@@ -84,7 +84,7 @@ private:
     // Send once
     if (batch.m_alert_active && !m_alert_active) {
       m_alert_active = true;
-      m_alert_service.send_alert({.m_alert_interval = ALERT_INTERVAL_S,
+      m_alert_service.send_alert({.m_alert_interval_ms = ALERT_INTERVAL_S,
                                   .m_alert_active = m_alert_active});
       m_vote_service.set_collection_window(ALERT_INTERVAL_S * 1000);
       m_vote_service.resync();
@@ -92,7 +92,7 @@ private:
                m_alert_active != batch.m_alert_active) {
       m_alert_active = false;
       m_alert_service.send_alert(
-          {.m_alert_interval = 0, .m_alert_active = m_alert_active});
+          {.m_alert_interval_ms = 0, .m_alert_active = m_alert_active});
       m_vote_service.set_config(vote::Config{});
       m_vote_service.resync();
     }

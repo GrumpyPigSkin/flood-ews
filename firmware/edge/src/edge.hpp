@@ -4,7 +4,7 @@
 #include "common/logging.hpp"
 #include "common/ot_utils.hpp"
 #include "common/sensor_reading.hpp"
-#include "config/service.hpp"
+#include "config/config.hpp"
 #include "jsn/driver.hpp"
 #include "jsn/jsn_logic.hpp"
 #include "sensor/sensor_coap.hpp"
@@ -84,15 +84,10 @@ private:
                                     common::SENSOR_URI};
 
   /** @brief Handle an alert message from the fog layer. */
-  common::Alert m_alert_handler{[this](const auto alert) {
-    if (alert.m_alert_active) {
-      logging::inf("Alert activated: sleep time: {}", alert.m_alert_interval);
-      m_config_service.set_alert(alert.m_alert_interval);
-    } else {
-      logging::inf("Alert deactivated", alert.m_alert_interval);
-      m_config_service.clear_alert();
-    }
-  }};
+  common::Alert m_alert_handler{[this](const auto alert) { m_alert = alert; }};
+
+  /** @brief stored alert packet. */
+  common::Alert::AlertPacket m_alert;
 };
 
 } // namespace edge
