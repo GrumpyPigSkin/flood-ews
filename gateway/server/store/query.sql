@@ -83,3 +83,7 @@ FROM queued_advisory WHERE id = ?;
 -- name: ResolvePending :execresult
 UPDATE queued_advisory SET status = ?, resolved_at = ?, resolved_by = ?
 WHERE id = ? AND status = 'pending';
+
+-- name: CountPendingAction :one
+SELECT COUNT(*) FROM queued_advisory
+WHERE actuator_id = ? AND target_state = ? AND status = 'pending';

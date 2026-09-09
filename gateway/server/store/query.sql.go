@@ -10,6 +10,23 @@ import (
 	"database/sql"
 )
 
+const countPendingAction = `-- name: CountPendingAction :one
+SELECT COUNT(*) FROM queued_advisory
+WHERE actuator_id = ? AND target_state = ? AND status = 'pending'
+`
+
+type CountPendingActionParams struct {
+	ActuatorID  string
+	TargetState string
+}
+
+func (q *Queries) CountPendingAction(ctx context.Context, arg CountPendingActionParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countPendingAction, arg.ActuatorID, arg.TargetState)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const deleteActuator = `-- name: DeleteActuator :exec
 DELETE FROM actuator WHERE id = ?
 `

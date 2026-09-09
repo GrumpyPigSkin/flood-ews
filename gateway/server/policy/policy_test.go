@@ -2,6 +2,7 @@ package policy
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"os"
 	"server/actuator"
@@ -15,6 +16,9 @@ import (
 type mockDaemon struct {
 	executed    []actuator.Command
 	errToReturn error
+
+	state            string
+	stateErrToReturn *string
 }
 
 func (m *mockDaemon) Execute(ctx context.Context, cmd actuator.Command) (actuator.Result, error) {
@@ -22,14 +26,28 @@ func (m *mockDaemon) Execute(ctx context.Context, cmd actuator.Command) (actuato
 	return actuator.Result{}, m.errToReturn
 }
 
+func (m *mockDaemon) CurrentState(actuatorId string) (string, error) {
+	var err error
+	if m.stateErrToReturn != nil {
+		err = errors.New(*m.stateErrToReturn)
+	}
+	return m.state, err
+}
+
 type mockQueue struct {
 	enqueued    []advisory.Advisory
 	errToReturn error
+
+	pending bool
 }
 
 func (m *mockQueue) Enqueue(a advisory.Advisory) error {
 	m.enqueued = append(m.enqueued, a)
 	return m.errToReturn
+}
+
+func (m *mockQueue) HasPendingFor(actuatorID, targetState string) (bool, error) {
+	return m.pending, nil
 }
 
 // Tests suites.
@@ -64,6 +82,7 @@ func TestEngine_SubmitAdvisory(t *testing.T) {
 		advisory       advisory.Advisory
 		expectActuated []string
 		expectQueued   []string
+		state          string
 	}{
 		{
 			name: "Autonomous trigger",
@@ -181,5 +200,93 @@ func TestEngine_ApprovePending(t *testing.T) {
 	cmd := daemon.executed[0]
 	if cmd.ActuatorID != "siren" || cmd.TargetState != "ON" || cmd.Reason != "manual override" || cmd.CorrelationID != "corr-123" {
 		t.Errorf("command parameters passed incorrectly: %+v", cmd)
+	}
+}
+
+func TestEngine_SubmitAdvisory_SkipsWhenAlreadyAtTargetOrPending(t *testing.T) {
+	now := time.Now().UTC()
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelError}))
+
+	error_str := "error"
+
+	tests := []struct {
+		name         string
+		rules        []Rule
+		advisory     advisory.Advisory
+		expectQueued []string
+		state        string
+		stateErr     *string
+		pending      bool
+	}{
+		{
+			name: "Queued when state differs and not pending",
+			rules: []Rule{
+				{ID: "r-barrier", Enabled: true, Disposition: advisory.DispositionOperatorApproved, ActuatorID: "barrier", TargetState: "CLOSE"},
+			},
+			advisory:     advisory.Advisory{ReceivedAt: now},
+			expectQueued: []string{"r-barrier"},
+			state:        "OPEN",
+			stateErr:     nil,
+		},
+		{
+			name: "Not queued when state is the same",
+			rules: []Rule{
+				{ID: "r-barrier", Enabled: true, Disposition: advisory.DispositionOperatorApproved, ActuatorID: "barrier", TargetState: "CLOSE"},
+			},
+			advisory: advisory.Advisory{ReceivedAt: now},
+			state:    "CLOSE",
+			stateErr: nil,
+		},
+		{
+			name: "Not queued when actuator not found",
+			rules: []Rule{
+				{ID: "r-barrier", Enabled: true, Disposition: advisory.DispositionOperatorApproved, ActuatorID: "barrier", TargetState: "CLOSE"},
+			},
+			advisory: advisory.Advisory{ReceivedAt: now},
+			state:    "OPEN",
+			stateErr: &error_str,
+		},
+		{
+			name: "Pending item skipped",
+			rules: []Rule{
+				{ID: "r-barrier", Enabled: true, Disposition: advisory.DispositionOperatorApproved, ActuatorID: "barrier", TargetState: "CLOSE"},
+			},
+			advisory: advisory.Advisory{ReceivedAt: now},
+			state:    "OPEN",
+			pending:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			daemon := &mockDaemon{}
+			queue := &mockQueue{}
+
+			engine := NewEngine(nil, queue, logger)
+			engine.daemon = daemon
+			engine.SetRules(tt.rules)
+
+			daemon.state = tt.state
+			daemon.stateErrToReturn = tt.stateErr
+			queue.pending = tt.pending
+
+			err := engine.SubmitAdvisory(tt.advisory)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			// Verify operator queue
+			if len(queue.enqueued) != len(tt.expectQueued) {
+				t.Errorf("expected %d queued items, got %d", len(tt.expectQueued), len(queue.enqueued))
+			}
+			for i, ruleID := range tt.expectQueued {
+				if i < len(queue.enqueued) {
+					action := queue.enqueued[i].IntendedAction
+					if action == nil || action.RuleId != ruleID {
+						t.Errorf("expected queued action for rule %s, got %+v", ruleID, action)
+					}
+				}
+			}
+		})
 	}
 }

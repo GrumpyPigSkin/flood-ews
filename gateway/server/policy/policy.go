@@ -32,7 +32,7 @@ type Rule struct {
 	TargetState string `json:"target_state"`
 
 	// RequireOperator: if true, a match does NOT act autonomously. It is
-	// queued for a human to approve on the local dashboard.
+	// queued for an operator to approve on the local dashboard.
 	Disposition advisory.Disposition `json:"disposition"`
 
 	// Priority: higher wins when multiple rules target the same actuator in
@@ -64,7 +64,12 @@ func (r Rule) matches(a advisory.Advisory) bool {
 
 // Interface type so we aren't coupled to the actuator daemon.
 type ActuatorExecutor interface {
+
+	// Execute an action
 	Execute(ctx context.Context, cmd actuator.Command) (actuator.Result, error)
+
+	// Gets the current state of the given actuator
+	CurrentState(actuatorId string) (string, error)
 }
 
 // Engine evaluates advisories against rules and drives the actuator daemon
@@ -111,6 +116,37 @@ func (e *Engine) evaluate(ctx context.Context, a advisory.Advisory) {
 	for _, r := range e.rules {
 		// Check we have the rule.
 		if !r.matches(a) {
+			continue
+		}
+
+		has_pending, err := e.opQueue.HasPendingFor(r.ActuatorID, r.TargetState)
+		if err != nil {
+			continue
+		}
+
+		// If there is already an outstanding action queued to drive this actuator
+		// to this state then skip.
+		if has_pending {
+			e.log.Error("policy: skipping as already queued",
+				"rule", r.ID,
+				"actuator", r.ActuatorID,
+				"target state", r.TargetState)
+			continue
+		}
+
+		current_state, err := e.daemon.CurrentState(r.ActuatorID)
+		if err != nil {
+			continue
+		}
+
+		// The actuator is already at the target state so there is no change to
+		// approve.
+		if current_state == r.TargetState {
+			e.log.Error("policy: skipping as already at target state",
+				"rule", r.ID,
+				"actuator", r.ActuatorID,
+				"target state", r.TargetState,
+				"current state", current_state)
 			continue
 		}
 

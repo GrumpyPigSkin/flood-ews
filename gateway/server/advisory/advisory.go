@@ -23,8 +23,8 @@ const (
 	// the policy does not explicitly allow.
 	DispositionAdvisory Disposition = "advisory"
 
-	// DispositionOperatorApproved: the alert is always queued for a human at the
-	// local dashboard to confirm before it influences anything, regardless of
+	// DispositionOperatorApproved: the alert is always queued for an operator at
+	// the local dashboard to confirm before it influences anything, regardless of
 	// what any rule says. Used for sources trusted less, or actions weightier.
 	DispositionOperatorApproved Disposition = "operator_approved"
 )
@@ -100,8 +100,13 @@ type Sink interface {
 	SubmitAdvisory(a Advisory) error
 }
 
-// OperatorQueue receives advisories that require human approval before they
+// OperatorQueue receives advisories that require operator approval before they
 // influence the system.
 type OperatorQueue interface {
+
+	// Enqueue an advisory to the operator queue
 	Enqueue(a Advisory) error
+
+	// Does a pending item already exist for this actuator and state
+	HasPendingFor(actuatorID, targetState string) (bool, error)
 }

@@ -267,6 +267,19 @@ func (d *Daemon) emit(r Result) {
 	}
 }
 
+// Get the current state of the given actuator.
+func (d *Daemon) CurrentState(actuatorId string) (string, error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	state, ok := d.state[actuatorId]
+	if !ok {
+		return "",
+			fmt.Errorf("unknown actuator %q", actuatorId)
+	}
+
+	return state, nil
+}
+
 // For testing in the final-project building a proper actuator is out of scope.
 // So to test that some alert results in an actuation, I create a simulated
 // actuator that just logs the command.

@@ -39,6 +39,10 @@ func (m *MockOperatorQueue) Enqueue(adv advisory.Advisory) error {
 	return nil
 }
 
+func (m *MockOperatorQueue) HasPendingFor(actuatorID, targetState string) (bool, error) {
+	return false, nil
+}
+
 func TestPoller_PollOnce_SuccessAndRouting(t *testing.T) {
 	// Spin up a mock local HTTP server to return the JSON payload
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

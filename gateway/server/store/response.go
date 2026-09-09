@@ -424,3 +424,16 @@ func (s *Store) ResolvePending(
 	existing.ResolvedBy = actor
 	return pendingFromRow(existing), nil
 }
+
+// Does this actuator and state already have a pending action.
+func (s *Store) HasPendingFor(actuatorID, targetState string) (bool, error) {
+	ctx := context.Background()
+	count, err := s.queries.CountPendingAction(ctx, CountPendingActionParams{
+		ActuatorID:  actuatorID,
+		TargetState: targetState,
+	})
+	if err != nil {
+		return false, fmt.Errorf("operator queue: pending lookup failed: %w", err)
+	}
+	return count > 0, nil
+}
