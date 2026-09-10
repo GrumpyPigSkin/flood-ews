@@ -10,6 +10,7 @@ import (
 	"server/store"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -26,13 +27,50 @@ func OpenSupabase(ctx context.Context, dsn string, log *slog.Logger) (*SupabaseS
 		return nil, fmt.Errorf("parse dsn: %w", err)
 	}
 	cfg.MaxConns = 4
+
+	// Use the simple protocol for maximum compatibility as I was getting
+	// ENOTFOUND failure on connection.
+	cfg.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
+
 	pool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("connect pool: %w", err)
 	}
+
 	if err := pool.Ping(ctx); err != nil {
 		pool.Close()
 		return nil, fmt.Errorf("ping: %w", err)
+	}
+
+	const maxRetries = 5
+	backoff := 1 * time.Second
+
+	// Try to ping a few times with increasing backoff in case we cannot establish
+	// a connection on first boot.
+	for i := 1; i <= maxRetries; i++ {
+		pingCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		err = pool.Ping(pingCtx)
+		cancel()
+
+		if err == nil {
+			log.Info("successfully connected to supabase", "attempt", i)
+			break
+		}
+
+		log.Warn("supabase ping failed on startup, retrying...", "attempt", i, "err", err)
+
+		if i == maxRetries {
+			pool.Close()
+			return nil, fmt.Errorf("ping failed after %d attempts: %w", maxRetries, err)
+		}
+
+		select {
+		case <-ctx.Done():
+			pool.Close()
+			return nil, ctx.Err()
+		case <-time.After(backoff):
+			backoff *= 2
+		}
 	}
 
 	return &SupabaseSink{
@@ -57,7 +95,7 @@ func (s *SupabaseSink) Append(ctx context.Context, e TelemetryEvent) error {
 	return nil
 }
 
-// AppendBatch now leverages PostgreSQL's high-speed COPY binary protocol
+// AppendBatch leverages PostgreSQL's high-speed COPY binary protocol
 func (s *SupabaseSink) AppendBatch(ctx context.Context, events []TelemetryEvent) error {
 	if len(events) == 0 {
 		return nil
