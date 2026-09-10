@@ -1,11 +1,22 @@
 """Test fixtures used throughout testing."""
 
+import os
+
 import pytest
 from aiocoap import Context
 
 from chirpstack_handler import ChirpStackHandler
-from config import CHANNEL, FOG_NODES, NETWORK_KEY, OT_CTL_PATH, PANID, XPANID
+from config import (
+    CHANNEL,
+    FOG_NODES,
+    GATEWAY_URL,
+    NETWORK_KEY,
+    OT_CTL_PATH,
+    PANID,
+    XPANID,
+)
 from fog_cluster import FogCluster
+from gateway_api_client import GatewayApiClient
 from ot_ctl import OtCtl
 
 
@@ -55,3 +66,11 @@ def fog_cluster(node_cfgs: any, request: pytest.FixtureRequest) -> any:
     cluster = FogCluster(node_cfgs, log_dir=request.node.name)
     with cluster.connected():
         yield cluster
+
+@pytest.fixture(scope="session")
+def gateway_client() -> GatewayApiClient:
+    """Connect to the gateway."""
+    client = GatewayApiClient(GATEWAY_URL)
+    password = os.environ["GATEWAY_PASSWORD"]
+    client.login(password)
+    return client

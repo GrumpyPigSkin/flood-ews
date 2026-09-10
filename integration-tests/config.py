@@ -79,10 +79,11 @@ MQTT_JOIN_TOPIC = "application/+/device/+/event/join"
 CHIRPSTACK_API = os.getenv("CHIRPSTACK_API", "http://127.0.0.1:8080")
 CHIRPSTACK_API_TOKEN = os.getenv("CHIRPSTACK_API_TOKEN", "")
 
-# Supabase
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
-SUPABASE_TABLE = os.getenv("SUPABASE_TABLE", "telemetry_event")
+# Gateway server
+GATEWAY_URL = "http://127.0.0.1:8081"
+FLOOD_GATE_ID = "flood-gate"
+FLOOD_GATE_CLOSED_STATE = "CLOSED"
+FLOOD_GATE_OPEN_STATE = "OPEN"
 
 # Path for ot-ctl
 OT_CTL_PATH = [

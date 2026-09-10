@@ -9,6 +9,7 @@ from typing import Any
 
 from chirpstack_handler import ChirpStackHandler, Uplink
 from config import KNOWN_SENSOR_MACS, NodeCfg
+from gateway_api_client import GatewayApiClient
 from jlink_node import JLinkNode
 from ot_ctl import OtCtl
 
@@ -404,3 +405,22 @@ def discover_sed_pool(otctl: OtCtl) -> list[dict]:
         pool.append({"role": "sed", "eui": eui, **s})
     assert pool, "no fault-injection targets found"
     return pool
+
+def assert_actuator_state(
+    client: GatewayApiClient, actuator_id: str, expected_state: str
+) -> None:
+    """Assert that an actuator exists and is in the expected state.
+
+    Args:
+        client (GatewayApiClient): The client to fetch actuator data with.
+        actuator_id (str): The actuator to check.
+        expected_state (str): The expected value of the actuator's state.
+    """
+    actuator = client.get_actuator(actuator_id)
+    assert actuator is not None, f"Actuator {actuator_id} not found."
+
+    current_state = actuator["state"]
+    assert current_state == expected_state, (
+        f"Expected {actuator_id} in state {expected_state}, "
+        f"found {current_state}."
+    )

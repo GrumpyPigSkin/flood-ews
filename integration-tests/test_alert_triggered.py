@@ -21,8 +21,14 @@ from contextlib import AsyncExitStack
 
 import pytest
 
+from config import FLOOD_GATE_CLOSED_STATE, FLOOD_GATE_ID
 from sensor_fault_injector import SensorFaultInjector
-from test_helpers import confirm_clean_baseline, discover_sed_pool, wait_for_alert
+from test_helpers import (
+    assert_actuator_state,
+    confirm_clean_baseline,
+    discover_sed_pool,
+    wait_for_alert,
+)
 
 BASELINE_WINDOW = 150.0  # watch ~2.5 reporting cycles for a clean start
 ALERT_WAIT = 300.0  # ~5 reporting cycles alert but we should get it on the next cycle.
@@ -33,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.asyncio
-async def test_alert_triggered(chirpstack, coap_context, otctl) -> None:  # noqa: ANN001
+async def test_alert_triggered(chirpstack, coap_context, otctl, gateway_client) -> None:  # noqa: ANN001
     """Integration Test.
 
     Test that when all nodes report the water level is higher than the trigger
@@ -46,9 +52,11 @@ async def test_alert_triggered(chirpstack, coap_context, otctl) -> None:  # noqa
 
       3. Wait for the alert to come back in the uplink.
 
-      4. Remove the override.
+      5. Check the gateway and that the flood-gate was closed.
 
-      5. Wait for the the alert to clear, we need to see 3 clean cycles before a
+      6. Remove the override.
+
+      7. Wait for the the alert to clear, we need to see 3 clean cycles before a
         clear.
     """
     await confirm_clean_baseline(chirpstack, BASELINE_WINDOW)
@@ -64,5 +72,7 @@ async def test_alert_triggered(chirpstack, coap_context, otctl) -> None:  # noqa
 
         entry = await wait_for_alert(chirpstack, fault_mark, ALERT_WAIT)
         logger.info("Alert received: %s", entry)
+        assert_actuator_state(gateway_client, FLOOD_GATE_ID, FLOOD_GATE_CLOSED_STATE)
+
 
     await confirm_clean_baseline(chirpstack, CLEAR_ALERT_TIMEOUT)
