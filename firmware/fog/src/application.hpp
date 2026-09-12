@@ -9,7 +9,6 @@
 #include "common/sensor_reading.hpp"
 #include "egress/egress_coordinator.hpp"
 #include "lorawan/service.hpp"
-#include "lorawan/uart_e5.hpp"
 #include "outlier_vote/engine.hpp"
 #include "outlier_vote/sensor_batch.hpp"
 #include "outlier_vote/service.hpp"
@@ -52,7 +51,11 @@ public:
                    pub_key.value());
     }
 
-    m_uart.init();
+    if (!m_lora_service.init()) {
+      logging::err("Failed to initialise LoRaWAN service.");
+      return;
+    }
+
     m_sensor_service.init();
     m_raft_engine.init();
     m_alert_service.init();
@@ -62,7 +65,6 @@ public:
    * @brief Start all sub components.
    */
   void start() {
-    m_lora_service.start();
     m_vote_service.start();
     m_raft_engine.start();
   }
@@ -155,9 +157,9 @@ private:
   }
 
   common::Eui64Arr m_eui = common::get_eui64_as_arr8();
-  fog::lora::E5Uart m_uart{DEVICE_DT_GET(DT_NODELABEL(uart2))};
+
   lora::LoraWanService m_lora_service{lora::Platform{
-      .uart = m_uart.port(),
+      .uart = DEVICE_DT_GET(DT_NODELABEL(uart2)),
       .eui = m_eui,
       .app_key = LORAWAN_APP_KEY,
       .m_on_complete = [this](std::uint32_t seq, std::uint64_t batch_index) {

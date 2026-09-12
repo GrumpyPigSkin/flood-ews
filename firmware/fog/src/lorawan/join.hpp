@@ -35,55 +35,47 @@ eui_hex(std::span<const std::uint8_t, common::EUI64_LEN> eui) noexcept {
   return out;
 }
 
-constexpr std::string_view CHECK_AT_STR = "AT\r\n";
+constexpr std::string_view CHECK_AT_STR = "AT";
 constexpr std::string_view CHECK_AT_RSP = "+AT: OK";
 
-constexpr std::string_view SET_OTAA_STR = "AT+MODE=LWOTAA\r\n";
+constexpr std::string_view SET_OTAA_STR = "AT+MODE=LWOTAA";
 constexpr std::string_view SET_OTAA_RSP = "+MODE: LWOTAA";
 
-constexpr std::string_view SET_APP_EUI_CMD = "AT+ID=AppEui,\"%s\"\r\n";
+constexpr std::string_view SET_APP_EUI_CMD = "AT+ID=AppEui,\"%s\"";
 constexpr std::string_view SET_APP_EUI_RSP = "+ID: AppEui";
 
-constexpr std::string_view SET_DEV_EUI_CMD = "AT+ID=DevEui,\"%s\"\r\n";
+constexpr std::string_view SET_DEV_EUI_CMD = "AT+ID=DevEui,\"%s\"";
 constexpr std::string_view SET_DEV_EUI_RSP = "+ID: DevEui";
 
-constexpr std::string_view SET_APP_KEY_CMD = "AT+KEY=APPKEY,\"%s\"\r\n";
+constexpr std::string_view SET_APP_KEY_CMD = "AT+KEY=APPKEY,\"%s\"";
 constexpr std::string_view SET_APP_KEY_RSP = "+KEY: APPKEY";
 
-constexpr std::string_view SET_DATA_RATE_CMD = "AT+DR=DR5\r\n";
+constexpr std::string_view SET_DATA_RATE_CMD = "AT+DR=DR5";
 constexpr std::string_view SET_DATA_RATE_RSP = "+DR: DR5";
 
-constexpr std::string_view SET_EU868_CMD = "AT+DR=EU868\r\n";
+constexpr std::string_view SET_EU868_CMD = "AT+DR=EU868";
 constexpr std::string_view SET_EU868_RSP = "+DR: EU868";
 
-constexpr std::string_view JOIN_CMD = "AT+JOIN\r\n";
+constexpr std::string_view JOIN_CMD = "AT+JOIN";
 constexpr std::string_view JOIN_RSP = "+JOIN: Network joined";
 
-constexpr std::string_view FORCE_JOIN_CMD = "AT+JOIN=FORCE\r\n";
+constexpr std::string_view FORCE_JOIN_CMD = "AT+JOIN=FORCE";
 constexpr std::string_view FORCE_JOIN_RSP = "+JOIN: Network joined";
 
 constexpr std::string_view MSG_START_CMD = "AT+MSGHEX=\"";
-constexpr std::string_view MSG_FMT_CMD = "%02X";
-constexpr std::string_view MSG_END_CMD = "\"\r\n";
-constexpr std::string_view MSG_PING_CMD = "AT+MSGHEX=\"BEEF\"\r\n";
+constexpr std::string_view MSG_END_CMD = "\"";
 constexpr std::string_view MSG_DONE_RSP = "+MSGHEX: Done";
-constexpr std::string_view E5_TOK_NOT_JOINED = "Please join network first";
-
-constexpr std::string_view E5_STATUS_CMD = "AT+NJS=?\r\n";
-constexpr std::string_view E5_STATUS_JOINED = "+NJS: 1";
 
 // Disable duty cycle for testing.
-constexpr std::string_view E5_DUTY_CYCLE_OFF_CMD = "AT+LW=DC, OFF\r\n";
+constexpr std::string_view E5_DUTY_CYCLE_OFF_CMD = "AT+LW=DC, OFF";
 constexpr std::string_view E5_DUTY_CYCLE_OFF_RSP = "+LW: DC, OFF, 0";
 
-constexpr std::string_view E5_JOIN_DUTY_CYCLE_OFF_CMD = "AT+LW=JDC, OFF\r\n";
+constexpr std::string_view E5_JOIN_DUTY_CYCLE_OFF_CMD = "AT+LW=JDC, OFF";
 constexpr std::string_view E5_JOIN_DUTY_CYCLE_OFF_RSP = "+LW: JDC, OFF";
 
-constexpr std::string_view E5_DISABLE_AUTO_DATA_RATE_CMD = "AT+ADR=OFF\r\n";
+constexpr std::string_view E5_DISABLE_AUTO_DATA_RATE_CMD = "AT+ADR=OFF";
 constexpr std::string_view E5_DISABLE_AUTO_DATA_RATE_RSP = "+ADR: OFF";
 
-constexpr std::string_view AT_PARAM_ERR = "AT_PARAM_ERROR";
-constexpr std::string_view AT_ERR = "AT_ERROR";
 /**
  * @brief Run the full OTAA bring-up: AT, OTAA mode, AppEui/DevEui, AppKey, DR,
  * region, then JOIN.

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/inplace_function.hpp"
 #include "common/logging.hpp"
 #include "common/message_queue.hpp"
 #include "common/ot_utils.hpp"
@@ -23,7 +24,7 @@ inline constexpr std::size_t TX_QUEUE_DEPTH = 8;
  * @brief Everything the LoraWanService needs from the platform.
  */
 struct Platform {
-  UartPort uart{};
+  device const *uart{nullptr};
   std::array<std::uint8_t, common::EUI64_LEN> eui{};
   std::string_view app_key;
   stdext::inplace_function<void(std::uint32_t seq, std::uint64_t batch_index)>
@@ -58,7 +59,12 @@ public:
    * @brief Start the lorawan thread, this thread runs in it's own very low
    * priority to prevent the whole system from being blocked.
    */
-  void start() {
+  bool init() {
+
+    if (!m_modem.init()) {
+      logging::err("LoraWAN::Service: Failed to initialise E5 modem link.");
+      return false;
+    }
 
     m_running.store(true, std::memory_order_release);
 
@@ -70,6 +76,8 @@ public:
 #ifdef CONFIG_ENABLE_FAULT_INJECTION
     m_fault_injection.init();
 #endif
+
+    return true;
   }
 
   /**
@@ -139,17 +147,17 @@ private:
   static void thread_entry(void *self_ptr, void * /*p2*/, void * /*p3*/) {
     auto *self = static_cast<LoraWanService *>(self_ptr);
 
-    logging::inf("LoraWanService: Thread started.");
+    logging::inf("LoraWAN::Service: Thread started.");
 
     while (self->m_running.load()) {
       if (!self->is_joined()) {
         // PHASE 1: Attempt to join the network and back off progressively on
         // failed attempts.
-        logging::inf("LoraWanService: Attempting to join network.");
+        logging::inf("LoraWAN::Service: Attempting to join network.");
         const bool join_ok = run_join(
             self->m_modem, {self->m_eui, self->m_app_key}, self->m_scratch);
         if (join_ok) {
-          logging::inf("LoraWanService: Joined LoRaWAN network.");
+          logging::inf("LoraWAN::Service: Joined LoRaWAN network.");
           self->m_joined.store(true, std::memory_order_release);
           self->m_join_attempt = 0;
         } else {
@@ -165,7 +173,7 @@ private:
         if (const auto payload = self->m_tx_q.get(K_FOREVER)) {
           bool success = self->ship_payload(payload.value());
           if (!success) {
-            logging::err("LoraWanService: Failed to send message.");
+            logging::err("LoraWAN::Service: Failed to send message.");
           }
         }
       }
@@ -184,7 +192,7 @@ private:
     const auto cmd = build_uplink(payload, cmd_buf);
     if (!cmd) {
       // Skip malformed payloads.
-      logging::wrn("LoraWanService: malformed packet, dropping.");
+      logging::wrn("LoraWAN::Service: malformed packet, dropping.");
       return false;
     }
 
@@ -208,8 +216,8 @@ private:
       const auto fault = m_fault_injection.get_fault();
       if (fault.m_pause_egress) {
         m_fault_injection.clear_fault();
-        LOG_INF("FAULT:PAUSED_IN_WINDOW");
-        k_msleep(fault.m_sleep_time_ms);
+        logging::inf("FAULT:PAUSED_IN_WINDOW");
+        k_msleep(static_cast<int32_t>(fault.m_sleep_time_ms));
       }
 #endif
 

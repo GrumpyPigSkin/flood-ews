@@ -91,66 +91,6 @@ to_hex(std::span<const ByteLike> in, std::span<char> out) noexcept {
 }
 
 /**
- * @brief Parse the hex blob inside an  RX: "<hex>"  response line into `out`.
- * Returns the number of bytes decoded (0 if no RX marker / nothing to decode).
- * @param [in] line The line to parse.
- * @param [out] out The output buffer.
- * @return std::size_t
- */
-[[nodiscard]] inline std::size_t
-parse_downlink(std::string_view line, std::span<std::byte> out) noexcept {
-
-  // Check for RX start.
-  constexpr std::string_view marker = "RX: \"";
-  const auto pos = line.find(marker);
-  if (pos == std::string_view::npos) {
-    return 0;
-  }
-
-  // Get the part of the string we want to parse.
-  std::string_view hex = line.substr(pos + marker.size());
-
-  // Lambda to parse a nibble.
-  auto nibble = [](char c) -> std::int32_t {
-    constexpr auto OFFSET = 10;
-    if (c >= '0' && c <= '9') {
-      return c - '0';
-    }
-
-    if (c >= 'A' && c <= 'F') {
-      return c - 'A' + OFFSET;
-    }
-
-    if (c >= 'a' && c <= 'f') {
-      return c - 'a' + OFFSET;
-    }
-
-    return -1;
-  };
-
-  std::size_t num_parsed = 0;
-  for (std::size_t i = 0; i + 1 < hex.size() && num_parsed < out.size();
-       i += 2) {
-
-    // Reached the end, break.
-    if (hex[i] == '"') {
-      break;
-    }
-
-    // Combine 2 hex chars into a byte.
-    const int high = nibble(hex[i]);
-    const int low = nibble(hex[i + 1]);
-
-    if (high < 0 || low < 0) {
-      break;
-    }
-
-    out[num_parsed++] = static_cast<std::byte>((high << 4) | low);
-  }
-  return num_parsed;
-}
-
-/**
  * @brief Backoff policy for joining LoRaWAN, after each unsuccessful
  * attempt, double the duration on each attempt, capped at MAX_MS.
  */
