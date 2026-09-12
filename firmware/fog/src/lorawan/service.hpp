@@ -146,12 +146,8 @@ private:
         // PHASE 1: Attempt to join the network and back off progressively on
         // failed attempts.
         logging::inf("LoraWanService: Attempting to join network.");
-        const bool join_ok =
-            run_join(self->m_modem, {self->m_eui, self->m_app_key},
-                     self->m_scratch) &&
-            // Send a ping packet to set the correct data rate so we can send
-            // our main packet
-            self->send_ping();
+        const bool join_ok = run_join(
+            self->m_modem, {self->m_eui, self->m_app_key}, self->m_scratch);
         if (join_ok) {
           logging::inf("LoraWanService: Joined LoRaWAN network.");
           self->m_joined.store(true, std::memory_order_release);
@@ -174,16 +170,6 @@ private:
         }
       }
     }
-  }
-
-  /**
-   * @brief A ping packet is used in order to set the data rate, before first
-   * comms the data rate is set to only accept up 51 bytes. After sending a ping
-   * LoRaWAN upgrades this connection.
-   * @return true cmd executed okay.
-   */
-  bool send_ping() {
-    return m_modem.ok(MSG_PING_CMD, MSG_DONE_RSP, Timeouts::DEFAULT_MS);
   }
 
   /**
