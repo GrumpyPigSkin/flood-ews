@@ -49,6 +49,7 @@ PAUSE_MARKER_TIMEOUT = 120.0
 NEW_LEADER_TIMEOUT = 60.0
 REJOIN_TIMEOUT = 60.0
 RETRANSMIT_TIMEOUT = 120.0
+CLEAN_ENTRY_TIMEOUT = 300.0
 
 logger = logging.getLogger(__name__)
 
@@ -136,3 +137,5 @@ async def test_egress_resumed_by_next_leader(
             logger.info("%s rejoined as follower.", leader.cfg.name)
         except Exception as e:  # noqa: BLE001
             logger.info("WARNING: %s did not rejoin cleanly: %s", leader.cfg.name, e)
+
+    await confirm_clean_baseline(chirpstack, CLEAN_ENTRY_TIMEOUT)

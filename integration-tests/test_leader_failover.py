@@ -18,6 +18,7 @@ import pytest
 
 from config import Marker
 from test_helpers import (
+    confirm_clean_baseline,
     wait_for_first_marker,
 )
 
@@ -25,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 STATE_CHANGE_TIMEOUT = 60.0
 UPLINK_TIMEOUT = 120.0
+CLEAN_ENTRY_TIMEOUT = 300.0
 
 
 @pytest.mark.asyncio
@@ -58,3 +60,4 @@ async def test_leader_failover(chirpstack, fog_cluster) -> None:  # noqa: ANN001
     leader.resume()
     await leader.wait_for(Marker.BECAME_FOLLOWER, STATE_CHANGE_TIMEOUT)
     logger.info("Failover confirmed: old leader rejoined as follower.")
+    await confirm_clean_baseline(chirpstack, CLEAN_ENTRY_TIMEOUT)
