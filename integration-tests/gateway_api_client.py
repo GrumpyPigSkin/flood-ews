@@ -24,7 +24,7 @@ class GatewayApiClient:
             str: The token.
         """
         response = self.session.post(
-            f"{self.base_url}/v1/login",
+            f"{self.base_url}/v1/auth/login",
             json={"password": password},
         )
         response.raise_for_status()
@@ -36,9 +36,9 @@ class GatewayApiClient:
         """Get the list of actuators.
 
         Returns:
-            _type_: The list of actuators.
+            list[dict]: The list of actuators.
         """
-        response = self.session.get(f"{self.base_url}/v1/actuators")
+        response = self.session.get(f"{self.base_url}/v1/config/actuators")
         response.raise_for_status()
         return response.json()
 
@@ -55,4 +55,20 @@ class GatewayApiClient:
         for actuator in actuators:
             if actuator["id"] == actuator_id:
                 return actuator
+        return None
+
+    def get_actuator_state(self, actuator_id: str) -> str | None:
+        """Get the list of actuators.
+
+        Returns:
+            str | none : The actuator state or None.
+        """
+        response = self.session.get(f"{self.base_url}/v1/dashboard/actuators")
+        response.raise_for_status()
+
+        actuators = response.json()
+
+        if actuators[actuator_id] is not None:
+            return actuators[actuator_id]
+
         return None

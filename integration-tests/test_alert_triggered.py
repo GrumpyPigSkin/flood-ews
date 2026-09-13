@@ -21,7 +21,7 @@ from contextlib import AsyncExitStack
 
 import pytest
 
-from config import FLOOD_GATE_CLOSED_STATE, FLOOD_GATE_ID
+from config import FLOOD_GATE_CLOSED_STATE, FLOOD_GATE_ID, FLOOD_GATE_OPEN_STATE
 from sensor_fault_injector import SensorFaultInjector
 from test_helpers import (
     assert_actuator_state,
@@ -74,5 +74,7 @@ async def test_alert_triggered(chirpstack, coap_context, otctl, gateway_client) 
         logger.info("Alert received: %s", entry)
         assert_actuator_state(gateway_client, FLOOD_GATE_ID, FLOOD_GATE_CLOSED_STATE)
 
-
+    logger.info("Waiting for clean baseline")
     await confirm_clean_baseline(chirpstack, CLEAR_ALERT_TIMEOUT)
+    logger.info("Checking flood gate is open")
+    assert_actuator_state(gateway_client, FLOOD_GATE_ID, FLOOD_GATE_OPEN_STATE)

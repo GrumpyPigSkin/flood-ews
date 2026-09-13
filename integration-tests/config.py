@@ -82,8 +82,8 @@ CHIRPSTACK_API_TOKEN = os.getenv("CHIRPSTACK_API_TOKEN", "")
 # Gateway server
 GATEWAY_URL = "http://127.0.0.1:8081"
 FLOOD_GATE_ID = "flood-gate"
-FLOOD_GATE_CLOSED_STATE = "CLOSED"
-FLOOD_GATE_OPEN_STATE = "OPEN"
+FLOOD_GATE_CLOSED_STATE = "closed"
+FLOOD_GATE_OPEN_STATE = "open"
 
 # Path for ot-ctl
 OT_CTL_PATH = [

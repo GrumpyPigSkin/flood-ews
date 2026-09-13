@@ -399,9 +399,6 @@ def discover_sed_pool(otctl: OtCtl) -> list[dict]:
     pool = []
     for s in seds:
         eui = resolve_eui(otctl, s["address"])
-        if eui not in KNOWN_SENSOR_MACS:
-            logger.info("Skipping SED: %s", eui)
-            continue
         pool.append({"role": "sed", "eui": eui, **s})
     assert pool, "no fault-injection targets found"
     return pool
@@ -416,11 +413,10 @@ def assert_actuator_state(
         actuator_id (str): The actuator to check.
         expected_state (str): The expected value of the actuator's state.
     """
-    actuator = client.get_actuator(actuator_id)
-    assert actuator is not None, f"Actuator {actuator_id} not found."
+    actuator_state = client.get_actuator_state(actuator_id)
+    assert actuator_state is not None, f"Actuator {actuator_id} not found."
 
-    current_state = actuator["state"]
-    assert current_state == expected_state, (
+    assert actuator_state == expected_state, (
         f"Expected {actuator_id} in state {expected_state}, "
-        f"found {current_state}."
+        f"found {actuator_state}."
     )
