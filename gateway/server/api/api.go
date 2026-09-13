@@ -18,6 +18,7 @@ import (
 	"server/policy"
 	"server/poller"
 	"server/store"
+	"server/telemetry"
 	"strconv"
 	"sync"
 	"time"
@@ -26,15 +27,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// LiveStore holds the latest per-station state for dashboard reads.
+// LiveStore holds the latest per-sensor state for dashboard reads.
 type LiveStore struct {
-	mu       sync.RWMutex
-	stations map[string]map[string]any // deviceEUI -> latest reading object
+	mu      sync.RWMutex
+	sensors map[string]telemetry.SensorEntry // deviceEUI -> latest reading object
 }
 
 // Factory function.
 func NewLiveStore() *LiveStore {
-	return &LiveStore{stations: map[string]map[string]any{}}
+	return &LiveStore{sensors: map[string]telemetry.SensorEntry{}}
 }
 
 // Struct to handle login requests .
@@ -42,11 +43,11 @@ type loginRequest struct {
 	Password string `json:"password"`
 }
 
-// UpdateStation is called from the uplink path to publish the latest reading
-// for a station.
-func (l *LiveStore) UpdateStation(eui string, reading map[string]any) {
+// UpdateSensor is called from the uplink path to publish the latest reading
+// for a sensor.
+func (l *LiveStore) UpdateSensor(eui string, reading telemetry.SensorEntry) {
 	l.mu.Lock()
-	l.stations[eui] = reading
+	l.sensors[eui] = reading
 	l.mu.Unlock()
 }
 
@@ -520,17 +521,14 @@ func writeJSON(w http.ResponseWriter, code int, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-// Get a snapshot of the stored readings for each station.
-func (l *LiveStore) snapshot() []map[string]any {
+// Get a snapshot of the stored readings for each sensor.
+func (l *LiveStore) snapshot() []telemetry.SensorEntry {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
-	out := make([]map[string]any, 0, len(l.stations))
-	for _, r := range l.stations {
-		cloned := make(map[string]any, len(r))
-		for k, v := range r {
-			cloned[k] = v
-		}
-		out = append(out, cloned)
+
+	out := make([]telemetry.SensorEntry, 0, len(l.sensors))
+	for _, entry := range l.sensors {
+		out = append(out, entry)
 	}
 	return out
 }

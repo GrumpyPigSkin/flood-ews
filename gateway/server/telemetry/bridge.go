@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"server/advisory"
 	"server/egress"
 	"server/store"
 	"sync"
@@ -13,11 +14,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// StationSink receives per-station readings folded from uplinks (satisfied
-// by api.LiveStore). An interface keeps telemetry decoupled from the api
-// package.
-type StationSink interface {
-	UpdateStation(eui string, reading map[string]interface{})
+// SensorSink receives per-sensor readings folded from uplinks (satisfied
+// by api.LiveStore).
+type SensorSink interface {
+	UpdateSensor(eui string, reading SensorEntry)
 }
 
 // EgressSink buffers/pushes events to the cloud read-model (satisfied by a
@@ -37,12 +37,13 @@ type WebhookForwarder interface {
 // forward alerts to the EWS authority. Keeping this in one place means one
 // decision about what leaves the gateway.
 type Bridge struct {
-	hub     *Hub
-	live    StationSink
-	egress  EgressSink
-	webhook WebhookForwarder
-	targets []store.EgressTarget
-	log     *slog.Logger
+	hub          *Hub
+	live         SensorSink
+	egress       EgressSink
+	advisorySink advisory.Sink
+	webhook      WebhookForwarder
+	targets      []store.EgressTarget
+	log          *slog.Logger
 
 	mu      sync.Mutex
 	pending []egress.TelemetryEvent
@@ -50,23 +51,25 @@ type Bridge struct {
 
 // BridgeDeps groups the bridge's collaborators. egress/webhook may be nil.
 type BridgeDeps struct {
-	Hub     *Hub
-	Live    StationSink
-	Egress  EgressSink
-	Webhook WebhookForwarder
-	Targets []store.EgressTarget
-	Log     *slog.Logger
+	Hub          *Hub
+	Live         SensorSink
+	Egress       EgressSink
+	AdvisorySink advisory.Sink
+	Webhook      WebhookForwarder
+	Targets      []store.EgressTarget
+	Log          *slog.Logger
 }
 
 // Bridge factory function.
 func NewBridge(d BridgeDeps) *Bridge {
 	return &Bridge{
-		hub:     d.Hub,
-		live:    d.Live,
-		egress:  d.Egress,
-		webhook: d.Webhook,
-		targets: d.Targets,
-		log:     d.Log,
+		hub:          d.Hub,
+		live:         d.Live,
+		egress:       d.Egress,
+		advisorySink: d.AdvisorySink,
+		webhook:      d.Webhook,
+		targets:      d.Targets,
+		log:          d.Log,
 	}
 }
 
@@ -79,10 +82,9 @@ func (b *Bridge) HandleUplink(payload []byte) {
 	}
 	u := cs.toUplink(time.Now().UTC())
 
-	b.log.Info("Got uplink: " + string(payload))
-
 	// Check for a duplicate entry.
 	if !b.hub.IsUnique(u) {
+		b.log.Error("Duplicate dropped", "Sequence ID", u.Object.Seq.Uint32())
 		return
 	}
 
@@ -91,8 +93,8 @@ func (b *Bridge) HandleUplink(payload []byte) {
 
 	// Fold sensor entries into the live store for REST reads.
 	if b.live != nil {
-		for eui, reading := range u.stations() {
-			b.live.UpdateStation(eui, reading)
+		for eui, reading := range u.sensors() {
+			b.live.UpdateSensor(eui, reading)
 		}
 	}
 
@@ -100,6 +102,18 @@ func (b *Bridge) HandleUplink(payload []byte) {
 	if err != nil {
 		return
 	}
+
+	advisory := advisory.Advisory{
+		SourceID:   "local",
+		Kind:       u.kind(),
+		Severity:   u.severity(),
+		Value:      float64(u.mean()),
+		Unit:       "mm",
+		ObservedAt: time.Now(),
+		ReceivedAt: time.Now(),
+	}
+
+	b.advisorySink.SubmitAdvisory(advisory)
 
 	// Egress: buffer for the read-model, forward alerts.
 	ev := egress.TelemetryEvent{

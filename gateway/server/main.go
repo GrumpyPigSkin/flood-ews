@@ -125,12 +125,13 @@ func main() {
 	tcfg := telemetry.Config{}
 	hub := telemetry.NewHub(tcfg, logger)
 	bridge := telemetry.NewBridge(telemetry.BridgeDeps{
-		Hub:     hub,
-		Live:    live,
-		Egress:  egressSink,
-		Webhook: egress.NewWebhookSink(logger),
-		Targets: targets,
-		Log:     logger,
+		Hub:          hub,
+		Live:         live,
+		Egress:       egressSink,
+		AdvisorySink: engine,
+		Webhook:      egress.NewWebhookSink(logger),
+		Targets:      targets,
+		Log:          logger,
 	})
 	go bridge.RunEgressFlusher(ctx, 5*time.Second)
 

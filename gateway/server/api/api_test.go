@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"server/store"
+	"server/telemetry"
 	"testing"
 )
 
@@ -22,14 +23,12 @@ func TestLiveStore_UpdateAndSnapshot(t *testing.T) {
 		t.Errorf("expected empty snapshot, got %d items", len(ls.snapshot()))
 	}
 
-	// Insert station data
-	station1 := "eui-001"
-	reading1 := map[string]any{"temperature": 22.5}
-	ls.UpdateStation(station1, reading1)
+	// Insert sensor data
+	sensor1 := "sensor-123"
+	ls.UpdateSensor(sensor1, telemetry.SensorEntry{})
 
-	station2 := "eui-002"
-	reading2 := map[string]any{"temperature": 19.0}
-	ls.UpdateStation(station2, reading2)
+	sensor2 := "sensor-321"
+	ls.UpdateSensor(sensor2, telemetry.SensorEntry{})
 
 	// Verify snapshot contents
 	snap := ls.snapshot()
@@ -38,13 +37,13 @@ func TestLiveStore_UpdateAndSnapshot(t *testing.T) {
 	}
 
 	// Verify individual updates overwrite existing entries
-	updatedReading1 := map[string]any{"temperature": 23.0}
-	ls.UpdateStation(station1, updatedReading1)
+	updatedReading1 := telemetry.SensorEntry{WaterLevelMM: 102}
+	ls.UpdateSensor(sensor1, updatedReading1)
 
 	snap = ls.snapshot()
 	var foundUpdated bool
 	for _, r := range snap {
-		if r["temperature"] == 23.0 {
+		if r.WaterLevelMM == 102 {
 			foundUpdated = true
 		}
 	}
@@ -88,7 +87,7 @@ func TestRoute_Healthz(t *testing.T) {
 
 func TestRoute_DashboardReadings(t *testing.T) {
 	liveStore := NewLiveStore()
-	liveStore.UpdateStation("station-123", map[string]any{"test": "test"})
+	liveStore.UpdateSensor("sensor-123", telemetry.SensorEntry{WaterLevelMM: 123})
 
 	srv := NewServer(nil, liveStore, nil, nil, nil, nil, "secret", "admin", false)
 	router := srv.Routes()
@@ -111,8 +110,8 @@ func TestRoute_DashboardReadings(t *testing.T) {
 		t.Fatalf("expected 1 reading item, got %d", len(resp))
 	}
 
-	if resp[0]["test"] != "test" {
-		t.Errorf("expected battery status 'test', got %v", resp[0]["test"])
+	if resp[0]["water_level_mm"] != float64(123) {
+		t.Errorf("expected water_level_mm '123', got %v", resp[0]["water_level_mm"])
 	}
 }
 

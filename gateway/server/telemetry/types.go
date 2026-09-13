@@ -34,19 +34,41 @@ func (c Config) withDefaults() Config {
 	return c
 }
 
+// A single sensor entry.
+type SensorEntry struct {
+	DeviceEUI    string   `json:"device_eui"`
+	WaterLevelMM FlexUint `json:"water_level_mm"`
+	Validity     string   `json:"validity"`
+	ValidityCode FlexUint `json:"validity_code"`
+	Outlier      bool     `json:"outlier"`
+	Detail       FlexUint `json:"detail"`
+	Timestamp    FlexUint `json:"timestamp"`
+}
+
+// Data is the data we set in the codec that comes inside the ChirpStack uplink.
+type Data struct {
+	NodeId       string        `json:"node_id"`
+	RaftTerm     FlexUint      `json:"raft_term"`
+	RaftLogIndex FlexUint      `json:"raft_log_index"`
+	Seq          FlexUint      `json:"seq"`
+	Alert        bool          `json:"alert"`
+	Count        FlexUint      `json:"count"`
+	Entries      []SensorEntry `json:"entries"`
+}
+
 // Uplink is the subset of ChirpStack's uplink event forwarded to clients. The
 // decoded `object` is passed through verbatim because that is the actual
 // telemetry, the rest is metadata useful for display and debugging.
 type Uplink struct {
-	ReceivedAt    time.Time              `json:"receivedAt"`
-	DevEUI        string                 `json:"devEui"`
-	DeviceName    string                 `json:"deviceName,omitempty"`
-	ApplicationID string                 `json:"applicationId,omitempty"`
-	FCnt          uint32                 `json:"fCnt,omitempty"`
-	FPort         uint8                  `json:"fPort,omitempty"`
-	Object        map[string]interface{} `json:"object,omitempty"`
-	RxRSSI        *int                   `json:"rssi,omitempty"`
-	RxSNR         *float64               `json:"snr,omitempty"`
+	ReceivedAt    time.Time `json:"receivedAt"`
+	DevEUI        string    `json:"devEui"`
+	DeviceName    string    `json:"deviceName,omitempty"`
+	ApplicationID string    `json:"applicationId,omitempty"`
+	FCnt          uint32    `json:"fCnt,omitempty"`
+	FPort         uint8     `json:"fPort,omitempty"`
+	Object        Data      `json:"object,omitempty"`
+	RxRSSI        *int      `json:"rssi,omitempty"`
+	RxSNR         *float64  `json:"snr,omitempty"`
 }
 
 // chirpstackUplink is the ChirpStack v4 event-up envelope.
@@ -56,9 +78,9 @@ type chirpstackUplink struct {
 		DeviceName    string `json:"deviceName"`
 		ApplicationID string `json:"applicationId"`
 	} `json:"deviceInfo"`
-	FCnt   uint32                 `json:"fCnt"`
-	FPort  uint8                  `json:"fPort"`
-	Object map[string]interface{} `json:"object"`
+	FCnt   uint32 `json:"fCnt"`
+	FPort  uint8  `json:"fPort"`
+	Data   Data   `json:"object"`
 	RxInfo []struct {
 		RSSI int     `json:"rssi"`
 		SNR  float64 `json:"snr"`
@@ -76,7 +98,7 @@ func (cs chirpstackUplink) toUplink(now time.Time) Uplink {
 		ApplicationID: cs.DeviceInfo.ApplicationID,
 		FCnt:          cs.FCnt,
 		FPort:         cs.FPort,
-		Object:        cs.Object,
+		Object:        cs.Data,
 	}
 
 	if len(cs.RxInfo) > 0 {
@@ -100,7 +122,7 @@ func (cs chirpstackUplink) toUplink(now time.Time) Uplink {
 // vocabulary, an alert is critical.
 func (u Uplink) severity() advisory.Severity {
 
-	if alert, _ := u.Object["alert"].(bool); alert {
+	if u.Object.Alert {
 		return advisory.SeverityCritical
 	}
 
@@ -109,32 +131,40 @@ func (u Uplink) severity() advisory.Severity {
 
 // kind classifies the uplink for egress (e.g. "reading", "status").
 func (u Uplink) kind() string {
-
-	if t, ok := u.Object["type"].(string); ok && t != "" {
-		return t
-	}
-
-	return "reading"
+	return "sensor_reading"
 }
 
-// stations extracts per-station readings from object.entries[], keyed by
-// device_eui, for folding into the live store.
-func (u Uplink) stations() map[string]map[string]interface{} {
-
-	out := map[string]map[string]interface{}{}
-	entries, ok := u.Object["entries"].([]interface{})
-
-	if !ok {
-		return out
+// Get the mean across good readings.
+func (u Uplink) mean() int {
+	if len(u.Object.Entries) == 0 {
+		return 0
 	}
 
-	for _, e := range entries {
-		m, ok := e.(map[string]interface{})
-		if !ok {
-			continue
+	var sum int
+	var count int
+
+	for _, entry := range u.Object.Entries {
+		if entry.Validity == "GOOD" {
+			sum += entry.WaterLevelMM.Int()
+			count++
 		}
-		if eui, _ := m["device_eui"].(string); eui != "" {
-			out[eui] = m
+	}
+
+	if count == 0 {
+		return 0
+	}
+
+	return sum / count
+}
+
+// sensors extracts per-sensor readings from object.entries[], keyed by
+// device_eui, for folding into the live store.
+func (u Uplink) sensors() map[string]SensorEntry {
+	out := make(map[string]SensorEntry, len(u.Object.Entries))
+
+	for _, e := range u.Object.Entries {
+		if e.DeviceEUI != "" {
+			out[e.DeviceEUI] = e
 		}
 	}
 
