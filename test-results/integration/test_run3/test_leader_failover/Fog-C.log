@@ -1,29 +1,38 @@
-[13838.212] E: Cannot send frame
-[13838.212] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[13838.212] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
-[13838.212] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
-[13838.212] INF: on_window_close: Sensor window closed.
-[13838.212] INF: on_window_close: Batch submitted to raft.
-[13838.212] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[13838.212] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
-[13838.212] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
-[13838.212] E: Cannot send frame
-[13838.212] INF: on_window_close: Sensor window closed.
-[13838.212] INF: on_window_close: Batch submitted to raft.
-[13838.212] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=527
-[13838.212] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
-[13838.212] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
-[13838.212] INF: on_window_close: Sensor window closed.
-[13838.212] INF: on_window_close: Batch submitted to raft.
-[13861.351] INF: on_reading: got new reading: .eui=176INF: on_window_close: Sensor window closed.
-[13861.351] INF: on_window_close: Batch submitted to raft.
-[13865.692] INF: Persistence saved: .current_term=30, .voted_for=18446744073709551615
-[13865.692] INF: Persistence saved: .current_term=30, .voted_for=17640096208354293315
-[13866.222] INF: RAFT:BECAME_FOLLOWER
-[13866.940] E: Cannot send frame
-[13872.290] INF: RAFT:BECAME_CANDIDATE
-[13872.290] INF: State changed from: FOLLOWER to: CANDIDATE
-[13872.290] INF: Persistence saved: .current_term=31, .voted_for=17640096808941659601
-[13872.566] INF: RAFT:BECAME_LEADER
-[13872.566] INF: State changed from: CANDIDATE to: LEADER
-[13872.566] INF: RAFT:BECAME_LEADER
+[5205.600] INF: Persistence saved: .current_term=193, .voted_for=18446744073709551615
+[5205.600] INF: Persistence saved: .current_term=193, .voted_for=17640096414745845906
+[5205.600] INF: RAFT:BECAME_FOLLOWER
+[5205.600] INF: Persistence saved: .current_term=194, .voted_for=18446744073709551615
+[5205.600] INF: Persistence saved: .current_term=194, .voted_for=17640096208354293315
+[5205.600] INF: Persistence saved: .current_term=195, .voted_for=18446744073709551615
+[5205.600] INF: Persistence saved: .current_term=195, .voted_for=17640096414745845906
+[5205.600] INF: RAFT:BECAME_FOLLOWER
+[5205.600] INF: Persistence saved: .current_term=196, .voted_for=18446744073709551615
+[5205.600] INF: Persistence saved: .current_term=196, .voted_for=17640096208354293315
+[5205.600] INF: Persistence saved: .current_term=197, .voted_for=18446744073709551615
+[5205.600] INF: Persistence saved: .current_term=197, .voted_for=17640096414745845906
+[5205.600] INF: RAFT:BECAME_FOLLOWER
+[5205.600] INF: Persistence saved: .current_term=198, .voted_for=18446744073709551615
+[5205.600] INF: Persistence saved: .current_term=198, .voted_for=17640096208354293315
+[5205.600] INF: RAFT:BECAME_FOLLOWER
+[5208.222] INF: Persistence saINF: Persistence saved: .current_term=208, .voted_for=18446744073709551615
+[5208.222] INF: Persistence saved: .current_term=208, .voted_for=17640096414745845906
+[5208.762] INF: RAFT:BECAME_FOLLOWER
+[5212.849] INF: Persistence saved: .current_term=209, .voted_for=18446744073709551615
+[5212.849] INF: Persistence saved: .current_term=209, .voted_for=17640096208354293315
+[5213.421] INF: RAFT:BECAME_FOLLOWER
+[5216.441] INF: RAFT:BECAME_CANDIDATE
+[5216.441] INF: State changed from: FOLLOWER to: CANDIDATE
+[5216.441] INF: Persistence saved: .current_term=210, .voted_for=17640096808941659601
+[5216.664] INF: RAFT:BECAME_LEADER
+[5216.664] INF: State changed from: CANDIDATE to: LEADER
+[5216.664] INF: RAFT:BECAME_LEADER
+[5221.030] INF: on_window_close: Sensor window closed.
+[5221.084] INF: on_window_close: Sensor window closed.
+[5247.163] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[5247.376] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=522
+[5281.091] INF: on_window_close: Sensor window closed.
+[5281.091] INF: on_window_close: Batch submitted to raft.
+[5281.643] D: running script: e5_cmd
+[5281.643] D: e5_cmd: step: 0
+[5281.643] D: sending: AT+MSGHEX="D12578249636CEF4D200000002000000000000000002F1698BE95336CEF40A020000780780A2CE9504C33136CEF40F0200003CC07CA2"
+[5281.801] D: +MSGHEX: Start

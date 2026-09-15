@@ -1,37 +1,47 @@
-[12802.552] E: Cannot send frame
-[12802.552] E: Cannot send frame
-[12802.552] E: Cannot send frame
-[12802.552] E: Cannot send frame
-[12802.552] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[12802.552] E: Cannot send frame
-[12802.552] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
-[12802.552] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
-[12802.552] INF: on_window_close: Sensor window closed.
-[12802.552] INF: on_window_close: Batch submitted to raft.
-[12802.552] E: Cannot send frame
-[12802.552] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[12802.552] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=396
-[12802.552] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[12802.552] E: Cannot send frame
-[12802.552] INF: on_window_close: Sensor window closed.
-[12802.552] INF: on_window_close: Batch submitted to raft.
-[12802.552] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[12802.552] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=1000
-[12802.552] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[12803.803] INF: on_window_close: SensoE: Cannot send frame
-[12810.207] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[12810.567] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=401
-[12813.112] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[12824.854] E: Cannot send frame
-[12832.364] INF: on_window_close: Sensor window closed.
-[12832.364] INF: on_window_close: Batch submitted to raft.
-[12837.223] INF: Persistence saved: .current_term=15, .voted_for=18446744073709551615
-[12837.223] INF: Persistence saved: .current_term=15, .voted_for=17640096808941659601
-[12837.741] INF: RAFT:BECAME_FOLLOWER
-[12843.581] INF: RAFT:BECAME_CANDIDATE
-[12843.581] INF: State changed from: FOLLOWER to: CANDIDATE
-[12843.581] INF: Persistence saved: .current_term=16, .voted_for=17640096414745845906
-[12843.867] INF: RAFT:BECAME_LEADER
-[12843.867] INF: State changed from: CANDIDATE to: LEADER
-[12843.867] INF: RAFT:BECAME_LEADER
-[12844.068] WRN: cmd: got line: +MSGHEX: Start
+[3024.264] INF: on_window_close: Sensor window closed.
+[3024.264] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[3024.264] INF: on_window_close: Sensor window closed.
+[3024.264] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[3024.264] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[3024.264] INF: on_window_close: Sensor window closed.
+[3024.264] INF: on_window_close: Batch submitted to raft.
+[3024.264] D: running script: e5_cmd
+[3024.264] D: e5_cmd: step: 0
+[3024.264] D: sending: AT+MSGHEX="9260915C3A36CEF42F00000002000000000000000002ADE1C04F4F36CEF41A020000AE0DB307CE9504C33136CEF415020000E0A2B607"
+[3024.264] D: +MSGHEX: Start
+[3024.264] D: +MSGHEX: FPENDING
+[3024.264] D: +MSGHEX: RXWIN1, RSSI -27, SNR 9.0
+[3024.264] D: +MSGHEX: Done
+[3024.264] D: e5_cmd: complete
+[3024.264] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=522
+[3024.264] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[3024.264] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[3024.264] INF: on_window_close: Sensor window closed.
+[3024.264] INF: on_window_close: Batch submitted to raft.
+[3058.349] D: running scriptINF: on_window_close: Sensor window closed.
+[3058.349] INF: on_window_close: Batch submitted to raft.
+[3058.688] D: running script: e5_cmd
+[3058.688] D: e5_cmd: step: 0
+[3058.688] D: sending: AT+MSGHEX="9260915C3A36CEF42F000000530000001B0000000003ADE1C04F4F36CEF41F02000044344268CE9504C33136CEF41502000011BD4568F1698BE95336CEF40F0200000EC23B68"
+[3058.889] D: +MSGHEX: Start
+[3068.152] I: nRF5 802154 radio initialized
+[3068.152] I: 8 Sectors of 4096 bytes
+[3068.152] I: alloc wra: 1, c80
+[3068.152] I: data wra: 1, 63c
+[3068.152] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[3068.152] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[3068.152] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[3068.152] WRN: Device detached from thread network.
+[3068.152] WRN: Device attached started raft.
+[3068.152] INF: .eui=0xf4ce363a5c916092, .pub_key=[0x4, 0xbe, 0xde, 0xac, 0x71, 0xb7, 0x47, 0x42, 0xaf, 0x3, 0xf3, 0xd3, 0xf4, 0x4a, 0x99, 0x62, 0xba, 0x87, 0xe7, 0xe7, 0xb2, 0xc2, 0xfd, 0x29, 0x9f, 0xab, 0x16, 0x45, 0x7c, 0xcb, 0x92, 0x75, 0x1d, 0x29, 0x8f, 0x3a, 0xab, 0x28, 0x3, 0x48, 0x30, 0xe3, 0xe5, 0x1b, 0x19, 0x2, 0xde, 0x24, 0x1b, 0xc, 0x13, 0x7d, 0x1c, 0x9e, 0x11, 0x5f, 0x4b, 0xd0, 0xfc, 0x48, 0xf6, 0x45, 0xb, 0xde, 0x20]
+[3068.152] I: 4 Sectors of 4096 bytes
+[3068.152] I: alloc wra: 1, c50
+[3068.152] I: data wra: 1, 6f8
+[3068.152] INF: Service register: OK
+[3068.152] INF: load loaded state: .m_term=43, .m_voted_for=17640096208354293315 
+[3068.152] INF: LoraWAN::Service: Thread started.
+[3068.152] INF: LoraWAN::Service: Attempting to join network.
+[3068.152] D: running script: e5_cmd
+[3070.524] DINF: Persistence saved: .current_term=49, .voted_for=18446744073709551615
+[3070.524] INF: Persistence saved: .current_term=49, .voted_for=17640096808941659601
+[3071.003] INF: RAFT:BECAME_FOLLOWER

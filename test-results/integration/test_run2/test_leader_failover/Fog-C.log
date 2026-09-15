@@ -1,41 +1,57 @@
-[12885.953] INF: RAFT:BECAME_FOLLOWER
-[12885.953] INF: RAFT:BECAME_CANDIDATE
-[12885.953] INF: State changed from: FOLLOWER to: CANDIDATE
-[12885.953] INF: Persistence saved: .current_term=17, .voted_for=17640096808941659601
-[12885.953] INF: RAFT:BECAME_LEADER
-[12885.953] INF: State changed from: CANDIDATE to: LEADER
-[12885.953] INF: RAFT:BECAME_LEADER
-[12885.953] WRN: cmd: got line: +MSGHEX: Start
-[12885.953] WRN: cmd: got line: +MSGHEX: Done
-[12885.953] INF: RAFT:BECAME_FOLLOWER
-[12885.953] INF: State changed from: LEADER to: FOLLOWER
-[12885.953] INF: RAFT:BECAME_FOLLOWER
-[12885.953] INF: Persistence saved: .current_term=18, .voted_for=18446744073709551615
-[12885.953] INF: RAFT:BECAME_FOLLOWER
-[12885.953] INF: RAFT:BECAME_CANDIDATE
-[12885.953] INF: State changed from: FOLLOWER to: CANDIDATE
-[12885.953] INF: Persistence saved: .current_term=19, .voted_for=17640096808941659601
-[12885.953] INF: RAFT:BECAME_LEADER
-[12885.953] INF: State changed from: CANDIDATE to: LEADER
-[12885.953] INF: RAFT:BECAME_LEADER
-[12885.953] WRN: cmd: got line: +MSGHEX: Start
-[12885.953] INF: Persistence saved: .current_term=20, .voted_for=18446744073709551615
-[12885.953] INF: State changed from: LEADER to: FOLLOWER
-[12885.953] INF: RAFT:BECAME_FOLLOWER
-[12885.953] INF: RAFT:BECAME_FOLLOWER
-[12885.953] WRN: cmd: got line: +MSGHEX: Done
-[12888.299] INF: INF: Persistence saved: .current_term=24, .voted_for=18446744073709551615
-[12888.713] INF: RAFT:BECAME_CANDIDATE
-[12888.713] INF: State changed from: FOLLOWER to: CANDIDATE
-[12888.713] INF: Persistence saved: .current_term=25, .voted_for=17640096808941659601
-[12892.397] INF: on_window_close: Sensor window closed.
-[12892.397] INF: on_window_close: Batch submitted to raft.
-[12895.384] INF: RAFT:BECAME_CANDIDATE
-[12895.384] INF: Persistence saved: .current_term=26, .voted_for=17640096808941659601
-[12895.682] INF: RAFT:BECAME_LEADER
-[12895.682] INF: State changed from: CANDIDATE to: LEADER
-[12895.682] INF: RAFT:BECAME_LEADER
-[12901.446] INF: Persistence saved: .current_term=27, .voted_for=18446744073709551615
-[12901.446] INF: State changed from: LEADER to: FOLLOWER
-[12901.446] INF: RAFT:BECAME_FOLLOWER
-[12901.446] INF: RAFT:BECAME_FOLLOWER
+[3705.478] I: nRF5 802154 radio initialized
+[3705.478] I: 8 Sectors of 4096 bytes
+[3705.478] I: alloc wra: 0, ec8
+[3705.478] I: data wra: 0, 3e0
+[3705.478] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[3705.478] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[3705.478] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[3705.478] WRN: Device detached from thread network.
+[3705.478] WRN: Device attached started raft.
+[3705.478] INF: .eui=0xf4ce3696247825d1, .pub_key=[0x4, 0xc4, 0x80, 0x76, 0xcd, 0x37, 0x1a, 0x36, 0xe0, 0xba, 0x90, 0x76, 0xa2, 0x6d, 0x78, 0xa, 0x53, 0xa0, 0xe3, 0x2f, 0x49, 0x68, 0x38, 0xc4, 0x23, 0x31, 0xb9, 0x60, 0x4b, 0x8b, 0x6e, 0x4f, 0x9c, 0xfa, 0xed, 0xc6, 0xc9, 0x69, 0x3f, 0xe, 0xe2, 0x55, 0xba, 0x1d, 0xba, 0x45, 0xb9, 0xe7, 0x70, 0x8, 0x42, 0x41, 0xa9, 0x79, 0xa7, 0x4d, 0x6, 0x83, 0x91, 0x45, 0xe0, 0x13, 0x66, 0x1, 0x2f]
+[3705.478] I: 4 Sectors of 4096 bytes
+[3705.478] I: alloc wra: 0, e98
+[3705.478] I: data wra: 0, 49c
+[3705.478] INF: Service register: OK
+[3705.478] INF: get_time_us: Time not synced
+[3705.478] INF: load loaded state: .m_term=110, .m_voted_for=18446744073709551615 
+[3705.478] INF: LoraWAN::Service: Thread started.
+[3705.972] INF: LoraWAN::Service: Attempting to join nINF: RAFT:BECAME_FOLLOWER
+[3706.964] INF: RAFT:BECAME_FOLLOWER
+[3707.988] INF: RAFT:BECAME_FOLLOWER
+[3709.034] INF: RAFT:BECAME_FOLLOWER
+[3709.983] INF: RAFT:BECAME_FOLLOWER
+[3710.712] INF: RAFT:BECAME_FOLLOWER
+[3711.209] INF: RAFT:BECAME_FOLLOWER
+[3711.567] INF: RAFT:BECAME_FOLLOWER
+[3712.455] INF: on_window_close: Sensor window closed.
+[3712.455] INF: on_window_close: Batch submitted to raft.
+[3712.455] ERR: Submit failed: .err=1
+[3712.455] INF: get_time_us: Time not synced
+[3715.359] INF: RAFT:BECAME_CANDIDATE
+[3715.371] INF: State changed from: FOLLOWER to: CANDIDATE
+[3715.371] INF: Persistence saved: .current_term=112, .voted_for=17640096808941659601
+[3715.752] INF: RAFT:BECAME_LEADER
+[3715.752] INF: State changed from: CANDIDATE to: LEADER
+[3715.752] INF: RAFT:BECAME_LEADER
+[3727.506] WRN: on_reading: Network time not synced.
+[3727.560] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[3752.858] E: Cannot send frame
+[3761.900] E: Cannot send frame
+[3763.336] E: Cannot send frame
+[3772.479] INF: on_window_close: Sensor window closed.
+[3772.543] INF: get_time_us: Time not synced
+[3773.830] E: Cannot send frame
+[3782.879] E: Cannot send frame
+[3786.481] WRN: on_reading: Network time not synced.
+[3786.535] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[3787.484] WRN: on_reading: Network time not synced.
+[3787.538] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[3787.729] WRN: on_reading: Network time not synced.
+[3787.783] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=517
+[3832.546] INF: on_window_close: Sensor window closed.
+[3832.546] INF: on_window_close: Batch submitted to raft.
+[3832.577] INF: get_time_us: Time not synced
+[3832.917] D: running script: e5_cmd
+[3832.917] D: e5_cmd: step: 0
+[3832.917] D: sending: AT+MSGHEX="D12578249636CEF470000000300000000F0000000003ADE1C04F4F36CEF41A020000C9DD9F3DCE9504C33136CEF40F0200004632AF3DF1698BE95336CEF405020000F3D9B23D"
+[3833.118] D: +MSGHEX: Start

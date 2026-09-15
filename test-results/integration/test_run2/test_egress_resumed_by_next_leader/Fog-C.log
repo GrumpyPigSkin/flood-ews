@@ -1,64 +1,55 @@
-[8744.194] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[8744.194] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=406
-[8744.194] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[8744.194] INF: on_window_close: Sensor window closed.
-[8744.194] INF: on_window_close: Batch submitted to raft.
-[8744.194] WRN: cmd: got line: +MSGHEX: Start
-[8744.194] WRN: cmd: got line: +MSGHEX: Done
-[8744.194] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[8744.194] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=406
-[8744.194] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
-[8752.417] INF: on_window_close: Sensor window closed.
-[8752.417] INF: on_window_close: Batch submitted to raft.
-[8753.157] WRN: cmd: got line: +MSGHEX: Start
-[8756.144] WRN: cmd: got line: +MSGHEX: Done
-[8756.302] I: FAULT:PAUSED_IN_WINDOW
-[8765.132] I: nRF5 802154 radio initialized
-[8765.132] I: 8 Sectors of 4096 bytes
-[8765.132] I: alloc wra: 0, e10
-[8765.132] I: data wra: 0, 6b4
-[8765.132] *** Booting Zephyr OS build ncs-v3.4.0 ***
-[8765.132] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
-[8765.132] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
-[8765.132] WRN: Device detached from thread network.
-[8765.132] I: Device attached started raft.
-[8765.132] INF: .eui=0xf4ce3696247825d1, .pub_key=[0x4, 0xc4, 0x80, 0x76, 0xcd, 0x37, 0x1a, 0x36, 0xe0, 0xba, 0x90, 0x76, 0xa2, 0x6d, 0x78, 0xa, 0x53, 0xa0, 0xe3, 0x2f, 0x49, 0x68, 0x38, 0xc4, 0x23, 0x31, 0xb9, 0x60, 0x4b, 0x8b, 0x6e, 0x4f, 0x9c, 0xfa, 0xed, 0xc6, 0xc9, 0x69, 0x3f, 0xe, 0xe2, 0x55, 0xba, 0x1d, 0xba, 0x45, 0xb9, 0xe7, 0x70, 0x8, 0x42, 0x41, 0xa9, 0x79, 0xa7, 0x4d, 0x6, 0x83, 0x91, 0x45, 0xe0, 0x13, 0x66, 0x1, 0x2f]
-[8765.132] I: 4 Sectors of 4096 bytes
-[8765.132] I: alloc wra: 0, dd8
-[8765.132] I: data wra: 0, 77c
-[8765.132] INF: Service register: OK
-[8765.132] INF: get_time_us: Time not synced
-[8765.132] INF: load loaded state: .m_term=0, .m_voted_for=13853642551176209616 
-[8765.132] INF: LoraWanService: Thread started.
-[8765.132] INF: LoraWanService: Attempting to join network.
-[8767.410] INF: RAFT:BECAME_CANDIDATE
-[8767.410] INF: State changed from: FOLLOWER to: CANDIDATE
-[8767.420] INF: Persistence saved: .current_term=6, .voted_for=17640096808941659601
-[8768.067] INF: RAFT:BECAME_FOLLOWER
-[8768.086] INF: State changed from: CANDIDATE to: FOLLOWER
-[8768.086] INF: RAFT:BECAME_FOLLOWER
-[8768.526] INF: RAFT:BECAME_FOLLOWER
-[8771.891] INF: RAFT:BECAME_CANDIDATE
-[8771.891] INF: State changed from: FOLLOWER to: CANDIDATE
-[8771.891] INF: Persistence saved: .current_term=7, .voted_for=17640096808941659601
-[8772.188] INF: RAFT:BECAME_LEADER
-[8772.188] INF: State changed from: CANDIDATE to: LEADER
-[8772.188] INF: RAFT:BECAME_LEADER
-[8772.706] WRN: cmd: got line: +JOIN: Network joined
-[8772.992] WRN: cmd: got line: +MSGHEX: Start
-[8773.247] INF: Persistence saved: .current_term=8, .voted_for=18446744073709551615
-[8773.247] INF: State changed from: LEADER to: FOLLOWER
-[8773.247] INF: RAFT:BECAME_FOLLOWER
-[8774.095] WRN: cmd: got line: +MSGHEX: FPENDING
-[8774.127] WRN: cmd: got line: +MSGHEX: RXWIN1, RSSI -25, SNR 9.0
-[8774.148] WRN: cmd: got line: +MSGHEX: Done
-[8774.297] INF: LoraWanService: Joined LoRaWAN network.
-[8775.292] INF: RAFT:BECAME_CANDIDATE
-[8775.292] INF: State changed from: FOLLOWER to: CANDIDATE
-[8775.292] INF: Persistence saved: .current_term=9, .voted_for=17640096808941659601
-[8775.632] INF: RAFT:BECAME_LEADER
-[8775.632] INF: State changed from: CANDIDATE to: LEADER
-[8775.632] INF: RAFT:BECAME_LEADER
-[8790.226] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[8790.651] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
-[8793.245] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[2236.031] I: nRF5 802154 radio initialized
+[2236.031] I: 8 Sectors of 4096 bytes
+[2236.031] I: alloc wra: 0, f08
+[2236.031] I: data wra: 0, 2f0
+[2236.031] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[2236.031] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[2236.031] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[2236.031] WRN: Device detached from thread network.
+[2236.031] WRN: Device attached started raft.
+[2236.031] INF: .eui=0xf4ce3696247825d1, .pub_key=[0x4, 0xc4, 0x80, 0x76, 0xcd, 0x37, 0x1a, 0x36, 0xe0, 0xba, 0x90, 0x76, 0xa2, 0x6d, 0x78, 0xa, 0x53, 0xa0, 0xe3, 0x2f, 0x49, 0x68, 0x38, 0xc4, 0x23, 0x31, 0xb9, 0x60, 0x4b, 0x8b, 0x6e, 0x4f, 0x9c, 0xfa, 0xed, 0xc6, 0xc9, 0x69, 0x3f, 0xe, 0xe2, 0x55, 0xba, 0x1d, 0xba, 0x45, 0xb9, 0xe7, 0x70, 0x8, 0x42, 0x41, 0xa9, 0x79, 0xa7, 0x4d, 0x6, 0x83, 0x91, 0x45, 0xe0, 0x13, 0x66, 0x1, 0x2f]
+[2236.031] I: 4 Sectors of 4096 bytes
+[2236.031] I: alloc wra: 0, ee0
+[2236.031] I: data wra: 0, 384
+[2236.031] INF: Service register: OK
+[2236.031] INF: get_time_us: Time not synced
+[2236.031] INF: load loaded state: .m_term=110, .m_voted_for=18446744073709551615 
+[2236.031] INF: LoraWAN::Service: Thread started.
+[2236.779] INF: LoraWAN::Service: Attempting to join nINF: RAFT:BECAME_FOLLOWER
+[2237.772] INF: RAFT:BECAME_FOLLOWER
+[2238.775] INF: RAFT:BECAME_FOLLOWER
+[2239.790] INF: RAFT:BECAME_FOLLOWER
+[2240.782] INF: RAFT:BECAME_FOLLOWER
+[2241.923] INF: RAFT:BECAME_FOLLOWER
+[2242.367] INF: RAFT:BECAME_FOLLOWER
+[2242.716] INF: RAFT:BECAME_FOLLOWER
+[2243.116] INF: RAFT:BECAME_FOLLOWER
+[2243.602] INF: RAFT:BECAME_FOLLOWER
+[2243.908] INF: RAFT:BECAME_FOLLOWER
+[2244.214] INF: RAFT:BECAME_FOLLOWER
+[2244.552] INF: RAFT:BECAME_FOLLOWER
+[2245.007] INF: RAFT:BECAME_FOLLOWER
+[2250.486] WRN: Device detached from thread network.
+[2251.998] INF: RAFT:BECAME_CANDIDATE
+[2251.998] INF: State changed from: FOLLOWER to: CANDIDATE
+[2251.998] INF: Persistence saved: .current_term=111, .voted_for=17640096808941659601
+[2252.264] INF: RAFT:BECAME_LEADER
+[2252.264] INF: State changed from: CANDIDATE to: LEADER
+[2252.264] INF: RAFT:BECAME_LEADER
+[2252.264] D: running script: e5_cmd
+[2252.264] D: e5_cmd: step: 0
+[2252.264] D: sending: AT+MSGHEX="D12578249636CEF46E00000014000000050000000002F1698BE95336CEF40F0200000D276118ADE1C04F4F36CEF41A02000050267418"
+[2252.432] D: +MSGHEX: Start
+[2253.615] D: +MSGHEX: FPENDING
+[2253.658] D: +MSGHEX: RXWIN1, RSSI -22, SNR 9.0
+[2253.678] D: +MSGHEX: Done
+[2253.678] D: e5_cmd: complete
+[2275.544] INF: on_window_close: Sensor window closed.
+[2275.544] INF: on_window_close: Batch submitted to raft.
+[2275.607] INF: get_time_us: Time not synced
+[2276.286] D: running script: e5_cmd
+[2276.286] D: e5_cmd: step: 0
+[2276.296] D: sending: AT+MSGHEX="D12578249636CEF46F00000018000000060000000002F1698BE95336CEF40F02000096E1EB00ADE1C04F4F36CEF41A02000011DBFD00"
+[2276.455] D: +MSGHEX: Start
+[2279.453] D: +MSGHEX: Done
+[2279.453] D: e5_cmd: complete

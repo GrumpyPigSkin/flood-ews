@@ -1,29 +1,50 @@
-[6671.726] WRN: cmd: got line: +MSGHEX: Done
-[6671.726] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[6671.726] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
-[6671.726] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
-[6671.726] INF: on_window_close: Sensor window closed.
-[6671.726] INF: on_window_close: Batch submitted to raft.
-[6671.726] WRN: cmd: got line: +MSGHEX: Start
-[6671.726] WRN: cmd: got line: +MSGHEX: Done
-[6690.255] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[6690.700] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=396
-[6693.288] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
-[6712.448] INF: on_window_close: Sensor window closed.
-[6712.448] INF: on_window_close: Batch submitted to raft.
-[6713.145] WRN: cmd: got line: +MSGHEX: Start
-[6716.143] WRN: cmd: got line: +MSGHEX: Done
-[6750.255] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[6750.742] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=517
-[6753.286] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[6772.455] INF: on_window_close: Sensor window closed.
-[6772.455] INF: on_window_close: Batch submitted to raft.
-[6773.215] WRN: cmd: got line: +MSGHEX: Start
-[6776.069] WRN: cmd: got line: +MSGHEX: Done
-[6810.248] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[6810.692] INF: Bad sensor payload from .eui=17640096524485224945, .error=-149
-[6810.692] INF: ERROR:SIGNATURE_FAILED
-[6813.290] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
-[6832.456] INF: on_window_close: Sensor window closed.
-[6832.456] INF: on_window_close: Batch submitted to raft.
-[6833.099] WRN: cmd: got line: +MSGHEX: Start
+[605.485] I: nRF5 802154 radio initialized
+[605.485] I: 8 Sectors of 4096 bytes
+[605.485] I: alloc wra: 2, f30
+[605.485] I: data wra: 2, 1e0
+[605.485] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[605.485] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[605.485] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[605.485] WRN: Device detached from thread network.
+[605.485] WRN: Device attached started raft.
+[605.485] INF: .eui=0xf4ce360a4eac3643, .pub_key=[0x4, 0x72, 0xff, 0xc3, 0xf2, 0x28, 0x0, 0x45, 0x65, 0xdd, 0xd1, 0xa8, 0xfc, 0xce, 0x6f, 0x72, 0x3b, 0x50, 0xc3, 0x24, 0x43, 0xd8, 0xc7, 0x33, 0x7a, 0xaa, 0x3b, 0xd1, 0x22, 0x94, 0x42, 0x92, 0x1e, 0xe2, 0xad, 0x8b, 0xc2, 0x3a, 0x81, 0x3, 0xdc, 0x6c, 0xd3, 0x45, 0x67, 0x11, 0x48, 0x43, 0x68, 0xe5, 0x69, 0x28, 0xc9, 0x8d, 0xe8, 0x1b, 0x9c, 0x5a, 0xe1, 0x96, 0xef, 0xb4, 0x8, 0x7a, 0x7d]
+[605.485] I: 4 Sectors of 4096 bytes
+[605.485] I: alloc wra: 2, ef0
+[605.485] I: data wra: 2, 29c
+[605.485] INF: Service register: OK
+[605.485] INF: load loaded state: .m_term=84, .m_voted_for=17640096208354293315 
+[605.485] INF: LoraWAN::Service: Thread started.
+[605.485] INF: LoraWAN::Service: Attempting to join network.
+[611.301] D: running script: e5_cmdE: Cannot send frame
+[627.357] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[628.034] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[628.087] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=517
+[657.623] INF: on_window_close: Sensor window closed.
+[657.623] INF: on_window_close: Batch submitted to raft.
+[658.153] D: running script: e5_cmd
+[658.153] D: e5_cmd: step: 0
+[658.153] D: sending: AT+MSGHEX="4336AC4E0A36CEF4560000001D000000090000000003ADE1C04F4F36CEF41A020000128FF421CE9504C33136CEF41502000032DFFE21F1698BE95336CEF4050200007CC3FF21"
+[658.353] D: +MSGHEX: Start
+[661.353] D: +MSGHEX: Done
+[661.353] D: e5_cmd: complete
+[687.354] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[687.998] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=533
+[688.062] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=522
+[717.622] INF: on_window_close: Sensor window closed.
+[717.622] INF: on_window_close: Batch submitted to raft.
+[718.161] D: running script: e5_cmd
+[718.161] D: e5_cmd: step: 0
+[718.161] D: sending: AT+MSGHEX="4336AC4E0A36CEF456000000200000000A0000000003ADE1C04F4F36CEF41A0200006B118825CE9504C33136CEF4150200006EE89125F1698BE95336CEF40A020000F1E69225"
+[718.362] D: +MSGHEX: Start
+[721.363] D: +MSGHEX: Done
+[721.363] D: e5_cmd: complete
+[747.348] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[748.035] INF: Bad sensor payload from .eui=17640096377809966542, .error=-149
+[748.035] INF: ERROR:SIGNATURE_FAILED
+[748.100] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=527
+[777.625] INF: on_window_close: Sensor window closed.
+[777.625] INF: on_window_close: Batch submitted to raft.
+[778.164] D: running script: e5_cmd
+[778.164] D: e5_cmd: step: 0
+[778.164] D: sending: AT+MSGHEX="4336AC4E0A36CEF456000000230000000B0000000002ADE1C04F4F36CEF41A020000179A1B29F1698BE95336CEF40F020000E5F92629"
+[778.333] D: +MSGHEX: Start

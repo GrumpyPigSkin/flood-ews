@@ -1,76 +1,59 @@
-[12882.351] WRN: cmd: got line: +JOIN: Network joined
-[12882.351] WRN: cmd: got line: +MSGHEX: Start
-[12882.351] WRN: cmd: got line: +MSGHEX: FPENDING
-[12882.351] WRN: cmd: got line: +MSGHEX: RXWIN1, RSSI -3, SNR 9.0
-[12882.351] WRN: cmd: got line: +MSGHEX: Done
-[12882.351] INF: LoraWanService: Joined LoRaWAN network.
-[12882.351] INF: Persistence saved: .current_term=17, .voted_for=18446744073709551615
-[12882.351] INF: Persistence saved: .current_term=17, .voted_for=17640096808941659601
-[12882.351] INF: RAFT:BECAME_FOLLOWER
-[12882.351] INF: Persistence saved: .current_term=18, .voted_for=18446744073709551615
-[12882.351] INF: Persistence saved: .current_term=18, .voted_for=17640096414745845906
-[12882.351] INF: RAFT:BECAME_FOLLOWER
-[12882.351] INF: Persistence saved: .current_term=19, .voted_for=18446744073709551615
-[12882.351] INF: Persistence saved: .current_term=19, .voted_for=17640096808941659601
-[12882.351] INF: Persistence saved: .current_term=20, .voted_for=18446744073709551615
-[12882.351] INF: Persistence saved: .current_term=20, .voted_for=17640096414745845906
-[12882.351] INF: RAFT:BECAME_FOLLOWER
-[12882.351] INF: Persistence saved: .current_term=21, .voted_for=18446744073709551615
-[12888.286] INF: Persistence saved: .currenINF: Persistence saved: .current_term=24, .voted_for=18446744073709551615
-[12888.286] INF: Persistence saved: .current_term=24, .voted_for=17640096414745845906
-[12888.784] INF: RAFT:BECAME_FOLLOWER
-[12895.571] INF: Persistence saved: .current_term=26, .voted_for=18446744073709551615
-[12895.571] INF: Persistence saved: .current_term=26, .voted_for=17640096808941659601
-[12895.973] INF: RAFT:BECAME_FOLLOWER
-[12898.294] INF: on_window_close: Sensor window closed.
-[12898.294] INF: on_window_close: Batch submitted to raft.
-[12900.974] INF: Persistence saved: .current_term=27, .voted_for=18446744073709551615
-[12900.974] INF: Persistence saved: .current_term=27, .voted_for=17640096414745845906
-[12901.334] INF: RAFT:BECAME_FOLLOWER
-[12902.255] INF: RAFT:BECAME_FOLLOWER
-[12903.262] INF: RAFT:BECAME_FOLLOWER
-[12904.256] INF: RAFT:BECAME_FOLLOWER
-[12905.314] INF: RAFT:BECAME_FOLLOWER
-[12906.363] INF: RAFT:BECAME_FOLLOWER
-[12907.358] INF: RAFT:BECAME_FOLLOWER
-[12908.354] INF: RAFT:BECAME_FOLLOWER
-[12909.350] INF: RAFT:BECAME_FOLLOWER
-[12910.344] INF: RAFT:BECAME_FOLLOWER
-[12911.361] INF: RAFT:BECAME_FOLLOWER
-[12912.356] INF: RAFT:BECAME_FOLLOWER
-[12913.350] INF: RAFT:BECAME_FOLLOWER
-[12914.356] INF: RAFT:BECAME_FOLLOWER
-[12915.351] INF: RAFT:BECAME_FOLLOWER
-[12916.356] INF: RAFT:BECAME_FOLLOWER
-[12917.351] INF: RAFT:BECAME_FOLLOWER
-[12918.358] INF: RAFT:BECAME_FOLLOWER
-[12919.353] INF: RAFT:BECAME_FOLLOWER
-[12920.348] INF: RAFT:BECAME_FOLLOWER
-[12921.354] INF: RAFT:BECAME_FOLLOWER
-[12922.349] INF: RAFT:BECAME_FOLLOWER
-[12923.356] INF: RAFT:BECAME_FOLLOWER
-[12924.362] INF: RAFT:BECAME_FOLLOWER
-[12925.357] INF: RAFT:BECAME_FOLLOWER
-[12926.352] INF: RAFT:BECAME_FOLLOWER
-[12927.359] INF: RAFT:BECAME_FOLLOWER
-[12928.355] INF: RAFT:BECAME_FOLLOWER
-[12929.362] INF: RAFT:BECAME_FOLLOWER
-[12930.356] INF: RAFT:BECAME_FOLLOWER
-[12931.352] INF: RAFT:BECAME_FOLLOWER
-[12932.360] INF: RAFT:BECAME_FOLLOWER
-[12933.357] INF: RAFT:BECAME_FOLLOWER
-[12934.457] INF: RAFT:BECAME_FOLLOWER
-[12935.357] INF: RAFT:BECAME_FOLLOWER
-[12936.352] INF: RAFT:BECAME_FOLLOWER
-[12937.347] INF: RAFT:BECAME_FOLLOWER
-[12938.354] INF: RAFT:BECAME_FOLLOWER
-[12939.350] INF: RAFT:BECAME_FOLLOWER
-[12940.358] INF: RAFT:BECAME_FOLLOWER
-[12941.353] INF: RAFT:BECAME_FOLLOWER
-[12942.348] INF: RAFT:BECAME_FOLLOWER
-[12943.354] INF: RAFT:BECAME_FOLLOWER
-[12944.423] INF: RAFT:BECAME_FOLLOWER
-[12945.356] INF: RAFT:BECAME_FOLLOWER
-[12946.361] INF: RAFT:BECAME_FOLLOWER
-[12947.356] INF: RAFT:BECAME_FOLLOWER
-[12948.362] INF: RAFT:BECAME_FOLLOWER
+[3701.828] I: nRF5 802154 radio initialized
+[3701.828] I: 8 Sectors of 4096 bytes
+[3701.828] I: alloc wra: 3, fa8
+[3701.828] I: data wra: 3, 50
+[3701.828] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[3701.828] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[3701.828] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[3701.828] WRN: Device detached from thread network.
+[3701.828] WRN: Device attached started raft.
+[3701.828] INF: .eui=0xf4ce360a4eac3643, .pub_key=[0x4, 0x72, 0xff, 0xc3, 0xf2, 0x28, 0x0, 0x45, 0x65, 0xdd, 0xd1, 0xa8, 0xfc, 0xce, 0x6f, 0x72, 0x3b, 0x50, 0xc3, 0x24, 0x43, 0xd8, 0xc7, 0x33, 0x7a, 0xaa, 0x3b, 0xd1, 0x22, 0x94, 0x42, 0x92, 0x1e, 0xe2, 0xad, 0x8b, 0xc2, 0x3a, 0x81, 0x3, 0xdc, 0x6c, 0xd3, 0x45, 0x67, 0x11, 0x48, 0x43, 0x68, 0xe5, 0x69, 0x28, 0xc9, 0x8d, 0xe8, 0x1b, 0x9c, 0x5a, 0xe1, 0x96, 0xef, 0xb4, 0x8, 0x7a, 0x7d]
+[3701.828] I: GC Done marker found
+[3701.828] I: 4 Sectors of 4096 bytes
+[3701.828] I: alloc wra: 3, f78
+[3701.828] I: data wra: 3, 10c
+[3701.828] INF: Service register: OK
+[3701.828] INF: get_time_us: Time not synced
+[3701.828] INF: load loaded state: .m_term=106, .m_voted_for=17640096208354293315 
+[3701.828] INF: LoraWAN::Service: Thread started.
+[3710.398] INF: LoraWAN::ServINF: on_window_close: Sensor window closed.
+[3710.398] INF: on_window_close: Batch submitted to raft.
+[3710.461] INF: get_time_us: Time not synced
+[3710.948] D: running script: e5_cmd
+[3710.948] D: e5_cmd: step: 0
+[3710.948] D: sending: AT+MSGHEX="4336AC4E0A36CEF46F0000002D0000000E0000000003ADE1C04F4F36CEF41A0200008CDBA036CE9504C33136CEF40F0200000EB8B236F1698BE95336CEF40A020000BE60B536"
+[3711.233] D: +MSGHEX: Start
+[3720.405] I: nRF5 802154 radio initialized
+[3720.405] I: 8 Sectors of 4096 bytes
+[3720.405] I: alloc wra: 3, f08
+[3720.405] I: data wra: 3, 158
+[3720.405] *** Booting Zephyr OS build ncs-v3.4.0 ***
+[3720.405] *** Booting nRF Connect SDK v3.4.0-99553055607b ***
+[3720.405] *** Using Zephyr OS v4.4.0-bf801e4e3d19 ***
+[3720.405] WRN: Device detached from thread network.
+[3720.405] WRN: Device attached started raft.
+[3720.405] INF: .eui=0xf4ce360a4eac3643, .pub_key=[0x4, 0x72, 0xff, 0xc3, 0xf2, 0x28, 0x0, 0x45, 0x65, 0xdd, 0xd1, 0xa8, 0xfc, 0xce, 0x6f, 0x72, 0x3b, 0x50, 0xc3, 0x24, 0x43, 0xd8, 0xc7, 0x33, 0x7a, 0xaa, 0x3b, 0xd1, 0x22, 0x94, 0x42, 0x92, 0x1e, 0xe2, 0xad, 0x8b, 0xc2, 0x3a, 0x81, 0x3, 0xdc, 0x6c, 0xd3, 0x45, 0x67, 0x11, 0x48, 0x43, 0x68, 0xe5, 0x69, 0x28, 0xc9, 0x8d, 0xe8, 0x1b, 0x9c, 0x5a, 0xe1, 0x96, 0xef, 0xb4, 0x8, 0x7a, 0x7d]
+[3720.405] I: 4 Sectors of 4096 bytes
+[3720.405] I: alloc wra: 3, eb8
+[3720.405] I: data wra: 3, 26c
+[3720.405] INF: Service register: OK
+[3720.405] INF: get_time_us: Time not synced
+[3720.405] INF: load loaded state: .m_term=106, .m_voted_for=17640096208354293315 
+[3720.405] INF: LoraWAN::Service: Thread started.
+[3720.427] INF: LoraWAN::Service: Attempting to joinINF: Persistence saved: .current_term=112, .voted_for=18446744073709551615
+[3720.427] INF: RAFT:BECAME_FOLLOWER
+[3727.321] D: +JOIN: Network joined
+[3727.321] D: e5_cmd: complete
+[3727.321] INF: LoraWAN::Service: Joined LoRaWAN network.
+[3727.364] D: +JOIN: NetID 000000 DevAddr 00:5E:C5:F4
+[3727.364] D: +JOIN: Done
+[3727.566] WRN: on_reading: Network time not synced.
+[3727.619] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[3776.899] INF: on_window_close: Sensor window closed.
+[3776.899] INF: get_time_us: Time not synced
+[3786.480] WRN: on_reading: Network time not synced.
+[3786.534] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[3787.560] WRN: on_reading: Network time not synced.
+[3787.621] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[3787.808] WRN: on_reading: Network time not synced.
+[3787.860] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=517

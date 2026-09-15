@@ -1,19 +1,26 @@
-[9032.136] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[9032.136] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=506
-[9033.192] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[9040.425] E: Cannot send frame
-[9050.018] E: Cannot send frame
-[9050.104] E: Cannot send frame
-[9050.906] E: Cannot send frame
-[9052.461] INF: on_window_close: Sensor window closed.
-[9052.461] INF: on_window_close: Batch submitted to raft.
-[9060.114] INF: Persistence saved: .current_term=12, .voted_for=18446744073709551615
-[9060.114] INF: Persistence saved: .current_term=12, .voted_for=17640096808941659601
-[9060.588] E: Cannot send frame
-[9060.685] INF: RAFT:BECAME_FOLLOWER
-[9071.078] E: Cannot send frame
-[9090.149] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[9090.594] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=406
-[9093.182] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[9112.416] INF: on_window_close: Sensor window closed.
-[9112.416] INF: on_window_close: Batch submitted to raft.
+[6180.038] E: Cannot send frame
+[6180.038] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[6180.038] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[6180.038] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=517
+[6181.013] INF: on_window_close: Sensor window closed.
+[6181.013] INF: on_window_close: Batch submitted to raft.
+[6181.013] ERR: Submit failed: .err=1
+[6236.834] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
+[6237.078] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[6237.248] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=522
+[6241.016] INF: on_window_close: Sensor window closed.
+[6241.016] INF: on_window_close: Batch submitted to raft.
+[6241.016] ERR: Submit failed: .err=1
+[6247.506] INF: Persistence saved: .current_term=211, .voted_for=18446744073709551615
+[6247.506] INF: Persistence saved: .current_term=211, .voted_for=17640096208354293315
+[6247.898] INF: RAFT:BECAME_FOLLOWER
+[6251.139] E: Cannot send frame
+[6255.406] INF: Persistence saved: .current_term=212, .voted_for=18446744073709551615
+[6255.406] INF: Persistence saved: .current_term=212, .voted_for=17640096208354293315
+[6255.851] INF: RAFT:BECAME_FOLLOWER
+[6262.277] INF: RAFT:BECAME_CANDIDATE
+[6262.277] INF: State changed from: FOLLOWER to: CANDIDATE
+[6262.277] INF: Persistence saved: .current_term=213, .voted_for=17640096414745845906
+[6262.743] INF: RAFT:BECAME_LEADER
+[6262.743] INF: State changed from: CANDIDATE to: LEADER
+[6262.743] INF: RAFT:BECAME_LEADER

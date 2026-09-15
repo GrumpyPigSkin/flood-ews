@@ -1,0 +1,131 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.1.1, pluggy-1.6.0 -- /home/oliver/projects/tests/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/oliver/projects/tests
+configfile: pytest.ini
+plugins: timeout-2.4.0, anyio-4.14.2, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+test_leader_failover.py::test_leader_failover 2026-09-13 19:07:58 [INFO] pylink.jlink: Device "NRF5340_XXAA_APP" selected.
+2026-09-13 19:07:58 [INFO] pylink.jlink: ConfigTargetSettings() start
+2026-09-13 19:07:58 [INFO] pylink.jlink: ConfigTargetSettings() end - Took 40us
+2026-09-13 19:07:58 [INFO] pylink.jlink: InitTarget() start
+2026-09-13 19:07:58 [INFO] pylink.jlink: InitTarget() end - Took 4.68ms
+2026-09-13 19:07:58 [INFO] pylink.jlink: Found SW-DP with ID 0x6BA02477
+2026-09-13 19:07:58 [INFO] pylink.jlink: DPIDR: 0x6BA02477
+2026-09-13 19:07:58 [INFO] pylink.jlink: CoreSight SoC-400 or earlier
+2026-09-13 19:07:58 [INFO] pylink.jlink: AP map detection skipped. Manually configured AP map found.
+2026-09-13 19:07:58 [INFO] pylink.jlink: AP[0]: AHB-AP (IDR: Not set)
+2026-09-13 19:07:58 [INFO] pylink.jlink: AP[1]: AHB-AP (IDR: Not set)
+2026-09-13 19:07:58 [INFO] pylink.jlink: AP[2]: MEM-AP (IDR: Not set)
+2026-09-13 19:07:58 [INFO] pylink.jlink: AP[3]: MEM-AP (IDR: Not set)
+2026-09-13 19:07:58 [INFO] pylink.jlink: AP[0]: Core found
+2026-09-13 19:07:58 [INFO] pylink.jlink: AP[0]: AHB-AP ROM base: 0xE00FE000
+2026-09-13 19:07:58 [INFO] pylink.jlink: CPUID register: 0x410FD214. Implementer code: 0x41 (ARM)
+2026-09-13 19:07:58 [INFO] pylink.jlink: Feature set: Mainline
+2026-09-13 19:07:58 [INFO] pylink.jlink: Cache: No cache
+2026-09-13 19:07:58 [INFO] pylink.jlink: Found Cortex-M33 r0p4, Little endian.
+2026-09-13 19:07:58 [INFO] pylink.jlink: FPUnit: 8 code (BP) slots and 0 literal slots
+2026-09-13 19:07:58 [INFO] pylink.jlink: Security extension: implemented
+2026-09-13 19:07:58 [INFO] pylink.jlink: Secure debug: enabled
+2026-09-13 19:07:58 [INFO] pylink.jlink: CoreSight components:
+2026-09-13 19:07:58 [INFO] pylink.jlink: ROMTbl[0] @ E00FE000
+2026-09-13 19:07:58 [INFO] pylink.jlink: [0][0]: E00FF000 CID B105100D PID 000BB4C9 ROM Table
+2026-09-13 19:07:58 [INFO] pylink.jlink: ROMTbl[1] @ E00FF000
+2026-09-13 19:07:58 [INFO] pylink.jlink: [1][0]: E000E000 CID B105900D PID 000BBD21 DEVARCH 47702A04 DEVTYPE 00 Cortex-M33
+2026-09-13 19:07:58 [INFO] pylink.jlink: [1][1]: E0001000 CID B105900D PID 000BBD21 DEVARCH 47701A02 DEVTYPE 00 DWT
+2026-09-13 19:07:58 [INFO] pylink.jlink: [1][2]: E0002000 CID B105900D PID 000BBD21 DEVARCH 47701A03 DEVTYPE 00 FPB
+2026-09-13 19:07:58 [INFO] pylink.jlink: [1][3]: E0000000 CID B105900D PID 000BBD21 DEVARCH 47701A01 DEVTYPE 43 ITM
+2026-09-13 19:07:58 [INFO] pylink.jlink: [1][5]: E0041000 CID B105900D PID 002BBD21 DEVARCH 47724A13 DEVTYPE 13 ETM
+2026-09-13 19:07:58 [INFO] pylink.jlink: [1][6]: E0042000 CID B105900D PID 000BBD21 DEVARCH 47701A14 DEVTYPE 14 CSS600-CTI
+2026-09-13 19:07:58 [INFO] pylink.jlink: [0][1]: E0040000 CID B105900D PID 000BBD21 DEVARCH 00000000 DEVTYPE 11 TPIU
+2026-09-13 19:08:00 [INFO] pylink.jlink: Device "NRF5340_XXAA_APP" selected.
+2026-09-13 19:08:00 [INFO] pylink.jlink: ConfigTargetSettings() start
+2026-09-13 19:08:00 [INFO] pylink.jlink: ConfigTargetSettings() end - Took 55us
+2026-09-13 19:08:00 [INFO] pylink.jlink: InitTarget() start
+2026-09-13 19:08:00 [INFO] pylink.jlink: InitTarget() end - Took 4.75ms
+2026-09-13 19:08:00 [INFO] pylink.jlink: Found SW-DP with ID 0x6BA02477
+2026-09-13 19:08:00 [INFO] pylink.jlink: DPIDR: 0x6BA02477
+2026-09-13 19:08:00 [INFO] pylink.jlink: CoreSight SoC-400 or earlier
+2026-09-13 19:08:00 [INFO] pylink.jlink: AP map detection skipped. Manually configured AP map found.
+2026-09-13 19:08:00 [INFO] pylink.jlink: AP[0]: AHB-AP (IDR: Not set)
+2026-09-13 19:08:00 [INFO] pylink.jlink: AP[1]: AHB-AP (IDR: Not set)
+2026-09-13 19:08:00 [INFO] pylink.jlink: AP[2]: MEM-AP (IDR: Not set)
+2026-09-13 19:08:00 [INFO] pylink.jlink: AP[3]: MEM-AP (IDR: Not set)
+2026-09-13 19:08:00 [INFO] pylink.jlink: AP[0]: Core found
+2026-09-13 19:08:00 [INFO] pylink.jlink: AP[0]: AHB-AP ROM base: 0xE00FE000
+2026-09-13 19:08:00 [INFO] pylink.jlink: CPUID register: 0x410FD214. Implementer code: 0x41 (ARM)
+2026-09-13 19:08:00 [INFO] pylink.jlink: Feature set: Mainline
+2026-09-13 19:08:00 [INFO] pylink.jlink: Cache: No cache
+2026-09-13 19:08:00 [INFO] pylink.jlink: Found Cortex-M33 r0p4, Little endian.
+2026-09-13 19:08:00 [INFO] pylink.jlink: FPUnit: 8 code (BP) slots and 0 literal slots
+2026-09-13 19:08:00 [INFO] pylink.jlink: Security extension: implemented
+2026-09-13 19:08:00 [INFO] pylink.jlink: Secure debug: enabled
+2026-09-13 19:08:00 [INFO] pylink.jlink: CoreSight components:
+2026-09-13 19:08:00 [INFO] pylink.jlink: ROMTbl[0] @ E00FE000
+2026-09-13 19:08:00 [INFO] pylink.jlink: [0][0]: E00FF000 CID B105100D PID 000BB4C9 ROM Table
+2026-09-13 19:08:00 [INFO] pylink.jlink: ROMTbl[1] @ E00FF000
+2026-09-13 19:08:00 [INFO] pylink.jlink: [1][0]: E000E000 CID B105900D PID 000BBD21 DEVARCH 47702A04 DEVTYPE 00 Cortex-M33
+2026-09-13 19:08:00 [INFO] pylink.jlink: [1][1]: E0001000 CID B105900D PID 000BBD21 DEVARCH 47701A02 DEVTYPE 00 DWT
+2026-09-13 19:08:00 [INFO] pylink.jlink: [1][2]: E0002000 CID B105900D PID 000BBD21 DEVARCH 47701A03 DEVTYPE 00 FPB
+2026-09-13 19:08:00 [INFO] pylink.jlink: [1][3]: E0000000 CID B105900D PID 000BBD21 DEVARCH 47701A01 DEVTYPE 43 ITM
+2026-09-13 19:08:00 [INFO] pylink.jlink: [1][5]: E0041000 CID B105900D PID 002BBD21 DEVARCH 47724A13 DEVTYPE 13 ETM
+2026-09-13 19:08:00 [INFO] pylink.jlink: [1][6]: E0042000 CID B105900D PID 000BBD21 DEVARCH 47701A14 DEVTYPE 14 CSS600-CTI
+2026-09-13 19:08:00 [INFO] pylink.jlink: [0][1]: E0040000 CID B105900D PID 000BBD21 DEVARCH 00000000 DEVTYPE 11 TPIU
+2026-09-13 19:08:02 [INFO] pylink.jlink: Device "NRF5340_XXAA_APP" selected.
+2026-09-13 19:08:02 [INFO] pylink.jlink: ConfigTargetSettings() start
+2026-09-13 19:08:02 [INFO] pylink.jlink: ConfigTargetSettings() end - Took 35us
+2026-09-13 19:08:02 [INFO] pylink.jlink: InitTarget() start
+2026-09-13 19:08:02 [INFO] pylink.jlink: InitTarget() end - Took 4.67ms
+2026-09-13 19:08:02 [INFO] pylink.jlink: Found SW-DP with ID 0x6BA02477
+2026-09-13 19:08:02 [INFO] pylink.jlink: DPIDR: 0x6BA02477
+2026-09-13 19:08:02 [INFO] pylink.jlink: CoreSight SoC-400 or earlier
+2026-09-13 19:08:02 [INFO] pylink.jlink: AP map detection skipped. Manually configured AP map found.
+2026-09-13 19:08:02 [INFO] pylink.jlink: AP[0]: AHB-AP (IDR: Not set)
+2026-09-13 19:08:02 [INFO] pylink.jlink: AP[1]: AHB-AP (IDR: Not set)
+2026-09-13 19:08:02 [INFO] pylink.jlink: AP[2]: MEM-AP (IDR: Not set)
+2026-09-13 19:08:02 [INFO] pylink.jlink: AP[3]: MEM-AP (IDR: Not set)
+2026-09-13 19:08:02 [INFO] pylink.jlink: AP[0]: Core found
+2026-09-13 19:08:02 [INFO] pylink.jlink: AP[0]: AHB-AP ROM base: 0xE00FE000
+2026-09-13 19:08:02 [INFO] pylink.jlink: CPUID register: 0x410FD214. Implementer code: 0x41 (ARM)
+2026-09-13 19:08:02 [INFO] pylink.jlink: Feature set: Mainline
+2026-09-13 19:08:02 [INFO] pylink.jlink: Cache: No cache
+2026-09-13 19:08:02 [INFO] pylink.jlink: Found Cortex-M33 r0p4, Little endian.
+2026-09-13 19:08:02 [INFO] pylink.jlink: FPUnit: 8 code (BP) slots and 0 literal slots
+2026-09-13 19:08:02 [INFO] pylink.jlink: Security extension: implemented
+2026-09-13 19:08:02 [INFO] pylink.jlink: Secure debug: enabled
+2026-09-13 19:08:02 [INFO] pylink.jlink: CoreSight components:
+2026-09-13 19:08:02 [INFO] pylink.jlink: ROMTbl[0] @ E00FE000
+2026-09-13 19:08:02 [INFO] pylink.jlink: [0][0]: E00FF000 CID B105100D PID 000BB4C9 ROM Table
+2026-09-13 19:08:02 [INFO] pylink.jlink: ROMTbl[1] @ E00FF000
+2026-09-13 19:08:02 [INFO] pylink.jlink: [1][0]: E000E000 CID B105900D PID 000BBD21 DEVARCH 47702A04 DEVTYPE 00 Cortex-M33
+2026-09-13 19:08:02 [INFO] pylink.jlink: [1][1]: E0001000 CID B105900D PID 000BBD21 DEVARCH 47701A02 DEVTYPE 00 DWT
+2026-09-13 19:08:02 [INFO] pylink.jlink: [1][2]: E0002000 CID B105900D PID 000BBD21 DEVARCH 47701A03 DEVTYPE 00 FPB
+2026-09-13 19:08:02 [INFO] pylink.jlink: [1][3]: E0000000 CID B105900D PID 000BBD21 DEVARCH 47701A01 DEVTYPE 43 ITM
+2026-09-13 19:08:02 [INFO] pylink.jlink: [1][5]: E0041000 CID B105900D PID 002BBD21 DEVARCH 47724A13 DEVTYPE 13 ETM
+2026-09-13 19:08:02 [INFO] pylink.jlink: [1][6]: E0042000 CID B105900D PID 000BBD21 DEVARCH 47701A14 DEVTYPE 14 CSS600-CTI
+2026-09-13 19:08:02 [INFO] pylink.jlink: [0][1]: E0040000 CID B105900D PID 000BBD21 DEVARCH 00000000 DEVTYPE 11 TPIU
+2026-09-13 19:08:35 [INFO] tests.test_leader_failover: Leader identified: Fog-B
+2026-09-13 19:08:35 [INFO] tests.test_leader_failover: Resetting leader (Fog-B) and holding it in reset...
+2026-09-13 19:08:35 [INFO] pylink.jlink: Reset: ARMv8M core with Security Extension enabled detected.
+2026-09-13 19:08:35 [INFO] pylink.jlink: Reset: Halt core after reset via DEMCR.VC_CORERESET.
+2026-09-13 19:08:35 [INFO] pylink.jlink: Reset: Reset device via AIRCR.SYSRESETREQ.
+2026-09-13 19:08:39 [INFO] tests.test_leader_failover: New leader elected: Fog-A
+2026-09-13 19:08:39 [INFO] tests.test_leader_failover: Releasing Fog-B from reset...
+2026-09-13 19:08:39 [INFO] pylink.jlink: Memory map 'after startup completion point' is active
+2026-09-13 19:08:47 [INFO] tests.test_leader_failover: Failover confirmed: old leader rejoined as follower.
+2026-09-13 19:08:47 [INFO] test_helpers: Waiting up to 300.0s for a clean baseline...
+2026-09-13 19:08:48 [INFO] test_helpers: Baseline confirmed clean.
+PASSED2026-09-13 19:08:48 [INFO] fog_cluster: Dumped RTT history for Fog-A to test_leader_failover/Fog-A.log
+2026-09-13 19:08:48 [INFO] fog_cluster: Dumped RTT history for Fog-B to test_leader_failover/Fog-B.log
+2026-09-13 19:08:48 [INFO] fog_cluster: Dumped RTT history for Fog-C to test_leader_failover/Fog-C.log
+
+
+=============================== warnings summary ===============================
+test_leader_failover.py::test_leader_failover
+  /home/oliver/projects/tests/chirpstack_handler.py:39: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
+    self._client = mqtt.Client()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 1 passed, 1 warning in 50.70s =========================

@@ -1,22 +1,46 @@
-[7599.290] WRN: cmd: got line: +MSGHEX: Done
-[7599.290] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=527
-[7599.290] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=512
-[7599.290] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[7612.442] INF: on_window_close: Sensor window closed.
-[7612.442] INF: on_window_close: Batch submitted to raft.
-[7613.055] WRN: cmd: got line: +MSGHEX: Start
-[7616.052] WRN: cmd: got line: +MSGHEX: Done
-[7650.277] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=533
-[7650.732] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=401
-[7653.426] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[7672.486] INF: on_window_close: Sensor window closed.
-[7672.486] INF: on_window_close: Batch submitted to raft.
-[7673.311] WRN: cmd: got line: +MSGHEX: Start
-[7676.108] WRN: cmd: got line: +MSGHEX: Done
-[7710.293] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=500
-[7710.293] INF: ERROR:REPLAY_PROTECTION
-[7710.727] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=401
-[7713.293] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
-[7732.439] INF: on_window_close: Sensor window closed.
-[7732.439] INF: on_window_close: Batch submitted to raft.
-[7733.136] WRN: cmd: got line: +MSGHEX: Start
+[836.066] D: +MSGHEX: Done
+[836.066] D: e5_cmd: complete
+[836.066] E: Cannot send frame
+[836.066] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[836.066] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[836.066] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=527
+[837.626] INF: on_window_close: Sensor window closed.
+[837.626] INF: on_window_close: Batch submitted to raft.
+[838.197] D: running script: e5_cmd
+[838.197] D: e5_cmd: step: 0
+[838.197] D: sending: AT+MSGHEX="4336AC4E0A36CEF456000000260000000C0000000003ADE1C04F4F36CEF41A020000C01DAF2CCE9504C33136CEF40F020000BF12BA2CF1698BE95336CEF40F02000059FDBA2C"
+[838.397] D: +MSGHEX: Start
+[841.400] D: +MSGHEX: Done
+[841.400] D: e5_cmd: complete
+[867.352] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[868.102] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=527
+[868.156] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[897.626] INF: on_window_close: Sensor window closed.
+[897.626] INF: on_window_close: Batch submitted to raft.
+[898.196] D: running script: e5_cmd
+[898.196] D: e5_cmd: step: 0
+[898.196] D: sending: AT+MSGHEX="4336AC4E0A36CEF456000000290000000D0000000003ADE1C04F4F36CEF41A02000023A74230CE9504C33136CEF40F020000C2014F30F1698BE95336CEF40F02000033164E30"
+[898.397] D: +MSGHEX: Start
+[901.401] D: +MSGHEX: Done
+[901.401] D: e5_cmd: complete
+[927.350] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[928.090] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=527
+[928.154] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=522
+[957.626] INF: on_window_close: Sensor window closed.
+[957.626] INF: on_window_close: Batch submitted to raft.
+[957.975] D: running script: e5_cmd
+[957.975] D: e5_cmd: step: 0
+[957.975] D: sending: AT+MSGHEX="4336AC4E0A36CEF4560000002C0000000E0000000003ADE1C04F4F36CEF41A020000522AD633CE9504C33136CEF40F0200006E74E133F1698BE95336CEF40A020000525EE233"
+[958.176] D: +MSGHEX: Start
+[961.174] D: +MSGHEX: Done
+[961.174] D: e5_cmd: complete
+[987.355] INF: on_reading: got new reading: .eui=17640096504725168557, .reading=538
+[988.094] INF: on_reading: got new reading: .eui=17640096377809966542, .reading=500
+[988.094] INF: ERROR:REPLAY_PROTECTION
+[988.160] INF: on_reading: got new reading: .eui=17640096524485224945, .reading=522
+[1017.622] INF: on_window_close: Sensor window closed.
+[1017.622] INF: on_window_close: Batch submitted to raft.
+[1017.992] D: running script: e5_cmd
+[1017.992] D: e5_cmd: step: 0
+[1017.992] D: sending: AT+MSGHEX="4336AC4E0A36CEF4560000002F0000000F0000000002ADE1C04F4F36CEF41A0200006BB46937F1698BE95336CEF40A020000590B7637"
+[1018.152] D: +MSGHEX: Start

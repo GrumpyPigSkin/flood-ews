@@ -1,0 +1,43 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.1.1, pluggy-1.6.0 -- /home/oliver/projects/tests/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/oliver/projects/tests
+configfile: pytest.ini
+plugins: timeout-2.4.0, anyio-4.14.2, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier 2026-09-13 17:35:43 [INFO] test_helpers: Waiting up to 150.0s for a clean baseline...
+2026-09-13 17:36:50 [INFO] test_helpers: Baseline confirmed clean.
+2026-09-13 17:37:16 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Selected target fdde:ad00:beef:0:0:ff:fe00:a402
+2026-09-13 17:37:19 [INFO] coap: Retransmission, Message ID: 20269.
+2026-09-13 17:37:24 [INFO] coap: Retransmission, Message ID: 20269.
+2026-09-13 17:37:28 [INFO] sensor_fault_injector: Fault PUT acknowledged: 2.04 Changed
+2026-09-13 17:37:28 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:a402] (locally fdde:ad00:beef::ff:fe00:a405%wpan0)>, but could not match it to a running exchange.
+2026-09-13 17:37:28 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:a402] (locally fdde:ad00:beef::ff:fe00:a405%wpan0)>, token f76f, ACK, MID 0x4f2d> could not be matched to any request
+2026-09-13 17:37:28 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-13 17:37:28 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:a402] (locally fdde:ad00:beef::ff:fe00:a405%wpan0)>, but could not match it to a running exchange.
+2026-09-13 17:37:28 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:a402] (locally fdde:ad00:beef::ff:fe00:a405%wpan0)>, token f76f, ACK, MID 0x4f2d> could not be matched to any request
+2026-09-13 17:37:28 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-13 17:38:50 [INFO] tests.test_faulted_sensor_flagged_as_outlier: outlier confirmed: {'outlier': True, 'timestamp': 189018588.0, 'water_level_mm': 1000.0, 'device_eui': '17640096504725168557', 'validity_code': 2.0, 'detail': 16.0, 'validity': 'QUESTIONABLE'}
+2026-09-13 17:38:50 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Waiting up to 330.0 s for validity to become INVALID...
+2026-09-13 17:42:49 [INFO] tests.test_faulted_sensor_flagged_as_outlier: INVALID confirmed: {'water_level_mm': 1000.0, 'outlier': True, 'detail': 16.0, 'timestamp': 429022979.0, 'device_eui': '17640096504725168557', 'validity': 'INVALID', 'validity_code': 1.0}
+2026-09-13 17:42:52 [INFO] coap: Retransmission, Message ID: 20270.
+2026-09-13 17:42:54 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:a402] (locally fdde:ad00:beef::ff:fe00:a405%wpan0)>, but could not match it to a running exchange.
+2026-09-13 17:42:54 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:a402] (locally fdde:ad00:beef::ff:fe00:a405%wpan0)>, token f770, ACK, MID 0x4f2e> could not be matched to any request
+2026-09-13 17:42:54 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-13 17:48:49 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Reading for 17640096504725168557 recovered to GOOD.
+PASSED
+
+=============================== warnings summary ===============================
+test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier
+  /home/oliver/projects/tests/chirpstack_handler.py:39: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
+    self._client = mqtt.Client()
+
+test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier
+test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier
+  /home/oliver/projects/tests/sensor_fault_injector.py:54: DeprecationWarning: Initializing messages with an mtype is deprecated. Instead, set transport_tuning=aiocoap.Reliable or aiocoap.Unreliable.
+    msg = Message(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 1 passed, 3 warnings in 787.32s (0:13:07) ===================
