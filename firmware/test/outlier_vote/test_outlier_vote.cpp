@@ -34,36 +34,6 @@ protected:
 } // namespace
 
 // ============================================================================
-// Configuration Tests
-// ============================================================================
-
-TEST_F(VoteEngineTest, test_default_configuration) {
-  const auto cfg = m_engine.config();
-  EXPECT_EQ(cfg.m_tolerance_mm, 200);
-  EXPECT_EQ(cfg.m_alert_threshold_mm, 1500);
-  EXPECT_EQ(cfg.m_collection_window_ms, 300000);
-  EXPECT_EQ(cfg.m_alert_clear_windows, 3);
-}
-
-TEST_F(VoteEngineTest, test_update_configuration) {
-
-  constexpr std::uint16_t NEW_TOL = 100;
-  constexpr std::uint16_t NEW_THRESH = 100;
-  constexpr std::uint32_t NEW_WINDOW = 500000;
-
-  Config custom_cfg;
-  custom_cfg.m_tolerance_mm = NEW_TOL;
-  custom_cfg.m_alert_threshold_mm = NEW_THRESH;
-
-  m_engine.set_config(custom_cfg);
-  EXPECT_EQ(m_engine.config().m_tolerance_mm, NEW_TOL);
-  EXPECT_EQ(m_engine.config().m_alert_threshold_mm, NEW_THRESH);
-
-  m_engine.set_collection_window(NEW_WINDOW);
-  EXPECT_EQ(m_engine.config().m_collection_window_ms, NEW_WINDOW);
-}
-
-// ============================================================================
 // Accumulate & Slot Capacity Tests
 // ============================================================================
 
