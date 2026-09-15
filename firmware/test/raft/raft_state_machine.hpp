@@ -9,6 +9,7 @@
 #include <atomic>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <numeric>
 
 namespace fog::raft::test {
@@ -114,20 +115,24 @@ struct SnapshotTrackers {
    */
   [[nodiscard]] CallbackHook hook() {
     return [this](const std::size_t self, Callbacks<TestConfig> &cbs) {
-      cbs.m_apply = [this, self,
-                     // Save the original apply.
-                     inner = cbs.m_apply](const EntryT &entry) {
-        if (inner) {
-          inner(entry);
+      auto inner = std::make_shared<
+          stdext::inplace_function<void(const Entry<TestConfig> &)>>(
+          std::move(cbs.m_apply));
+
+      cbs.m_apply = [this, self, inner](const EntryT &entry) {
+        if (*inner) {
+          (*inner)(entry);
         }
         m_sm[self].apply(entry);
       };
+
       cbs.m_snapshot_save = [this,
                              self](std::uint8_t *buf,
                                    const std::uint32_t cap) -> std::int32_t {
         m_saves[self].fetch_add(1, std::memory_order_relaxed);
         return m_sm[self].save(buf, cap);
       };
+
       cbs.m_snapshot_load = [this, self](const std::uint8_t *buf,
                                          const std::uint32_t len) {
         m_loads[self].fetch_add(1, std::memory_order_relaxed);
