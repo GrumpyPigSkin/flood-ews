@@ -69,7 +69,7 @@ public:
    * an index into the log to get it from raft.
    * @return std::optional<Outstanding>
    */
-  [[nodiscard]] std::optional<Outstanding> outstanding() const noexcept {
+  [[nodiscard]] std::optional<Outstanding> outstanding() noexcept {
     std::optional<std::uint32_t> best_sequence;
     std::uint64_t best_index = 0;
     for (std::size_t i = 0; i < CAP; ++i) {
@@ -85,6 +85,9 @@ public:
     if (!best_sequence.has_value()) {
       return std::nullopt;
     }
+
+    // Adopt the outstanding entries sequence as our own
+    m_next_seq = best_sequence.value() + 1;
 
     return Outstanding{best_index,
                        static_cast<std::uint32_t>(best_sequence.value())};
