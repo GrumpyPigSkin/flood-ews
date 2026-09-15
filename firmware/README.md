@@ -1,0 +1,89 @@
+# Firmware
+
+This contains all the code for the Edge and Fog firmware and testing.
+
+The Nordic SDK version used is `3.4.1`
+
+## Edge
+
+The edge folder contains the code for the edge nodes, these have JSN-SR04T
+sensors for detecting water level. These readings are then sent to the fog layer
+using CoAP and Thread.
+
+## Fog
+
+The Fog layer is where all the action happens. It contains the Raft Algorithm,
+Outlier Vote mechanism and LoRaWAN backhaul back to the gateway.
+
+## Common
+
+This contains common code, mostly CoAP, some Zephyr RAII helpers, messages
+shared between the Fog and Edge layers, and some third-party libraries.
+
+## Testing
+
+Contains the host testing for Raft, Outlier Vote, Sensor Logic, and Security.
+These can be run locally without the Nordic SDK, but require a modern C++
+compiler, and CMake, and a build system like Ninja installed.
+
+### Building and Running the Tests
+
+```bash
+cd ./test
+mkdir build && cd build
+cmake ../ -G Ninja
+ninja
+```
+
+Running the tests:
+
+```bash
+ctest -L smoke
+
+# expected output
+PS E:\Uni\final-project\flood-ews\firmware\test\build> ctest -L smoke
+Test project E:/Uni/final-project/flood-ews/firmware/test/build
+      Start  1: test_asymmetric
+ 1/11 Test  #1: test_asymmetric ..................   Passed   10.72 sec
+      Start  2: test_catchup
+ 2/11 Test  #2: test_catchup .....................   Passed    5.44 sec
+      Start  3: test_divergence
+ 3/11 Test  #3: test_divergence ..................   Passed    6.08 sec
+      Start  4: test_failover
+ 4/11 Test  #4: test_failover ....................   Passed    9.01 sec
+      Start  5: test_log_full
+ 5/11 Test  #5: test_log_full ....................   Passed   10.96 sec
+      Start  6: test_restart
+ 6/11 Test  #6: test_restart .....................   Passed    6.10 sec
+      Start  7: test_snapshot
+ 7/11 Test  #7: test_snapshot ....................   Passed    4.39 sec
+      Start  8: soak_smoke
+ 8/11 Test  #8: soak_smoke .......................   Passed   23.17 sec
+      Start 10: test_outlier_vote
+ 9/11 Test #10: test_outlier_vote ................   Passed    0.03 sec
+      Start 11: test_jsn
+10/11 Test #11: test_jsn .........................   Passed    0.03 sec
+      Start 12: test_replay
+11/11 Test #12: test_replay ......................   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Label Time Summary:
+smoke    =  75.96 sec*proc (11 tests)
+unit     =  52.79 sec*proc (10 tests)
+
+Total Test time (real) =  76.29 sec
+```
+
+## Config options
+
+### Fault Injection
+
+Enabling the config option `CONFIG_ENABLE_FAULT_INJECTION` allows fault
+injection from the integration test harness.
+
+### Secure Sign
+
+Enabling the config option `CONFIG_SECURE_SIGN` switches the private key
+generation to use the HUK instead which is more secure than the using the
+Hardware Key. But comes at the disadvantage of hindering debugging.
