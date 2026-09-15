@@ -8,6 +8,7 @@ function.
 Handles actuation, this could be a flood barrier, siren, or some other form of
 alarm. The interface for an actuator is common and must provide the `Apply`
 function. The file itself handles:
+
 - A watchdog, if the rest of the application goes quiet it will drive the
   actuators to their failsafe position.
 - Override: An operator can manually override an actuator to a given position.
@@ -32,6 +33,7 @@ which is handled through JWT.
 Egress allows the configuration of external targets for us to push data to. When
 new data is received we can push this data to the egress location. There are two
 types of egress targets:
+
 - Supabase: which require a DSN and a database setup to receive data.
 - Webhook: Which could be a neighbouring authority or governing body we need to
   tell about alerts, water levels etc.
@@ -40,6 +42,7 @@ types of egress targets:
 
 Policies are the layer between advisories and actuation. It receives an advisory
 and then has to decide what action does it take. Either:
+
 - Directly take action and drive an actuator.
 - Queue the action to be approved by an operator.
 
@@ -63,22 +66,24 @@ manipulating the database based on my queries and schema
 
 ## Telemetry ##
 
-This listens to Data from Chirpstacks MQTT forwarder. This then serves the data to the upstream UI websocket, handles replays when connected, and sends the data onwards to supabase or external webhooks.
+This listens to Data from Chirpstacks MQTT forwarder. This then serves the data
+to the upstream UI websocket, handles replays when connected, and sends the data
+onwards to supabase or external webhooks.
 
 ## Building and Testing ##
 
 The software is built and tested using go version:
 
-```
+```bash
 go version go1.26.4
 ```
 
-Go must be installed beforehand:
-https://go.dev/doc/install
+Go must be installed beforehand: https://go.dev/doc/install
 
 ### Build and Run ###
 
 Run:
+
 ```bash
 # Build
 go build -o flood-ews_server.exe main.go
@@ -88,6 +93,7 @@ go build -o flood-ews_server.exe main.go
 ```
 
 ### Testing ###
+
 To run the unit tests, run this from the same folder as `main.go`
 
 ```bash

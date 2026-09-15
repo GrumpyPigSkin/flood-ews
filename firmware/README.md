@@ -19,6 +19,8 @@ Outlier Vote mechanism and LoRaWAN backhaul back to the gateway.
 
 This contains common code, mostly CoAP, some Zephyr RAII helpers, messages
 shared between the Fog and Edge layers, and some third-party libraries.
+`coap_utils.h/.c`, `inplace_function.h`, and `overload.hpp` files in here are
+from other libraries and their licences are documented in `third_party.md`
 
 ## Testing
 
@@ -85,5 +87,6 @@ injection from the integration test harness.
 ### Secure Sign
 
 Enabling the config option `CONFIG_SECURE_SIGN` switches the private key
-generation to use the HUK instead which is more secure than the using the
-Hardware Key. But comes at the disadvantage of hindering debugging.
+generation to use the HUK instead, which is more secure than the using the
+Hardware Key. But comes at the disadvantage of making debugging difficult due to
+keys changing on each re-flash.

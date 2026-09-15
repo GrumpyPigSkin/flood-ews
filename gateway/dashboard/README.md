@@ -9,6 +9,7 @@ The design of the UI follows MVVM principles:
 ### lib/config ###
 
 Contains application configuration.
+
 - Cloud config: only require the "cloud" flag, Supabase URL and public key at
   build. This then prevents any of the other screens being built which allows
   maximum security.
@@ -71,7 +72,7 @@ Then build the application:
 flutter build web --release --dart-define-from-file local.json
 ```
 
-The output will be in `/build/web` and can be deployed to the RPi.
+The output will be in `/build/web` and can be deployed to the Raspberry Pi.
 
 #### Cloud Build ####
 
@@ -105,4 +106,4 @@ flutter widget-preview start
 This then launches a browser and the UI should be shown in there. A note on the
 previewer is that it is fairly temperamental. You might have better luck running
 the VSCode Widget Previewer included with the flutter SDK, but you will need to
-make the pain rather large.
+make the side window rather large.
