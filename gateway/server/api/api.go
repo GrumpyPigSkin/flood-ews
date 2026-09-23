@@ -135,7 +135,7 @@ func (s *Server) Routes() http.Handler {
 		cfg.Handle("PUT /v1/config/sources", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleUpsertSource)))))
 		cfg.Handle("DELETE /v1/config/sources/{id}", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleDeleteSource)))))
 		cfg.Handle("PUT /v1/config/targets", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleUpsertTarget)))))
-		cfg.Handle("PUT /v1/config/targets/{id}", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleDeleteTarget)))))
+		cfg.Handle("DELETE /v1/config/targets/{id}", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleDeleteTarget)))))
 		cfg.Handle("PUT /v1/config/actuators", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleUpsertActuator)))))
 		cfg.Handle("DELETE /v1/config/actuators/{id}", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleDeleteActuator)))))
 		cfg.Handle("PUT /v1/config/rules", jwtAuth(jwtRequired(writeScope(http.HandlerFunc(s.handleUpsertRule)))))
