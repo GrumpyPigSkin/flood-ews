@@ -204,7 +204,7 @@ class _StubTelemetrySource extends TelemetrySource {
     final now = DateTime.now();
 
     final activeStations = stations.where(
-      (s) => s.freshnessAt(now) != Freshness.offline,
+      (s) => s.freshnessAt(now) != Freshness.offline && s.outlier == false,
     );
 
     var sum = 0;

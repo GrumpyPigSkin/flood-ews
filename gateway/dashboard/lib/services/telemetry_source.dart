@@ -74,7 +74,7 @@ mixin StationFold on ChangeNotifier implements TelemetrySource {
 
     // Is the reading fresh.
     final activeStations = stationsByEui.values.where(
-      (s) => s.freshnessAt(now) != Freshness.offline,
+      (s) => s.freshnessAt(now) != Freshness.offline && s.outlier == false,
     );
 
     var sum = 0;
