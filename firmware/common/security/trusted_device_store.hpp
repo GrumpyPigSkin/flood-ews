@@ -14,7 +14,7 @@
 #include <span>
 #include <zephyr/drivers/hwinfo.h>
 
-#ifdef SECURE_SIGN
+#ifdef CONFIG_SECURE_SIGN
 #include "tfm_crypto_defs.h"
 #endif
 
@@ -281,7 +281,7 @@ private:
       return std::unexpected(status);
     }
 
-#ifdef SECURE_SIGN
+#ifdef CONFIG_SECURE_SIGN
     // Pass the hardware built-in unique key (HUK) as secret input.
     status = psa_key_derivation_input_key(&op, PSA_KEY_DERIVATION_INPUT_SECRET,
                                           TFM_BUILTIN_KEY_ID_HUK);
