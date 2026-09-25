@@ -20,7 +20,7 @@ config OT_COAP_SAMPLE_SW
 
 config ENABLE_FAULT_INJECTION
 	bool "Enable integration test injection"
-	default y
+	default n
 
 config SECURE_SIGN
 	bool "Enable secure signing with HUK"
