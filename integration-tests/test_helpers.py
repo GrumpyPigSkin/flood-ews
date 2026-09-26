@@ -2,13 +2,14 @@
 
 import asyncio
 import ipaddress
+import itertools
 import logging
 import time
 from collections.abc import Callable
 from typing import Any
 
 from chirpstack_handler import ChirpStackHandler, Uplink
-from config import KNOWN_SENSOR_MACS, NodeCfg
+from config import NodeCfg
 from gateway_api_client import GatewayApiClient
 from jlink_node import JLinkNode
 from ot_ctl import OtCtl
@@ -256,6 +257,40 @@ async def wait_for_all_good(
     msg_0 = f"no uplinks observed within {timeout}s to confirm baseline"
     raise TimeoutError(msg_0)
 
+async def wait_for_recovery(
+    chirpstack: ChirpStackHandler, since: float, timeout: float,
+    poll_interval: float = 1.0,
+) -> Uplink:
+    """Wait until the most recent uplink is fully clean and the alert has cleared.
+
+    Args:
+        chirpstack (ChirpStackHandler): The ChirpStack handler.
+        since (float): The time to measure from.
+        timeout (float): How long to wait for.
+        poll_interval (float, optional): How often to poll for a new uplink.
+                                         Defaults to 1.0.
+
+    Raises:
+        TimeoutError: Timed out before seeing a clean uplink
+
+    Returns:
+        Uplink: The clean uplink
+    """
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        uplinks = chirpstack.uplinks_since(since)
+        if uplinks:
+            latest = uplinks[-1]
+            entries = latest.decoded.get("entries", [])
+            clean = bool(entries) and all(
+                e.get("validity") == "GOOD" and not e.get("outlier") for e in entries
+            )
+            if clean and not latest.decoded.get("alert", False):
+                return latest
+        await asyncio.sleep(poll_interval)
+    msg = f"system did not recover within {timeout}s"
+    raise TimeoutError(msg)
+
 
 async def wait_for_entry_state_by_predicate(
     chirpstack: ChirpStackHandler,
@@ -420,3 +455,39 @@ def assert_actuator_state(
         f"Expected {actuator_id} in state {expected_state}, "
         f"found {actuator_state}."
     )
+
+async def collect_uplinks(chirpstack, n: int, timeout: float) -> list[Uplink]:
+    """Collect n number of uplinks.
+
+    Args:
+        chirpstack (_type_): ChripStack to watch for uplinks.
+        n (int): The number of uplinks.
+        timeout (float): The timeout for wait for n number of uplinks.
+
+    Raises:
+        TimeoutError: If n uplinks aren't seen within the timeout.
+
+    Returns:
+        list[Uplink]: The uplinks.
+    """
+    since = chirpstack.mark()
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        ups = chirpstack.uplinks_since(since)
+        if len(ups) >= n:
+            return ups[:n]
+        await asyncio.sleep(1.0)
+    msg = f"only saw {len(ups)} uplinks in {timeout}s"
+    raise TimeoutError(msg)
+
+def assert_cadence(ups: list[Uplink], expected_s: float, tol_s: float =5.0) -> None:
+    """Check the cadence between uplinks.
+
+    Args:
+        ups (list[Uplink]): The uplinks to check.
+        expected_s (float): The expected cadence.
+        tol_s (float, optional): The expected tolerance. Defaults to 5.0.
+    """
+    times = [u.ts for u in ups]
+    gaps = [b - a for a, b in itertools.pairwise(times)]
+    assert all(abs(g - expected_s) <= tol_s for g in gaps), f"gaps={gaps}"

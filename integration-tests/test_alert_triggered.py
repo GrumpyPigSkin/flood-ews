@@ -25,15 +25,19 @@ from config import FLOOD_GATE_CLOSED_STATE, FLOOD_GATE_ID, FLOOD_GATE_OPEN_STATE
 from sensor_fault_injector import SensorFaultInjector
 from test_helpers import (
     assert_actuator_state,
+    assert_cadence,
+    collect_uplinks,
     confirm_clean_baseline,
     discover_sed_pool,
     wait_for_alert,
+    wait_for_recovery,
 )
 
 BASELINE_WINDOW = 150.0  # watch ~2.5 reporting cycles for a clean start
 ALERT_WAIT = 300.0  # ~5 reporting cycles alert but we should get it on the next cycle.
 CLEAR_ALERT_TIMEOUT = 660.0  # ~6 reporting cycles to become "GOOD" again.
 HIGH_WATER_LVL_MM = 1600  # Water level to override.
+ALERT_CADENCE = 30.0 # The cadence in the alert state.
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +77,10 @@ async def test_alert_triggered(chirpstack, coap_context, otctl, gateway_client) 
         entry = await wait_for_alert(chirpstack, fault_mark, ALERT_WAIT)
         logger.info("Alert received: %s", entry)
         assert_actuator_state(gateway_client, FLOOD_GATE_ID, FLOOD_GATE_CLOSED_STATE)
+        uplinks = await collect_uplinks(chirpstack, 2, 150)
+        assert_cadence(uplinks, ALERT_CADENCE)
 
     logger.info("Waiting for clean baseline")
-    await confirm_clean_baseline(chirpstack, CLEAR_ALERT_TIMEOUT)
+    await wait_for_recovery(chirpstack, chirpstack.mark(), CLEAR_ALERT_TIMEOUT)
     logger.info("Checking flood gate is open")
     assert_actuator_state(gateway_client, FLOOD_GATE_ID, FLOOD_GATE_OPEN_STATE)
