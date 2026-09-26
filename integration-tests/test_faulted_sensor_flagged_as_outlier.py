@@ -33,7 +33,7 @@ BASELINE_WINDOW = 150.0  # watch ~2.5 reporting cycles for a clean start
 OUTLIER_DETECT_TIMEOUT = 150.0  # ~2.5 reporting cycles for QUESTIONABLE + OUTLIER
 INVALID_DETECT_TIMEOUT = 330.0  # ~5.5 reporting cycles further for INVALID
 VALID_DETECT_TIMEOUT = 660.0  # 10 reporting cycles to become "GOOD" again.
-FAULT_WATER_LVL_MM = 1000  # Water level to override.
+FAULT_WATER_LVL_MM = 1600  # Water level to override.
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +68,9 @@ async def test_faulted_sensor_flagged_as_outlier(
     sfi = SensorFaultInjector(node_ipv6=target["address"], ctx=coap_context)
 
     entry = None
+    uplink = None
     async with sfi.active(water_level_mm=FAULT_WATER_LVL_MM):
-        entry = await wait_for_entry_state_by_predicate(
+        uplink, entry = await wait_for_entry_state_by_predicate(
             chirpstack,
             chirpstack.mark(),
             lambda e: (
@@ -78,13 +79,15 @@ async def test_faulted_sensor_flagged_as_outlier(
             OUTLIER_DETECT_TIMEOUT,
         )
 
+        assert(uplink.get("alert") is False)
+
         logger.info("outlier confirmed: %s", entry)
 
         logger.info(
             "Waiting up to %s s for validity to become INVALID...",
             INVALID_DETECT_TIMEOUT,
         )
-        entry = await wait_for_entry_state_by_predicate(
+        uplink, entry = await wait_for_entry_state_by_predicate(
             chirpstack,
             chirpstack.mark(),
             lambda e: (
@@ -94,6 +97,7 @@ async def test_faulted_sensor_flagged_as_outlier(
             ),
             INVALID_DETECT_TIMEOUT,
         )
+        assert(uplink.get("alert") is False)
         logger.info("INVALID confirmed: %s", entry)
 
     if entry is not None:

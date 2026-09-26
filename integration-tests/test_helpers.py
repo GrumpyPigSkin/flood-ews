@@ -285,7 +285,7 @@ async def wait_for_entry_state_by_predicate(
         for u in chirpstack.uplinks_since(since):
             for e in u.decoded.get("entries", []):
                 if predicate(e):
-                    return e
+                    return u.decoded, e
         await asyncio.sleep(poll_interval)
     msg = f"no entry matched predicate within {timeout}s"
     raise TimeoutError(msg)
