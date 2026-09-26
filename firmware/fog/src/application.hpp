@@ -14,7 +14,9 @@
 #include "outlier_vote/service.hpp"
 #include "raft/engine.hpp"
 #include "raft/raft_types.hpp"
-#include "secrets/provisioned_keys.hpp"
+// #include "secrets/provisioned_keys.hpp"
+// Example keys
+#include "provisioned_keys.example.hpp"
 #include "sensor/service.hpp"
 #include "utils/time_sync.h"
 #include "zephyr/kernel.h"
