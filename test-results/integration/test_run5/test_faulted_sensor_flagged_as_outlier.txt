@@ -7,30 +7,30 @@ plugins: timeout-2.4.0, anyio-4.14.2, asyncio-1.4.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
 collecting ... collected 1 item
 
-test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier 2026-09-15 15:35:54 [INFO] test_helpers: Waiting up to 150.0s for a clean baseline...
-2026-09-15 15:36:34 [INFO] test_helpers: Baseline confirmed clean.
-2026-09-15 15:37:19 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Selected target fdde:ad00:beef:0:0:ff:fe00:6002
-2026-09-15 15:37:21 [INFO] coap: Retransmission, Message ID: 45873.
-2026-09-15 15:37:23 [INFO] sensor_fault_injector: Fault PUT acknowledged: 2.04 Changed
-2026-09-15 15:37:23 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:6002] (locally fdde:ad00:beef::ff:fe00:b403%wpan0)>, but could not match it to a running exchange.
-2026-09-15 15:37:23 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:6002] (locally fdde:ad00:beef::ff:fe00:b403%wpan0)>, token 1667, ACK, MID 0xb331> could not be matched to any request
-2026-09-15 15:37:23 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
-2026-09-15 15:38:35 [INFO] tests.test_faulted_sensor_flagged_as_outlier: outlier confirmed: {'outlier': True, 'detail': 16.0, 'timestamp': 201543705.0, 'water_level_mm': 1000.0, 'validity': 'QUESTIONABLE', 'validity_code': 2.0, 'device_eui': '17640096504725168557'}
-2026-09-15 15:38:35 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Waiting up to 330.0 s for validity to become INVALID...
-2026-09-15 15:42:35 [INFO] tests.test_faulted_sensor_flagged_as_outlier: INVALID confirmed: {'outlier': True, 'device_eui': '17640096504725168557', 'water_level_mm': 1000.0, 'validity': 'INVALID', 'validity_code': 1.0, 'detail': 16.0, 'timestamp': 441555873.0}
-2026-09-15 15:42:37 [INFO] coap: Retransmission, Message ID: 45874.
-2026-09-15 15:42:41 [INFO] coap: Retransmission, Message ID: 45874.
-2026-09-15 15:42:50 [INFO] coap: Retransmission, Message ID: 45874.
-2026-09-15 15:42:53 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:6002] (locally fdde:ad00:beef::ff:fe00:6003%wpan0)>, but could not match it to a running exchange.
-2026-09-15 15:42:53 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:6002] (locally fdde:ad00:beef::ff:fe00:6003%wpan0)>, token 1668, ACK, MID 0xb332> could not be matched to any request
-2026-09-15 15:42:53 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
-2026-09-15 15:42:53 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:6002] (locally fdde:ad00:beef::ff:fe00:6003%wpan0)>, but could not match it to a running exchange.
-2026-09-15 15:42:53 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:6002] (locally fdde:ad00:beef::ff:fe00:6003%wpan0)>, token 1668, ACK, MID 0xb332> could not be matched to any request
-2026-09-15 15:42:53 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
-2026-09-15 15:42:53 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:6002] (locally fdde:ad00:beef::ff:fe00:6003%wpan0)>, but could not match it to a running exchange.
-2026-09-15 15:42:53 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:6002] (locally fdde:ad00:beef::ff:fe00:6003%wpan0)>, token 1668, ACK, MID 0xb332> could not be matched to any request
-2026-09-15 15:42:53 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
-2026-09-15 15:48:35 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Reading for 17640096504725168557 recovered to GOOD.
+test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlier 2026-09-26 10:59:18 [INFO] test_helpers: Waiting up to 150.0s for a clean baseline...
+2026-09-26 11:00:02 [INFO] test_helpers: Baseline confirmed clean.
+2026-09-26 11:00:35 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Selected target fdde:ad00:beef:0:0:ff:fe00:5002
+2026-09-26 11:00:37 [INFO] coap: Retransmission, Message ID: 30943.
+2026-09-26 11:00:42 [INFO] coap: Retransmission, Message ID: 30943.
+2026-09-26 11:00:46 [INFO] sensor_fault_injector: Fault PUT acknowledged: 2.04 Changed
+2026-09-26 11:00:46 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:5002] (locally fdde:ad00:beef::ff:fe00:5004%wpan0)>, but could not match it to a running exchange.
+2026-09-26 11:00:46 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:5002] (locally fdde:ad00:beef::ff:fe00:5004%wpan0)>, token b632, ACK, MID 0x78df> could not be matched to any request
+2026-09-26 11:00:46 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-26 11:00:46 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:5002] (locally fdde:ad00:beef::ff:fe00:5004%wpan0)>, but could not match it to a running exchange.
+2026-09-26 11:00:46 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:5002] (locally fdde:ad00:beef::ff:fe00:5004%wpan0)>, token b632, ACK, MID 0x78df> could not be matched to any request
+2026-09-26 11:00:46 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-26 11:02:03 [INFO] tests.test_faulted_sensor_flagged_as_outlier: outlier confirmed: {'validity': 'QUESTIONABLE', 'outlier': True, 'detail': 16.0, 'timestamp': 3210362967.0, 'device_eui': '17640096504725168557', 'validity_code': 2.0, 'water_level_mm': 1600.0}
+2026-09-26 11:02:03 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Waiting up to 330.0 s for validity to become INVALID...
+2026-09-26 11:06:02 [INFO] tests.test_faulted_sensor_flagged_as_outlier: INVALID confirmed: {'water_level_mm': 1600.0, 'outlier': True, 'device_eui': '17640096504725168557', 'detail': 16.0, 'timestamp': 3450431173.0, 'validity': 'INVALID', 'validity_code': 1.0}
+2026-09-26 11:06:04 [INFO] coap: Retransmission, Message ID: 30944.
+2026-09-26 11:06:09 [INFO] coap: Retransmission, Message ID: 30944.
+2026-09-26 11:06:13 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:5002] (locally fdde:ad00:beef::ff:fe00:5004%wpan0)>, but could not match it to a running exchange.
+2026-09-26 11:06:13 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:5002] (locally fdde:ad00:beef::ff:fe00:5004%wpan0)>, token b633, ACK, MID 0x78e0> could not be matched to any request
+2026-09-26 11:06:13 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-26 11:06:13 [INFO] coap: Received ACK from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:5002] (locally fdde:ad00:beef::ff:fe00:5004%wpan0)>, but could not match it to a running exchange.
+2026-09-26 11:06:13 [INFO] coap: Response <aiocoap.Message: 2.04 Changed from <UDP6EndpointAddress [fdde:ad00:beef::ff:fe00:5002] (locally fdde:ad00:beef::ff:fe00:5004%wpan0)>, token b633, ACK, MID 0x78e0> could not be matched to any request
+2026-09-26 11:06:13 [INFO] coap: Ignoring unknown response (which is not a unicast CON)
+2026-09-26 11:12:02 [INFO] tests.test_faulted_sensor_flagged_as_outlier: Reading for 17640096504725168557 recovered to GOOD.
 PASSED
 
 =============================== warnings summary ===============================
@@ -44,4 +44,4 @@ test_faulted_sensor_flagged_as_outlier.py::test_faulted_sensor_flagged_as_outlie
     msg = Message(
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-================== 1 passed, 3 warnings in 761.08s (0:12:41) ===================
+================== 1 passed, 3 warnings in 765.12s (0:12:45) ===================
