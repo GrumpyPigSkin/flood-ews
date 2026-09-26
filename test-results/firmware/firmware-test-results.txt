@@ -1,31 +1,31 @@
 Test project E:/Uni/final-project/flood-ews/firmware/test/build
       Start  1: test_asymmetric
- 1/11 Test  #1: test_asymmetric ..................   Passed   10.67 sec
+ 1/11 Test  #1: test_asymmetric ..................   Passed   10.69 sec
       Start  2: test_catchup
- 2/11 Test  #2: test_catchup .....................   Passed    5.49 sec
+ 2/11 Test  #2: test_catchup .....................   Passed    5.41 sec
       Start  3: test_divergence
- 3/11 Test  #3: test_divergence ..................   Passed    6.05 sec
+ 3/11 Test  #3: test_divergence ..................   Passed    6.06 sec
       Start  4: test_failover
  4/11 Test  #4: test_failover ....................   Passed    9.03 sec
       Start  5: test_log_full
- 5/11 Test  #5: test_log_full ....................   Passed   10.98 sec
+ 5/11 Test  #5: test_log_full ....................   Passed   10.93 sec
       Start  6: test_restart
  6/11 Test  #6: test_restart .....................   Passed    6.09 sec
       Start  7: test_snapshot
- 7/11 Test  #7: test_snapshot ....................   Passed    4.40 sec
+ 7/11 Test  #7: test_snapshot ....................   Passed    4.35 sec
       Start  8: soak_smoke
- 8/11 Test  #8: soak_smoke .......................   Passed   23.17 sec
+ 8/11 Test  #8: soak_smoke .......................   Passed   23.06 sec
       Start 10: test_outlier_vote
- 9/11 Test #10: test_outlier_vote ................   Passed    0.04 sec
+ 9/11 Test #10: test_outlier_vote ................   Passed    0.01 sec
       Start 11: test_jsn
-10/11 Test #11: test_jsn .........................   Passed    0.03 sec
+10/11 Test #11: test_jsn .........................   Passed    0.01 sec
       Start 12: test_replay
 11/11 Test #12: test_replay ......................   Passed    0.01 sec
 
 100% tests passed, 0 tests failed out of 11
 
 Label Time Summary:
-smoke    =  75.95 sec*proc (11 tests)
-unit     =  52.78 sec*proc (10 tests)
+smoke    =  75.66 sec*proc (11 tests)
+unit     =  52.60 sec*proc (10 tests)
 
-Total Test time (real) =  76.27 sec
+Total Test time (real) =  75.67 sec

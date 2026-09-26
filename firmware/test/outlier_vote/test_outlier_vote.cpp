@@ -67,17 +67,19 @@ TEST_F(VoteEngineTest, test_existing_eui) {
 // ============================================================================
 
 TEST_F(VoteEngineTest, test_close_window_fails_if_fewer_than_min_reporters) {
-  // MIN_REPORTERS is 2
+  // MIN_REPORTERS is 3
   (void)m_engine.accumulate(make_entry(0x1));
+  (void)m_engine.accumulate(make_entry(0x2));
 
   const auto batch = m_engine.close_window();
   EXPECT_FALSE(batch.has_value());
 }
 
 TEST_F(VoteEngineTest, test_close_window_succeeds_with_min_reporters) {
-  constexpr std::uint8_t NUM_EXPECTED = 2;
+  constexpr std::uint8_t NUM_EXPECTED = 3;
   (void)m_engine.accumulate(make_entry(0x1));
   (void)m_engine.accumulate(make_entry(0x2));
+  (void)m_engine.accumulate(make_entry(0x3));
 
   const auto batch = m_engine.close_window();
   ASSERT_TRUE(batch.has_value());
@@ -88,6 +90,7 @@ TEST_F(VoteEngineTest, test_close_window_succeeds_with_min_reporters) {
 TEST_F(VoteEngineTest, test_open_window_clears_reported_set) {
   (void)m_engine.accumulate(make_entry(0x1));
   (void)m_engine.accumulate(make_entry(0x2));
+  (void)m_engine.accumulate(make_entry(0x3));
 
   m_engine.open_window();
 
@@ -211,6 +214,7 @@ TEST_F(VoteEngineTest, test_alert_trigger_and_clear_hysteresis) {
 
   (void)m_engine.accumulate(make_entry(0x1, HIGH_WATER_LVL));
   (void)m_engine.accumulate(make_entry(0x2, HIGH_WATER_LVL));
+  (void)m_engine.accumulate(make_entry(0x3, HIGH_WATER_LVL));
   auto batch = m_engine.close_window();
   ASSERT_TRUE(batch.has_value());
 
@@ -221,6 +225,7 @@ TEST_F(VoteEngineTest, test_alert_trigger_and_clear_hysteresis) {
   for (int i = 1; i <= 3; ++i) {
     (void)m_engine.accumulate(make_entry(0x1));
     (void)m_engine.accumulate(make_entry(0x2));
+    (void)m_engine.accumulate(make_entry(0x3));
     batch = m_engine.close_window();
 
     if (i < 3) {
@@ -242,14 +247,16 @@ TEST_F(VoteEngineTest, test_alert_trigger_and_clear_hysteresis) {
 TEST_F(VoteEngineTest, ReputationSnapshotExport) {
   (void)m_engine.accumulate(make_entry(0x1));
   (void)m_engine.accumulate(make_entry(0x2));
+  (void)m_engine.accumulate(make_entry(0x3));
   (void)m_engine.close_window();
 
   std::array<Reputation, VoteEngine::MAX_SENSORS> buf{};
   const std::size_t count = m_engine.reputation_snapshot(buf);
 
-  EXPECT_EQ(count, 2);
+  EXPECT_EQ(count, 3);
   EXPECT_EQ(buf[0].m_eui, 0x1);
   EXPECT_EQ(buf[1].m_eui, 0x2);
+  EXPECT_EQ(buf[2].m_eui, 0x3);
 }
 
 } // namespace fog::vote::test
