@@ -69,7 +69,7 @@ public:
   using Detail = common::IEC61850_DetailQual;
   static constexpr std::size_t MAX_SENSORS = common::MAX_SENSORS;
   static constexpr std::size_t MAX_BATCH_ENTRIES = common::MAX_SENSORS;
-  static constexpr std::uint8_t MIN_REPORTERS = 2;
+  static constexpr std::uint8_t MIN_REPORTERS = 3;
 
   static constexpr std::uint8_t MAX_REPUTATION = 100;
   static constexpr std::uint8_t MIN_REPUTATION = 10;
